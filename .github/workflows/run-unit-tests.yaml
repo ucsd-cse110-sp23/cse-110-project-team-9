@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   build:
+    name: Java Unit Tests
     runs-on: ubuntu-latest
 
     steps:
