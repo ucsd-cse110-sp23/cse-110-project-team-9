@@ -75,7 +75,27 @@ public class Interface {
 		scrollPane.setPreferredSize(new Dimension(200, 500));
 		pane.add(scrollPane, BorderLayout.LINE_START);
 
-		JTextField content = new JTextField("CONTENT");
+		//Add entry
+
+		// Create the "Question" JTextArea and JScrollPane
+        JTextArea questionTextArea = new JTextArea();
+        questionTextArea.setEditable(false);
+        questionTextArea.setText("Question: This is a hard coded question");
+        JScrollPane questionScrollPane = new JScrollPane(questionTextArea);
+        questionScrollPane.setPreferredSize(new Dimension(380, 250));
+
+        // Create the "Answer" JTextArea and JScrollPane
+        JTextArea answerTextArea = new JTextArea();
+        answerTextArea.setEditable(false);
+        answerTextArea.setText("Answer: This is a hard coded answer");
+        JScrollPane answerScrollPane = new JScrollPane(answerTextArea);
+        answerScrollPane.setPreferredSize(new Dimension(380, 250));
+
+        // Create panel for each JTextArea
+
+		JPanel content = new JPanel();
+		content.add(questionScrollPane);
+		content.add(answerScrollPane);
 		content.setPreferredSize(new Dimension(500, 500));
 		pane.add(content, BorderLayout.CENTER);
 	}
