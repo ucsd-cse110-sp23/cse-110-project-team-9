@@ -2,4 +2,8 @@
 .gradle
 
 # Ignore Gradle build output directory
-build
+build/
+
+# Ignore any IDE configuration files.
+.idea
+.vscode
