@@ -18,6 +18,15 @@ import org.json.*;
 public class Whisper implements IWhisper {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
     private static final String MODEL = "whisper-1";
+    private final String _apiKey;
+
+    /**
+     * Creates a new instance of the <c>Whisper</c> class with the specified API key.
+     * @param apiKey The API key to use for the Whisper API.
+     */
+    public Whisper(String apiKey) {
+        this._apiKey = apiKey;
+    }
 
     /**
      * Transcribes the given <c>AudioInputStream</c> into a <c>String</c>, using OpenAI's Whisper API.
@@ -36,7 +45,7 @@ public class Whisper implements IWhisper {
 
         String boundary = "Boundary-" + System.currentTimeMillis();
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-        connection.setRequestProperty("Authorization", "Bearer " + 1);
+        connection.setRequestProperty("Authorization", "Bearer " + this._apiKey);
 
         try (OutputStream outputStream = connection.getOutputStream()) {
             // Write the parameter name and value to the output stream.
