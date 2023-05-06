@@ -9,7 +9,7 @@ import javax.swing.*;
 public class EntryDisplayer {
 
 
-    JTextArea displayQuestion(Entry e) {
+    public JTextArea displayQuestion(Entry e) {
 
 	    String text = e.getQuestion().getQuestionText();
 	    JTextArea question = new JTextArea(text);

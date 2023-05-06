@@ -39,9 +39,15 @@ public class Interface {
 	private static JButton recordButton;
 	private static JButton stopButton;
 
+	private static JScrollPane answerScrollPane;
+	private static JScrollPane questionScrollPane;
+
+	private static EntryDisplayer displayer;
+
 	// initialize the interface
 	public static void init() {
 		JFrame frame = new JFrame(appName);
+		displayer = new EntryDisplayer();
 		addComponentsToPane(frame.getContentPane());
 		frame.pack();
 		frame.setVisible(true);
@@ -76,19 +82,25 @@ public class Interface {
 		pane.add(scrollPane, BorderLayout.LINE_START);
 
 		//Add entry
+		//boxes are hardcoded as of right now, once we get entries figured out I can change it to the answer
+		//im thinking entry object will be passed over to interface and then interface code can fix it
 
 		// Create the "Question" JTextArea and JScrollPane
         JTextArea questionTextArea = new JTextArea();
         questionTextArea.setEditable(false);
         questionTextArea.setText("Question: This is a hard coded question");
-        JScrollPane questionScrollPane = new JScrollPane(questionTextArea);
+		
+
+        questionScrollPane = new JScrollPane(questionTextArea);
         questionScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create the "Answer" JTextArea and JScrollPane
         JTextArea answerTextArea = new JTextArea();
         answerTextArea.setEditable(false);
         answerTextArea.setText("Answer: This is a hard coded answer");
-        JScrollPane answerScrollPane = new JScrollPane(answerTextArea);
+		
+
+        answerScrollPane = new JScrollPane(answerTextArea);
         answerScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create panel for each JTextArea
@@ -98,6 +110,13 @@ public class Interface {
 		content.add(answerScrollPane);
 		content.setPreferredSize(new Dimension(500, 500));
 		pane.add(content, BorderLayout.CENTER);
+	}
+
+	//In progress
+	public void displayEntry(Entry e){
+		questionScrollPane.setViewportView(displayer.displayQuestion(e));
+		answerScrollPane.setViewportView(displayer.displayAnswer(e));
+		
 	}
 
 	// For debugging
