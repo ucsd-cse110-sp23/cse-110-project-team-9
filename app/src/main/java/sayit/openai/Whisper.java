@@ -1,14 +1,10 @@
 package sayit.openai;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.annotation.Nonnull;
-import javax.sound.sampled.AudioInputStream;
 
 import org.json.*;
 
@@ -37,7 +33,7 @@ public class Whisper implements IWhisper {
      * @throws IOException If an issue occurs with the given connection.
      */
     @Override
-    public String transcribe(@Nonnull AudioInputStream inputStream) throws IOException, OpenAiException {
+    public String transcribe(@Nonnull InputStream inputStream) throws IOException, OpenAiException {
         URL url = new URL(API_ENDPOINT);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -92,12 +88,12 @@ public class Whisper implements IWhisper {
      */
     private static void writeAudioStream(
             OutputStream outputStream,
-            AudioInputStream inputStream,
+            InputStream inputStream,
             String boundary
     ) throws IOException {
         outputStream.write(("--" + boundary + "\r\n").getBytes());
         outputStream.write(
-                ("Content-Disposition: form-data; name=\"file\"; filename=\"hello\"\r\n").getBytes()
+                ("Content-Disposition: form-data; name=\"file\"; filename=\"hello.mp3\"\r\n").getBytes()
         );
 
         outputStream.write(("Content-Type: audio/mpeg\r\n\r\n").getBytes());

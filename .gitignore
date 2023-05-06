@@ -7,3 +7,6 @@ build/
 # Ignore any IDE configuration files.
 .idea
 .vscode
+
+# Configuration files
+token.txt

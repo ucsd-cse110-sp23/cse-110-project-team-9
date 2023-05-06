@@ -1,8 +1,7 @@
 package sayit.openai;
 
 import java.io.IOException;
-
-import javax.sound.sampled.AudioInputStream;
+import java.io.InputStream;
 
 /**
  * An interface that represents a wrapper for OpenAI's Whisper API.
@@ -16,5 +15,5 @@ public interface IWhisper {
      * @throws IOException If an error occurs from the request to OpenAI's Whisper API.
      * @throws OpenAiException If an error occurred with the request data itself.
      */
-    String transcribe(AudioInputStream inputStream) throws IOException, OpenAiException;
+    String transcribe(InputStream inputStream) throws IOException, OpenAiException;
 }

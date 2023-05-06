@@ -1,6 +1,6 @@
 package sayit.openai;
 
-import javax.sound.sampled.AudioInputStream;
+import java.io.InputStream;
 
 public class MockWhisper implements IWhisper {
     private final boolean _shouldThrowError;
@@ -10,7 +10,7 @@ public class MockWhisper implements IWhisper {
     }
 
     @Override
-    public String transcribe(AudioInputStream inputStream) throws OpenAiException {
+    public String transcribe(InputStream inputStream) throws OpenAiException {
         if (this._shouldThrowError) {
             throw new OpenAiException("test error here");
         }
