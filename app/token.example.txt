@@ -1,0 +1,2 @@
+REPLACE THIS LINE WITH OPENAI TOKEN
+Then rename this file to token.txt AND DELETE THIS LINE (you should only have one line in this file)
