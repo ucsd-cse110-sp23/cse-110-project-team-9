@@ -3,7 +3,7 @@ package sayit.openai;
 /**
  * Represents an error that occurred from either the Whisper or ChatGPT APIs.
  */
-public class OpenAiException extends Throwable {
+public class OpenAiException extends Exception {
     /**
      * Creates a new instance of the <c>OpenAiException</c> with the specified error message.
      * @param errorMsg The error message, preferably from the OpenAI API response.

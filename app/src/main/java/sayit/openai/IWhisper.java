@@ -2,7 +2,6 @@ package sayit.openai;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
 import javax.sound.sampled.AudioInputStream;
 
 /**
@@ -17,5 +16,5 @@ public interface IWhisper {
      * @throws IOException If an error occurs from the request to OpenAI's Whisper API.
      * @throws OpenAiException If an error occurred with the request data itself.
      */
-    String transcribe(@Nonnull AudioInputStream inputStream) throws IOException, OpenAiException;
+    String transcribe(AudioInputStream inputStream) throws IOException, OpenAiException;
 }
