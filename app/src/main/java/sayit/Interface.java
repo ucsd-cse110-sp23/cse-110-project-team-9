@@ -42,12 +42,11 @@ public class Interface {
 	private static JScrollPane answerScrollPane;
 	private static JScrollPane questionScrollPane;
 
-	private static EntryDisplayer displayer;
+	//private static EntryDisplayer displayer;
 
 	// initialize the interface
 	public static void init() {
 		JFrame frame = new JFrame(appName);
-		displayer = new EntryDisplayer();
 		addComponentsToPane(frame.getContentPane());
 		frame.pack();
 		frame.setVisible(true);
@@ -100,10 +99,11 @@ public class Interface {
         answerTextArea.setText("Answer: This is a hard coded answer");
 		
 
+		//Create the "Question" JTextArea and JScrollPane
         answerScrollPane = new JScrollPane(answerTextArea);
         answerScrollPane.setPreferredSize(new Dimension(380, 250));
 
-        // Create panel for each JTextArea
+        // Create panel for each JTextArea and add Panel to the Main Pane
 
 		JPanel content = new JPanel();
 		content.add(questionScrollPane);
@@ -112,12 +112,13 @@ public class Interface {
 		pane.add(content, BorderLayout.CENTER);
 	}
 
-	//entry will need to be passed over from somewhere else
-	public void displayEntry(Entry e){
-		questionScrollPane.setViewportView(displayer.displayQuestion(e));
-		answerScrollPane.setViewportView(displayer.displayAnswer(e));
+	//updates question and answer boxes with a new entry
+	//comented out until files are linked
+	//public void displayEntry(Entry e){
+		//questionScrollPane.setViewportView(displayer.displayQuestion(e));
+		//answerScrollPane.setViewportView(displayer.displayAnswer(e));
 		
-	}
+	//}
 
 	// For debugging
 	public static void main(String[] args) throws IOException {
