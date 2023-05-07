@@ -112,7 +112,7 @@ public class Interface {
 		pane.add(content, BorderLayout.CENTER);
 	}
 
-	//In progress
+	//entry will need to be passed over from somewhere else
 	public void displayEntry(Entry e){
 		questionScrollPane.setViewportView(displayer.displayQuestion(e));
 		answerScrollPane.setViewportView(displayer.displayAnswer(e));
