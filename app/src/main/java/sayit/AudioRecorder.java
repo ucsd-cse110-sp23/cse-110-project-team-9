@@ -1,3 +1,7 @@
+package sayit;
+
+import javax.sound.sampled.*;
+
 public class AudioRecorder {
     InternalAudioRecorder recorder;
 
@@ -5,21 +9,21 @@ public class AudioRecorder {
         recorder = new InternalAudioRecorder();
     }
 
-    private AudioInputStream startRecording(){
+    public void startRecording(){
         recorder.run();
     }
 
-    private void stopRecording() {
+    public void stopRecording() {
         recorder.stopRecording();
     }
 
-    private AudioInputStream getRecording(){
-      recorder.getValue();
+    public AudioInputStream getRecording(){
+      return recorder.getValue();
     }
 }
 
 
-private class InternalAudioRecorder implements Runnable{
+class InternalAudioRecorder implements Runnable{
     private AudioInputStream value;
     private AudioFormat audioFormat;
     private TargetDataLine targetDataLine;
@@ -36,15 +40,10 @@ private class InternalAudioRecorder implements Runnable{
             targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
             targetDataLine.open(audioFormat);
             targetDataLine.start();
-            recordingLabel.setVisible(true);
       
             // the AudioInputStream that will be used to write the audio data to a file
-            AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
-      
-            // the file that will contain the audio data
-            File audioFile = new File("recording.wav");
-            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, audioFile);
-            recordingLabel.setVisible(false);
+            value = new AudioInputStream(targetDataLine);
+
           } catch (Exception ex) {
             ex.printStackTrace();
           }
@@ -54,7 +53,7 @@ private class InternalAudioRecorder implements Runnable{
          return value;
      }
     
-      private void stopRecording() {
+    public void stopRecording() {
         targetDataLine.stop();
         targetDataLine.close();
       }
