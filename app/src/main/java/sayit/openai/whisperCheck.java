@@ -7,14 +7,16 @@ import java.io.InputStream;
 public class WhisperCheck {
 
     IWhisper instance;
+    InputStream input;
 
-    public WhisperCheck(IWhisper w, InputStream input){
+    public WhisperCheck(IWhisper w, InputStream i){
         this.instance = w;
+        this.input = i;
     }
 
     public String output(){
         try{
-             return instance.transcribe(null);
+             return instance.transcribe(input);
         }
         catch (Exception e){
             return e.getMessage();
