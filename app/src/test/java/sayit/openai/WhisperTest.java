@@ -9,7 +9,7 @@ public class WhisperTest {
     @Test
     public void testMockWhisperNoException() {
         MockWhisper whisper = new MockWhisper(false);
-        whisperCheck check = new whisperCheck(whisper, null);
+        WhisperCheck check = new WhisperCheck(whisper, null);
         try {
             assertEquals(check.output(), "Welcome to CSE 12 Pre-Recorded Lecture");
         } catch (Exception e) {
@@ -20,7 +20,7 @@ public class WhisperTest {
     @Test
     public void testMockWhisperWithException() {
         MockWhisper whisper = new MockWhisper(true);
-        whisperCheck check = new whisperCheck(whisper, null);
-        assertThrows(OpenAiException.class, () -> check.output());
+        WhisperCheck check = new WhisperCheck(whisper, null);
+        assertEquals("some error", check.output());
     }
 }

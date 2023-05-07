@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 //base functionality to handle whisper errors, should be transposed to main app when we get everything working
-public class whisperCheck {
+public class WhisperCheck {
 
     IWhisper instance;
 
-    public whisperCheck(IWhisper w, InputStream input){
+    public WhisperCheck(IWhisper w, InputStream input){
         this.instance = w;
     }
 
