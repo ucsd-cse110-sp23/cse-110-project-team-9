@@ -21,6 +21,6 @@ public class WhisperTest {
     public void testMockWhisperWithException() {
         MockWhisper whisper = new MockWhisper(true);
         WhisperCheck check = new WhisperCheck(whisper, null);
-        assertEquals("some error", check.output());
+        assertEquals("test error here", check.output());
     }
 }
