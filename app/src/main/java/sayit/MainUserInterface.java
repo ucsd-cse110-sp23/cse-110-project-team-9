@@ -11,7 +11,6 @@ import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -20,52 +19,75 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 
-public class Interface {
+public class MainUserInterface {
     private static final String appName = "SayIt Assistant";
     private static final String trashCanFileName = "./Pictures/TrashCan.jpg";
     private static final String recordButtonFileName = "./Pictures/RecordButton.jpg";
     private static final String stopButtonFileName = "./Pictures/StopButton.jpg";
 
-    private static JButton recordButton;
-    private static JButton stopButton;
+    private JButton recordButton;
+    private JButton stopButton;
+    private JScrollPane answerScrollPane;
+    private JScrollPane questionScrollPane;
+    private final JFrame frame;
 
-    private static JScrollPane answerScrollPane;
-    private static JScrollPane questionScrollPane;
-
-    //private static EntryDisplayer displayer;
-
-    // initialize the interface
-    public static void init() {
-        JFrame frame = new JFrame(appName);
-        addComponentsToPane(frame.getContentPane());
-        frame.pack();
-        frame.setVisible(true);
+    private MainUserInterface() {
+        this.frame = new JFrame(appName);
+        addComponentsToPane(this.frame.getContentPane());
+        this.frame.pack();
+        this.frame.setVisible(true);
     }
 
-    // adds components to the interface
-    public static void addComponentsToPane(Container pane) {
+    private static MainUserInterface userInterface;
+
+    /**
+     * <p>
+     *  Gets or creates a new instance of the <c>MainUserInterface</c> class. This method is
+     *  designed so that there can be at most one instance of the <c>MainUserInterface</c> class
+     *  at any point.
+     * </p>
+     *
+     * <p>
+     *  This will also automatically make the user interface visible if it hasn't been initialized.
+     * </p>
+     *
+     * @return The instance of the <c>MainUserInterface</c> class.
+     */
+    public static MainUserInterface getInstance() {
+        if (userInterface == null) {
+            userInterface = new MainUserInterface();
+        }
+
+        return userInterface;
+    }
+
+    /**
+     * Adds the specified components to this user interface.
+     *
+     * @param pane The pane to add the components to.
+     */
+    public void addComponentsToPane(Container pane) {
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        recordButton = new RoundButton(recordButtonFileName, 50);
+        this.recordButton = new RoundButton(recordButtonFileName, 50);
         toolBar.add(recordButton);
-        stopButton = new RoundButton(stopButtonFileName, 40);
+        this.stopButton = new RoundButton(stopButtonFileName, 40);
         toolBar.add(stopButton);
-        JButton button = new RoundButton(trashCanFileName, 40);
-        toolBar.add(button);
+
+        toolBar.add(new RoundButton(trashCanFileName, 40));
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
-        button = new JButton("Clear All");
-        toolBar.add(button);
+        toolBar.add(new JButton("Clear All"));
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         //JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
         JPanel scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
         for (int i = 0; i < 6; i++) {
-            JButton test = new JButton("" + i);
+            JButton test = new JButton(String.valueOf(i));
             test.setPreferredSize(new Dimension(180, 100));
             scrollBar.add(test);
         }
+
         //TODO: ADD ALL QUESTIONS TO THIE PANEL
         JScrollPane scrollPane = new JScrollPane(scrollBar);
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -81,19 +103,17 @@ public class Interface {
         questionTextArea.setEditable(false);
         questionTextArea.setText("Question: This is a hard coded question");
 
-
-        questionScrollPane = new JScrollPane(questionTextArea);
-        questionScrollPane.setPreferredSize(new Dimension(380, 250));
+        this.questionScrollPane = new JScrollPane(questionTextArea);
+        this.questionScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create the "Answer" JTextArea and JScrollPane
         JTextArea answerTextArea = new JTextArea();
         answerTextArea.setEditable(false);
         answerTextArea.setText("Answer: This is a hard coded answer");
 
-
         //Create the "Question" JTextArea and JScrollPane
-        answerScrollPane = new JScrollPane(answerTextArea);
-        answerScrollPane.setPreferredSize(new Dimension(380, 250));
+        this.answerScrollPane = new JScrollPane(answerTextArea);
+        this.answerScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create panel for each JTextArea and add Panel to the Main Pane
 
@@ -105,25 +125,32 @@ public class Interface {
     }
 
     //updates question and answer boxes with a new entry
-    //comented out until files are linked
+    //commented out until files are linked
     //public void displayEntry(Entry e){
     //questionScrollPane.setViewportView(displayer.displayQuestion(e));
     //answerScrollPane.setViewportView(displayer.displayAnswer(e));
-
     //}
 }
 
+/**
+ * Represents a round button.
+ */
 class RoundButton extends JButton {
+    private Shape shape;
 
+    /**
+     * Creates a <c>RoundButton</c> object with the specified image and size.
+     *
+     * @param fileName The file containing the image.
+     * @param size     The size of the button.
+     */
     public RoundButton(String fileName, int size) {
         Image img;
         try {
             img = ImageIO.read(new File(fileName));
             super.setIcon(new ImageIcon(img.getScaledInstance(size, size, Image.SCALE_SMOOTH)));
-
         } catch (Exception e) {
-            System.out.println("ERROR");
-            e.getStackTrace();
+            throw new RuntimeException("Unable to load image: " + fileName + "\n" + e.getMessage());
         }
 
         setBackground(Color.lightGray);
@@ -134,24 +161,25 @@ class RoundButton extends JButton {
         setContentAreaFilled(false);
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         if (getModel().isArmed()) {
             g.setColor(Color.gray);
         } else {
             g.setColor(getBackground());
         }
-        g.fillOval(0, 0, getSize().width - 1, getSize().height - 1);
 
+        g.fillOval(0, 0, getSize().width - 1, getSize().height - 1);
         super.paintComponent(g);
     }
 
+    @Override
     protected void paintBorder(Graphics g) {
         g.setColor(Color.darkGray);
         g.drawOval(0, 0, getSize().width - 1, getSize().height - 1);
     }
 
-    Shape shape;
-
+    @Override
     public boolean contains(int x, int y) {
         if (shape == null || !shape.getBounds().equals(getBounds())) {
             shape = new Ellipse2D.Float(0, 0, getWidth(), getHeight());

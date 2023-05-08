@@ -1,26 +1,50 @@
 package sayit.openai;
 
-import java.io.IOException;
 import java.io.InputStream;
 
-//base functionality to handle whisper errors, should be transposed to main app when we get everything working
+/**
+ * A wrapper class around an <c>IWhisper</c> instance, which is designed to handle
+ * possible errors sent from the API or while transcribing.
+ */
 public class WhisperCheck {
+    private final IWhisper instance;
+    private final InputStream input;
+    private boolean isExceptionThrown;
 
-    IWhisper instance;
-    InputStream input;
-
-    public WhisperCheck(IWhisper w, InputStream i){
+    /**
+     * Creates a new <c>WhisperCheck</c> object with the specified <c>IWhisper</c> instance
+     * and input stream.
+     *
+     * @param w The <c>IWhisper</c> instance to use.
+     * @param i The input stream to use.
+     */
+    public WhisperCheck(IWhisper w, InputStream i) {
         this.instance = w;
         this.input = i;
+        this.isExceptionThrown = false;
     }
 
-    public String output(){
-        try{
-             return instance.transcribe(input);
-        }
-        catch (Exception e){
-            return e.getMessage();
-        }    
+    /**
+     * Gets whether an exception was thrown.
+     *
+     * @return Whether an exception was thrown.
+     */
+    public boolean isExceptionThrown() {
+        return this.isExceptionThrown;
     }
-    
+
+    /**
+     * Transcribes the input stream provided in the constructor.
+     *
+     * @return The transcription, if any, or the error message.
+     */
+    public String output() {
+        try {
+            return instance.transcribe(input);
+        } catch (Exception e) {
+            this.isExceptionThrown = true;
+            return e.getMessage();
+        }
+    }
+
 }

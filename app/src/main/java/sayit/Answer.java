@@ -1,35 +1,37 @@
 package sayit;
 
+/**
+ * Represents an answer to a question from ChatGPT.
+ */
 public class Answer {
-
-    String text;
-
-    /**
-     * Default constructor with no arguments
-     */
-    public Answer() {
-
-    }
+    private String _text;
 
     /**
-     * Constructor that sets text field to parameter
+     * Creates a new <c>Answer</c> object.
+     *
      * @param s The answer to set.
      */
     public Answer(String s) {
-	this.text = s;
+        this._text = s;
     }
 
 
     /**
-     * Constructor that sets answer text to parameter
+     * Sets the answer to the specified answer.
+     *
      * @param s The answer to set.
      */
     public void setAnswer(String s) {
-	this.text = s;
+        this._text = s;
     }
 
+    /**
+     * Gets the answer.
+     *
+     * @return The answer.
+     */
     public String getAnswerText() {
-	return text;
+        return this._text;
     }
 
 }

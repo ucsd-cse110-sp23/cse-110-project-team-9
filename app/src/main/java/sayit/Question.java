@@ -1,15 +1,10 @@
 package sayit;
 
+/**
+ * Represents a question asked by a user.
+ */
 public class Question {
-
-    String text;
-
-    /**
-     * Default constructor with no arguments.
-     */
-    public Question() {
-
-    }
+    private String text;
 
     /**
      * Constructor that sets the question text
@@ -21,13 +16,21 @@ public class Question {
 
     }
 
+    /**
+     * Sets the question to the specified question.
+     *
+     * @param s The question to set.
+     */
     public void setQuestion(String s) {
         this.text = s;
     }
 
+    /**
+     * Gets the question asked by the user.
+     *
+     * @return The question.
+     */
     public String getQuestionText() {
         return text;
     }
-
-
 }
