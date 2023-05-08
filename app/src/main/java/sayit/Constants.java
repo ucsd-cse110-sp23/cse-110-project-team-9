@@ -16,9 +16,7 @@ public final class Constants {
     public static final String OPENAI_API_KEY;
 
     static {
-        // show current dir
-        System.out.println("Current dir: " + System.getProperty("user.dir"));
-        var apiKey = "";
+        String apiKey = "";
         try {
             var configFile = new File("token.txt");
             apiKey = Files.readString(configFile.toPath()).trim();

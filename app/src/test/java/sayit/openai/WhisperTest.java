@@ -8,7 +8,7 @@ public class WhisperTest {
 
     @Test
     public void testMockWhisperNoException() {
-        MockWhisper whisper = new MockWhisper(false);
+        MockWhisper whisper = new MockWhisper(false, "Welcome to CSE 12 Pre-Recorded Lecture");
         WhisperCheck check = new WhisperCheck(whisper, null);
         try {
             assertEquals(check.output(), "Welcome to CSE 12 Pre-Recorded Lecture");
@@ -19,7 +19,7 @@ public class WhisperTest {
 
     @Test
     public void testMockWhisperWithException() {
-        MockWhisper whisper = new MockWhisper(true);
+        MockWhisper whisper = new MockWhisper(true, "test error here");
         WhisperCheck check = new WhisperCheck(whisper, null);
         assertEquals("test error here", check.output());
     }

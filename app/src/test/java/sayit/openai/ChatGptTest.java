@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ChatGptTest {
     @Test
     public void testAskQuestionNoException() {
-        IChatGpt chatGpt = new MockChatGpt(false);
+        IChatGpt chatGpt = new MockChatGpt(false, "some response");
         try {
             String response = chatGpt.askQuestion("some prompt");
             assertEquals("some response", response);
@@ -18,7 +18,7 @@ public class ChatGptTest {
 
     @Test
     public void testAskQuestionException() {
-        IChatGpt chatGpt = new MockChatGpt(true);
+        IChatGpt chatGpt = new MockChatGpt(true, "some error");
         assertThrows(OpenAiException.class, () -> chatGpt.askQuestion("some prompt"));
     }
 }

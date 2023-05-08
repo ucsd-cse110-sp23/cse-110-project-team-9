@@ -103,7 +103,8 @@ class InternalAudioRecorder implements Runnable {
     }
 
     /**
-     * Stops recording audio.
+     * Stops recording audio. Once stopped, the audio input stream can be retrieved using
+     * <c>getValue</c>.
      */
     public void stopRecording() {
         this.targetDataLine.stop();
