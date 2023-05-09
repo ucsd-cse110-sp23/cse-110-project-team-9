@@ -1,9 +1,9 @@
 package sayit.openai;
 
 import org.junit.jupiter.api.Test;
-import sayit.Answer;
-import sayit.QuestionAnswerEntry;
-import sayit.Question;
+import sayit.qa.Answer;
+import sayit.qa.QuestionAnswerEntry;
+import sayit.qa.Question;
 
 import static org.junit.jupiter.api.Assertions.*;
 
