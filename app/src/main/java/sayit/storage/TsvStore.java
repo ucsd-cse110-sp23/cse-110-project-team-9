@@ -14,17 +14,17 @@ import java.util.Map;
 
 /**
  * <p>
- *     Represents a "database" which uses a TSV file as its storage system. This particular class is
- *     designed to be used to store Question and Answer pairs.
+ * Represents a "database" which uses a TSV file as its storage system. This particular class is
+ * designed to be used to store Question and Answer pairs.
  * </p>
  * <p>
- *     To ensure that we can have the same entries in the TSV file (since the user can ask the same questions,
- *     for example), we will use a unique id for each entry. This id will be used to identify the entry in the
- *     TSV file. Note that, if an entry is deleted, the id will not be reused. In other words, the id will be
- *     monotonically increasing.
+ * To ensure that we can have the same entries in the TSV file (since the user can ask the same questions,
+ * for example), we will use a unique id for each entry. This id will be used to identify the entry in the
+ * TSV file. Note that, if an entry is deleted, the id will not be reused. In other words, the id will be
+ * monotonically increasing.
  * </p>
  * <p>
- *     The following assumptions are made for this store:
+ * The following assumptions are made for this store:
  *     <ul>
  *         <li>There is only <i>one</i> store for a given file at any given time.</li>
  *     </ui>
