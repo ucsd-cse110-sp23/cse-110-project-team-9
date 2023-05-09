@@ -7,6 +7,7 @@ import sayit.qa.Answer;
 import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -187,5 +188,6 @@ public class TsvStoreTest {
     @AfterEach
     public void tearDown() {
         _store.clearAll();
+        assertFalse(new File(TEST_FILE).exists());
     }
 }
