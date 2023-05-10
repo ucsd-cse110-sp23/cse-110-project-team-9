@@ -5,6 +5,7 @@ import sayit.openai.*;
 import sayit.qa.Answer;
 import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
+import sayit.storage.IStore;
 import sayit.storage.TsvStore;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class WalkthroughTest {
         };
 
         // Let's create our store, which can be used to store any questions and answers
-        var store = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store);
 
         // Iterate over each question and answer, and pretend that we're "asking" them.
@@ -57,7 +58,7 @@ public class WalkthroughTest {
         }
 
         // Make sure we have the right number of entries.
-        assertEquals(10, store.getNumEntries());
+        assertEquals(10, store.size());
 
         // Okay, let's suppose the user wants to look at their response to "What is 3 + 3?"
         // The user will press the "What is 3 + 3?" button, and we'll get the index of that button (2)
@@ -66,14 +67,14 @@ public class WalkthroughTest {
 
         // Now, let's suppose the user closes the application. Before the app closes, we should
         // probably save the store to disk.
-        store.saveChanges();
+        store.save();
 
         // Now, let's suppose the user opens the application again. We should load the store from disk.
         var loadedStore = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(loadedStore);
 
         // Let's make sure the loaded store has the same number of entries as the original store.
-        assertEquals(store.getNumEntries(), loadedStore.getNumEntries());
+        assertEquals(store.size(), loadedStore.size());
 
         // The user now clicks on the "What is 5 + 5?" button. We'll get the index of that button (4)
         // and use that to get the question and answer.
@@ -123,7 +124,7 @@ public class WalkthroughTest {
         assertEquals(new QuestionAnswerEntry(new Question("What is the meaning of life?"), new Answer("42")), loadedStore.get(0));
 
         // Great. Let's save it once more.
-        loadedStore.saveChanges();
+        loadedStore.save();
 
         // And pretend the user closes the application and then opens it again.
         var reloadedStore = TsvStore.createOrOpenStore(TEST_FILE);

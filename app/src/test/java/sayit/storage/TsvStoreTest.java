@@ -8,13 +8,12 @@ import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
 
 import java.io.File;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TsvStoreTest {
     private static final String TEST_FILE = "test.tsv";
-    private TsvStore _store;
+    private IStore<QuestionAnswerEntry> _store;
 
     @BeforeEach
     public void setUp() {
@@ -27,18 +26,14 @@ public class TsvStoreTest {
         _store.insert(new QuestionAnswerEntry(new Question("What is 2 + 2?"), new Answer("4")));
         _store.insert(new QuestionAnswerEntry(new Question("What is 3 + 3?"), new Answer("6")));
 
-        assertEquals(3, _store.getNumEntries());
+        assertEquals(3, _store.size());
 
         assertEquals(new QuestionAnswerEntry(new Question("What is 1 + 1?"), new Answer("2")), _store.get(0));
         assertEquals(new QuestionAnswerEntry(new Question("What is 2 + 2?"), new Answer("4")), _store.get(1));
         assertEquals(new QuestionAnswerEntry(new Question("What is 3 + 3?"), new Answer("6")), _store.get(2));
 
-        assertEquals(List.of("2"), _store.get("What is 1 + 1?"));
-        assertEquals(List.of("4"), _store.get("What is 2 + 2?"));
-        assertEquals(List.of("6"), _store.get("What is 3 + 3?"));
-
         assertTrue(_store.delete(0));
-        assertEquals(2, _store.getNumEntries());
+        assertEquals(2, _store.size());
         assertNull(_store.get(0));
         assertEquals(new QuestionAnswerEntry(new Question("What is 2 + 2?"), new Answer("4")), _store.get(1));
         assertEquals(new QuestionAnswerEntry(new Question("What is 3 + 3?"), new Answer("6")), _store.get(2));
@@ -53,11 +48,11 @@ public class TsvStoreTest {
         _store.insert(new QuestionAnswerEntry(new Question("Daniel"), new Answer("Kane")));
         _store.insert(new QuestionAnswerEntry(new Question("Miles"), new Answer("Jones")));
 
-        assertTrue(_store.saveChanges());
+        assertTrue(_store.save());
 
         var store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
-        assertEquals(6, store2.getNumEntries());
+        assertEquals(6, store2.size());
         assertEquals(new QuestionAnswerEntry(new Question("Greg"), new Answer("Miranda")), store2.get(0));
         assertEquals(new QuestionAnswerEntry(new Question("Joe"), new Answer("Politz")), store2.get(1));
         assertEquals(new QuestionAnswerEntry(new Question("Paul"), new Answer("Cao")), store2.get(2));
@@ -79,11 +74,11 @@ public class TsvStoreTest {
         _store.insert(new QuestionAnswerEntry(new Question("COGS"), new Answer("Cognitive Science")));
         _store.insert(new QuestionAnswerEntry(new Question("POLI"), new Answer("hello")));
 
-        assertTrue(_store.saveChanges());
+        assertTrue(_store.save());
 
         var store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
-        assertEquals(10, store2.getNumEntries());
+        assertEquals(10, store2.size());
         assertEquals(new QuestionAnswerEntry(new Question("CSE"), new Answer("Computer Science & Engineering")), store2.get(0));
         assertEquals(new QuestionAnswerEntry(new Question("ECE"), new Answer("Electrical & Computer Engineering")), store2.get(1));
         assertEquals(new QuestionAnswerEntry(new Question("MAE"), new Answer("Mechanical & Aerospace Engineering")), store2.get(2));
@@ -98,11 +93,11 @@ public class TsvStoreTest {
         assertTrue(store2.delete(0));
         assertTrue(store2.delete(1));
         assertTrue(store2.delete(2));
-        assertTrue(store2.saveChanges());
+        assertTrue(store2.save());
 
         var store3 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store3);
-        assertEquals(7, store3.getNumEntries());
+        assertEquals(7, store3.size());
         assertNull(store2.get(0));
         assertNull(store2.get(1));
         assertNull(store2.get(2));
@@ -117,11 +112,11 @@ public class TsvStoreTest {
         assertFalse(store3.delete(0));
         assertFalse(store3.delete(1111));
 
-        assertTrue(store3.saveChanges());
+        assertTrue(store3.save());
 
         var store4 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store4);
-        assertEquals(7, store4.getNumEntries());
+        assertEquals(7, store4.size());
         assertNull(store4.get(0));
         assertNull(store4.get(1));
         assertNull(store4.get(2));
@@ -137,11 +132,11 @@ public class TsvStoreTest {
         assertEquals(10, store4.insert(new QuestionAnswerEntry(new Question("POLI"), new Answer("Political Science"))));
         assertTrue(store4.delete(4));
 
-        assertTrue(store4.saveChanges());
+        assertTrue(store4.save());
 
         var store5 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store5);
-        assertEquals(6, store5.getNumEntries());
+        assertEquals(6, store5.size());
         assertNull(store5.get(0));
         assertNull(store5.get(1));
         assertNull(store5.get(2));
@@ -157,18 +152,18 @@ public class TsvStoreTest {
 
     @Test
     public void testEmptyStore() {
-        assertEquals(0, _store.getNumEntries());
+        assertEquals(0, _store.size());
         assertNull(_store.get(0));
         assertNull(_store.get(1));
 
         assertFalse(_store.delete(0));
         assertFalse(_store.delete(1));
 
-        assertTrue(_store.saveChanges());
+        assertTrue(_store.save());
 
         var store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
-        assertEquals(0, store2.getNumEntries());
+        assertEquals(0, store2.size());
 
         assertNull(store2.get(0));
         assertNull(store2.get(1));
@@ -179,7 +174,7 @@ public class TsvStoreTest {
         _store.insert(new QuestionAnswerEntry(new Question("CSE"), new Answer("Computer Science & Engineering")));
         _store.insert(new QuestionAnswerEntry(new Question("ECE"), new Answer("Electrical & Computer Engineering")));
 
-        var map = _store.getAllEntries();
+        var map = _store.getEntries();
         assertEquals(2, map.size());
         assertEquals(new QuestionAnswerEntry(new Question("CSE"), new Answer("Computer Science & Engineering")), map.get(0));
         assertEquals(new QuestionAnswerEntry(new Question("ECE"), new Answer("Electrical & Computer Engineering")), map.get(1));

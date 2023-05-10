@@ -30,7 +30,7 @@ import java.util.Map;
  *     </ui>
  * </p>
  */
-public class TsvStore {
+public class TsvStore implements IStore<QuestionAnswerEntry> {
     private static final int NUM_COLUMNS = 3;
     private static final String TSV_HEADER = "id\tquestion\tanswer";
     private static final String DELIMITER = "\t";
@@ -143,20 +143,6 @@ public class TsvStore {
     }
 
     /**
-     * Gets all answers to the specified question. This is useful if, for example, the user asked the same question
-     * multiple times and want to get all the answers to that question.
-     *
-     * @param question The question to get the answers for.
-     * @return A list of all answers to the specified question.
-     */
-    public List<String> get(String question) {
-        return this._entries.values().stream()
-                .filter(entry -> entry.getQuestion().getQuestionText().equals(question))
-                .map(entry -> entry.getAnswer().getAnswerText())
-                .toList();
-    }
-
-    /**
      * Deletes the entry with the specified id.
      *
      * @param id The id of the entry to delete.
@@ -172,7 +158,7 @@ public class TsvStore {
      *
      * @return <c>true</c> if the save was successful, <c>false</c> otherwise.
      */
-    public boolean saveChanges() {
+    public boolean save() {
         try {
             File file = new File(this._filename);
             try (FileWriter writer = new FileWriter(file, false)) {
@@ -198,7 +184,7 @@ public class TsvStore {
      *
      * @return The number of entries in the store.
      */
-    public int getNumEntries() {
+    public int size() {
         return this._entries.size();
     }
 
@@ -207,7 +193,7 @@ public class TsvStore {
      *
      * @return An immutable map of all entries in the store.
      */
-    public Map<Integer, QuestionAnswerEntry> getAllEntries() {
+    public Map<Integer, QuestionAnswerEntry> getEntries() {
         return Map.copyOf(this._entries);
     }
 
