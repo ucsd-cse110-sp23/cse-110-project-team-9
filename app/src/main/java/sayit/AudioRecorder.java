@@ -46,6 +46,7 @@ class InternalAudioRecorder implements Runnable {
 
     /**
      * Gets the audio format used by the AudioRecorder.
+     *
      * @return The audio format used by the AudioRecorder.
      */
     private AudioFormat getAudioFormat() {
@@ -96,6 +97,7 @@ class InternalAudioRecorder implements Runnable {
 
     /**
      * Gets the audio input stream.
+     *
      * @return The audio input stream.
      */
     public AudioInputStream getValue() {
