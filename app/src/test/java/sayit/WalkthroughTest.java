@@ -70,7 +70,7 @@ public class WalkthroughTest {
         store.save();
 
         // Now, let's suppose the user opens the application again. We should load the store from disk.
-        var loadedStore = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> loadedStore = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(loadedStore);
 
         // Let's make sure the loaded store has the same number of entries as the original store.
@@ -127,7 +127,7 @@ public class WalkthroughTest {
         loadedStore.save();
 
         // And pretend the user closes the application and then opens it again.
-        var reloadedStore = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> reloadedStore = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(reloadedStore);
 
         // And the user clicks on the "What is the meaning of life?" button.

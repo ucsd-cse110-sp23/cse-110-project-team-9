@@ -50,7 +50,7 @@ public class TsvStoreTest {
 
         assertTrue(_store.save());
 
-        var store2 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
         assertEquals(6, store2.size());
         assertEquals(new QuestionAnswerEntry(new Question("Greg"), new Answer("Miranda")), store2.get(0));
@@ -76,7 +76,7 @@ public class TsvStoreTest {
 
         assertTrue(_store.save());
 
-        var store2 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
         assertEquals(10, store2.size());
         assertEquals(new QuestionAnswerEntry(new Question("CSE"), new Answer("Computer Science & Engineering")), store2.get(0));
@@ -95,7 +95,7 @@ public class TsvStoreTest {
         assertTrue(store2.delete(2));
         assertTrue(store2.save());
 
-        var store3 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store3 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store3);
         assertEquals(7, store3.size());
         assertNull(store2.get(0));
@@ -114,7 +114,7 @@ public class TsvStoreTest {
 
         assertTrue(store3.save());
 
-        var store4 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store4 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store4);
         assertEquals(7, store4.size());
         assertNull(store4.get(0));
@@ -134,7 +134,7 @@ public class TsvStoreTest {
 
         assertTrue(store4.save());
 
-        var store5 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store5 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store5);
         assertEquals(6, store5.size());
         assertNull(store5.get(0));
@@ -161,7 +161,7 @@ public class TsvStoreTest {
 
         assertTrue(_store.save());
 
-        var store2 = TsvStore.createOrOpenStore(TEST_FILE);
+        IStore<QuestionAnswerEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
         assertNotNull(store2);
         assertEquals(0, store2.size());
 
