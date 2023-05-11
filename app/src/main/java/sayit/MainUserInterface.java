@@ -1,6 +1,7 @@
 package sayit;
 
 import sayit.helpers.ImageHelper;
+import sayit.openai.ChatGpt;
 import sayit.openai.IWhisper;
 import sayit.openai.Whisper;
 import sayit.openai.WhisperCheck;
@@ -84,21 +85,31 @@ public class MainUserInterface {
                 IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
                 WhisperCheck whisperCheck = new WhisperCheck(whisper, recordingFile);
 
-                String output = whisperCheck.output();
+                String question = whisperCheck.output();
 
                 if (whisperCheck.isExceptionThrown()) {
                     // Show a message box with an error containing the exception content
                     JOptionPane.showMessageDialog(this.frame,
-                            "Unable to transcribe response. " + output,
+                            "Unable to transcribe response. " + question,
                             "Error",
                             JOptionPane.ERROR_MESSAGE);
 
-                } else {
-                    JOptionPane.showMessageDialog(this.frame,
-                            "Transcription: " + output,
-                            "Transcription",
-                            JOptionPane.INFORMATION_MESSAGE);
                 }
+
+                ChatGpt chatGpt = new ChatGpt(Constants.OPENAI_API_KEY, 100);
+                String response;
+                try {
+                    response = chatGpt.askQuestion(question);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this.frame,
+                            "Unable to transcribe response. " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // question & response -> database
+                // TODO connor
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
