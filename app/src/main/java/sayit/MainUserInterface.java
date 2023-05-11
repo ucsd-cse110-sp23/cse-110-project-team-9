@@ -37,6 +37,7 @@ public class MainUserInterface {
     private final JFrame frame;
     private AudioRecorder recorder;
     private TsvStore db;
+    private int currentQID;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
@@ -142,7 +143,7 @@ public class MainUserInterface {
 
                 //add entry to database file
                 //probably violates srp but idk where we are handling db stuff rn
-                db.insert(entry);
+                currentQID = db.insert(entry);
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
