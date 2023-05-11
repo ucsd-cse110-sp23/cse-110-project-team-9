@@ -6,6 +6,7 @@ import sayit.openai.IWhisper;
 import sayit.openai.Whisper;
 import sayit.openai.WhisperCheck;
 import sayit.qa.*;
+import sayit.storage.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -114,10 +115,19 @@ public class MainUserInterface {
                 // question & response -> database
                 // TODO connor
 
+                //parse question and anser into entry
                 Question q = new Question(question);
                 Answer a = new Answer(response);
                 QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
+                
+                //display entry
                 displayEntry(entry);
+
+                //add entry to database file
+                //probably violates srp but idk where we are handling db stuff rn
+                TsvStore db = TsvStore.createOrOpenStore("entries.txt");
+                db.insert(entry);
+                db.save();
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
