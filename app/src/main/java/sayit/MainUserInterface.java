@@ -5,6 +5,8 @@ import sayit.openai.ChatGpt;
 import sayit.openai.IWhisper;
 import sayit.openai.Whisper;
 import sayit.openai.WhisperCheck;
+import sayit.qa.*;
+import sayit.storage.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -30,8 +32,12 @@ public class MainUserInterface {
     private JButton stopButton;
     private JScrollPane answerScrollPane;
     private JScrollPane questionScrollPane;
+    private JTextArea questionTextArea;
+    private JTextArea answerTextArea;
     private final JFrame frame;
     private AudioRecorder recorder;
+    private TsvStore db;
+    private int currentQID;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
@@ -39,6 +45,23 @@ public class MainUserInterface {
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
+        this.db = TsvStore.createOrOpenStore("entries.txt");
+
+        //add behavior for closing app
+        //update db
+        //code taken from https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Close Window?", 
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    db.save();
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     private static MainUserInterface userInterface;
@@ -109,7 +132,18 @@ public class MainUserInterface {
                 }
 
                 // question & response -> database
-                // TODO connor
+
+                //parse question and anser into entry
+                Question q = new Question(question);
+                Answer a = new Answer(response);
+                QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
+                
+                //display entry
+                displayEntry(entry);
+
+                //add entry to database file
+                //probably violates srp but idk where we are handling db stuff rn
+                currentQID = db.insert(entry);
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
@@ -162,7 +196,7 @@ public class MainUserInterface {
         //im thinking entry object will be passed over to interface and then interface code can fix it
 
         // Create the "Question" JTextArea and JScrollPane
-        JTextArea questionTextArea = new JTextArea();
+        questionTextArea = new JTextArea();
         questionTextArea.setEditable(false);
         questionTextArea.setText("Question: This is a hard coded question");
 
@@ -170,7 +204,7 @@ public class MainUserInterface {
         this.questionScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create the "Answer" JTextArea and JScrollPane
-        JTextArea answerTextArea = new JTextArea();
+        answerTextArea = new JTextArea();
         answerTextArea.setEditable(false);
         answerTextArea.setText("Answer: This is a hard coded answer");
 
@@ -185,14 +219,15 @@ public class MainUserInterface {
         content.add(answerScrollPane);
         content.setPreferredSize(new Dimension(500, 500));
         pane.add(content, BorderLayout.CENTER);
+
     }
 
     //updates question and answer boxes with a new entry
     //commented out until files are linked
-    //public void displayEntry(Entry e){
-    //questionScrollPane.setViewportView(displayer.displayQuestion(e));
-    //answerScrollPane.setViewportView(displayer.displayAnswer(e));
-    //}
+    public void displayEntry(QuestionAnswerEntry e){
+        questionTextArea.setText(e.getQuestion().getQuestionText());
+        answerTextArea.setText(e.getAnswer().getAnswerText());
+    }
 }
 
 /**
