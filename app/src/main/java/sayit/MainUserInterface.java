@@ -36,6 +36,7 @@ public class MainUserInterface {
     private JTextArea answerTextArea;
     private final JFrame frame;
     private AudioRecorder recorder;
+    private TsvStore db;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
@@ -43,6 +44,23 @@ public class MainUserInterface {
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
+        this.db = TsvStore.createOrOpenStore("entries.txt");
+
+        //add behavior for closing app
+        //update db
+        //code taken from https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Close Window?", 
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    db.save();
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     private static MainUserInterface userInterface;
@@ -125,9 +143,7 @@ public class MainUserInterface {
 
                 //add entry to database file
                 //probably violates srp but idk where we are handling db stuff rn
-                TsvStore db = TsvStore.createOrOpenStore("entries.txt");
                 db.insert(entry);
-                db.save();
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
@@ -203,6 +219,7 @@ public class MainUserInterface {
         content.add(answerScrollPane);
         content.setPreferredSize(new Dimension(500, 500));
         pane.add(content, BorderLayout.CENTER);
+
     }
 
     //updates question and answer boxes with a new entry
