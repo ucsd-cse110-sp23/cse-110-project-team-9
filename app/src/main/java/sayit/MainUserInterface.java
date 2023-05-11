@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Shape;
+import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
 
@@ -16,9 +17,14 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import sayit.qa.QuestionAnswerEntry;
+import sayit.storage.IStore;
+import sayit.storage.TsvStore;
 
 public class MainUserInterface {
     private static final String appName = "SayIt Assistant";
@@ -28,9 +34,13 @@ public class MainUserInterface {
 
     private JButton recordButton;
     private JButton stopButton;
+    private JButton deleteButton;
+    private boolean isSelected;
+    private int idSelected;
     private JScrollPane answerScrollPane;
     private JScrollPane questionScrollPane;
     private final JFrame frame;
+    private IStore<QuestionAnswerEntry> database;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
@@ -74,8 +84,36 @@ public class MainUserInterface {
         this.stopButton = new RoundButton(stopButtonFileName, 40);
         toolBar.add(stopButton);
 
-        toolBar.add(new RoundButton(trashCanFileName, 40));
-        //TODO: ADD ACTION LISTENER TO THIS BUTTON
+        // Create deleteQuestion button and add listener for functionality
+        this.deleteButton = new RoundButton(trashCanFileName, 40);
+        toolBar.add(deleteButton);
+        deleteButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            //TODO: find which question is selected
+                            if(isSelected){
+                                //delete qa pair from database
+                                if(database.delete(idSelected)){
+                                    String response = "Deleted question";
+                                    JOptionPane.showMessageDialog(null, response);
+                                    //TODO: specify a success message?
+                                }
+                                // TODO: delete button from UI/sidebar
+
+                                //TODO: refactor?
+                            }
+                            else{
+                                String response = "No question selected";
+                                JOptionPane.showMessageDialog(null, response);
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                        }
+                    }
+        });
+
         toolBar.add(new JButton("Clear All"));
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
@@ -84,11 +122,20 @@ public class MainUserInterface {
         JPanel scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
         for (int i = 0; i < 6; i++) {
             JButton test = new JButton(String.valueOf(i));
-            test.setPreferredSize(new Dimension(180, 100));
             scrollBar.add(test);
+
+            // Keep track of which question is selected for the deleteButton
+            test.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        isSelected = true;
+                        //idSelected = test.id;
+                        // TODO: get id from button
+                    }
+                });
         }
 
-        //TODO: ADD ALL QUESTIONS TO THIE PANEL
+        //TODO: ADD ALL QUESTIONS TO THE PANEL
         JScrollPane scrollPane = new JScrollPane(scrollBar);
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200, 500));
@@ -130,6 +177,31 @@ public class MainUserInterface {
     //questionScrollPane.setViewportView(displayer.displayQuestion(e));
     //answerScrollPane.setViewportView(displayer.displayAnswer(e));
     //}
+}
+
+/**
+ * Button class for questions on sidebar
+ */
+class QuestionButton extends JButton {
+    private Shape shape;
+    private int id;
+
+    /**
+     * Creates a <c>QuestionButton</c> object with the specified image and size.
+     *
+     * @param fileName The file containing the image.
+     * @param size     The size of the button.
+     */
+    public QuestionButton(String displayName, int id) {
+        // TODO: do we want this to change based on the length
+        super(displayName);
+        this.setPreferredSize(new Dimension(180, 100));
+        this.id = id;
+    }
+
+    public int getId(){
+        return this.id;
+    }
 }
 
 /**
