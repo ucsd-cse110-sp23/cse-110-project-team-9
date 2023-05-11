@@ -124,9 +124,9 @@ public class MainUserInterface {
 
                 //store data to database
                 QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
-                data.insert(qaEntry);
-				questionTextArea.setText("Question: \n" + question);
-				answerTextArea.setText("ChatGPT Response: \n" + response);
+                int id = data.insert(qaEntry);
+				questionTextArea.setText("Question: \n\n" + question);
+				answerTextArea.setText("ChatGPT Response: \n\n" + response.trim());
                 
                 //add data to scrollBar
                 JButton button = new JButton(question);
@@ -134,8 +134,8 @@ public class MainUserInterface {
                 button.addActionListener(new ActionListener() {
     				@Override
     				public void actionPerformed(ActionEvent e) {
-    					questionTextArea.setText("Question: \n" + question);
-    					answerTextArea.setText("ChatGPT Response: \n" + response);
+    					questionTextArea.setText("Question: \n\n" + question);
+    					answerTextArea.setText("ChatGPT Response: \n\n" + response.trim());
     				}
                 	
                 });
@@ -169,9 +169,11 @@ public class MainUserInterface {
 
         toolBar.add(recordButton);
 
-        toolBar.add(new RoundButton(trashCanFileName, 40));
+        JButton deleteButton = new RoundButton(trashCanFileName, 40);
+        toolBar.add(deleteButton);
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
-        toolBar.add(new JButton("Clear All"));
+        JButton clearAllButton = new JButton("Clear All");
+        toolBar.add(clearAllButton);
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
         scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
@@ -180,10 +182,6 @@ public class MainUserInterface {
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200, 500));
         pane.add(scrollPane, BorderLayout.LINE_START);
-
-        //Add entry
-        //boxes are hardcoded as of right now, once we get entries figured out I can change it to the answer
-        //im thinking entry object will be passed over to interface and then interface code can fix it
 
         // Create the "Question" JTextArea and JScrollPane
         questionTextArea = new JTextArea();
