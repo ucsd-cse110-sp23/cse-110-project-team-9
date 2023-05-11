@@ -131,7 +131,6 @@ public class MainUserInterface {
                 }
 
                 // question & response -> database
-                // TODO connor
 
                 //parse question and anser into entry
                 Question q = new Question(question);
