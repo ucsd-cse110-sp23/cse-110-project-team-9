@@ -18,6 +18,7 @@ public class Whisper implements IWhisper {
 
     /**
      * Creates a new instance of the <c>Whisper</c> class with the specified API key.
+     *
      * @param apiKey The API key to use for the Whisper API.
      */
     public Whisper(String apiKey) {
@@ -25,15 +26,15 @@ public class Whisper implements IWhisper {
     }
 
     /**
-     * Transcribes the given <c>AudioInputStream</c> into a <c>String</c>, using OpenAI's Whisper API.
+     * Transcribes the given audio <c>File</c> into a <c>String</c>, using OpenAI's Whisper API.
      *
-     * @param inputStream The audio input stream to transcribe.
+     * @param file The audio file.
      * @return A string representing the transcribed text. If an error occurred when attempting to get data
      * from the Whisper API, this method will instead return <c>null</c>.
      * @throws IOException If an issue occurs with the given connection.
      */
     @Override
-    public String transcribe(@Nonnull InputStream inputStream) throws IOException, OpenAiException {
+    public String transcribe(@Nonnull File file) throws IOException, OpenAiException {
         URL url = new URL(API_ENDPOINT);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -51,7 +52,7 @@ public class Whisper implements IWhisper {
             );
             outputStream.write((Whisper.MODEL + "\r\n").getBytes());
 
-            writeAudioStream(outputStream, inputStream, boundary);
+            writeAudioStream(outputStream, file, boundary);
             outputStream.write(("\r\n--" + boundary + "--\r\n").getBytes());
         }
 
@@ -81,28 +82,30 @@ public class Whisper implements IWhisper {
 
     /**
      * Writes the specified audio stream (e.g., from the AudioRecorder object) to the specified output stream.
+     *
      * @param outputStream The output stream.
-     * @param inputStream The input stream.
-     * @param boundary The boundary.
+     * @param file         The file.
+     * @param boundary     The boundary.
      * @throws IOException If an error occurred with reading to or writing from the buffer.
      */
     private static void writeAudioStream(
             OutputStream outputStream,
-            InputStream inputStream,
+            File file,
             String boundary
     ) throws IOException {
         outputStream.write(("--" + boundary + "\r\n").getBytes());
         outputStream.write(
-                ("Content-Disposition: form-data; name=\"file\"; filename=\"hello.mp3\"\r\n").getBytes()
+                ("Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"\r\n").getBytes()
         );
-
         outputStream.write(("Content-Type: audio/mpeg\r\n\r\n").getBytes());
+
+        FileInputStream fileInputStream = new FileInputStream(file);
         byte[] buffer = new byte[1024];
         int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
+        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
             outputStream.write(buffer, 0, bytesRead);
         }
 
-        inputStream.close();
+        fileInputStream.close();
     }
 }
