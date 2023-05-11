@@ -5,6 +5,7 @@ import sayit.openai.ChatGpt;
 import sayit.openai.IWhisper;
 import sayit.openai.Whisper;
 import sayit.openai.WhisperCheck;
+import sayit.qa.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -30,6 +31,8 @@ public class MainUserInterface {
     private JButton stopButton;
     private JScrollPane answerScrollPane;
     private JScrollPane questionScrollPane;
+    private JTextArea questionTextArea;
+    private JTextArea answerTextArea;
     private final JFrame frame;
     private AudioRecorder recorder;
 
@@ -111,6 +114,11 @@ public class MainUserInterface {
                 // question & response -> database
                 // TODO connor
 
+                Question q = new Question(question);
+                Answer a = new Answer(response);
+                QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
+                displayEntry(entry);
+
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
                 this.recordButton.setEnabled(true);
@@ -162,7 +170,7 @@ public class MainUserInterface {
         //im thinking entry object will be passed over to interface and then interface code can fix it
 
         // Create the "Question" JTextArea and JScrollPane
-        JTextArea questionTextArea = new JTextArea();
+        questionTextArea = new JTextArea();
         questionTextArea.setEditable(false);
         questionTextArea.setText("Question: This is a hard coded question");
 
@@ -170,7 +178,7 @@ public class MainUserInterface {
         this.questionScrollPane.setPreferredSize(new Dimension(380, 250));
 
         // Create the "Answer" JTextArea and JScrollPane
-        JTextArea answerTextArea = new JTextArea();
+        answerTextArea = new JTextArea();
         answerTextArea.setEditable(false);
         answerTextArea.setText("Answer: This is a hard coded answer");
 
@@ -189,10 +197,10 @@ public class MainUserInterface {
 
     //updates question and answer boxes with a new entry
     //commented out until files are linked
-    //public void displayEntry(Entry e){
-    //questionScrollPane.setViewportView(displayer.displayQuestion(e));
-    //answerScrollPane.setViewportView(displayer.displayAnswer(e));
-    //}
+    public void displayEntry(QuestionAnswerEntry e){
+        questionTextArea.setText(e.getQuestion().getQuestionText());
+        answerTextArea.setText(e.getAnswer().getAnswerText());
+    }
 }
 
 /**
