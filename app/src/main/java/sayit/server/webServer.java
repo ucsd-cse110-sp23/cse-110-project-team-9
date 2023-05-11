@@ -1,5 +1,13 @@
 package sayit.server;
 
+import sayit.storage.*;
+import com.sun.net.httpserver.*;
+import java.net.InetSocketAddress;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 public class webServer {
     // initialize server port and hostname
     private static final int SERVER_PORT = 8100;
@@ -11,8 +19,8 @@ public class webServer {
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) 
         Executors.newFixedThreadPool(10);
 
-        // create a map to store data
-        Map<String, String> data = new HashMap<>();
+        // create a TsvStore to store data
+        TsvStore serverStorage = TsvStore.createOrOpenStore("entries.tsv");
 
 
         // create a server
@@ -21,7 +29,7 @@ public class webServer {
         0
         );
 
-        server.createContext("/",  new RequestHandler(data));
+        server.createContext("/",  new RequestHandler(serverStorage));
         server.setExecutor(threadPoolExecutor);
         server.start();
 
