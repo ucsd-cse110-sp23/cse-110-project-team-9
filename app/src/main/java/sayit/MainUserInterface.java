@@ -44,15 +44,32 @@ public class MainUserInterface {
     private JScrollPane questionScrollPane;
     private final JFrame frame;
     private AudioRecorder recorder;
-    private TsvStore data;
+    private TsvStore db;
+    private int currentQID;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
-        data = TsvStore.createOrOpenStore(dataFileName);
+        db = TsvStore.createOrOpenStore(dataFileName);
         addComponentsToPane(this.frame.getContentPane());	
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
+
+        //add behavior for closing app
+        //update db
+        //code taken from https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to close this window?", "Close Window?", 
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    db.save();
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     private static MainUserInterface userInterface;
@@ -76,6 +93,11 @@ public class MainUserInterface {
         }
 
         return userInterface;
+    }
+    
+    public void displayEntry(QuestionAnswerEntry entry) {
+		questionTextArea.setText("Question: \n\n" + entry.getQuestion().getQuestionText().trim());
+		answerTextArea.setText("ChatGPT Response: \n\n" + entry.getAnswer().getAnswerText().trim());
     }
 
     /**
@@ -124,9 +146,8 @@ public class MainUserInterface {
 
                 //store data to database
                 QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
-                int id = data.insert(qaEntry);
-				questionTextArea.setText("Question: \n\n" + question);
-				answerTextArea.setText("ChatGPT Response: \n\n" + response.trim());
+                currentQID = db.insert(qaEntry);
+				displayEntry(qaEntry);
                 
                 //add data to scrollBar
                 JButton button = new JButton(question);
@@ -134,8 +155,7 @@ public class MainUserInterface {
                 button.addActionListener(new ActionListener() {
     				@Override
     				public void actionPerformed(ActionEvent e) {
-    					questionTextArea.setText("Question: \n\n" + question);
-    					answerTextArea.setText("ChatGPT Response: \n\n" + response.trim());
+    					displayEntry(qaEntry);
     				}
                 	
                 });
@@ -185,6 +205,7 @@ public class MainUserInterface {
 
         // Create the "Question" JTextArea and JScrollPane
         questionTextArea = new JTextArea();
+        questionTextArea.setLineWrap(true);
         questionTextArea.setEditable(false);
         questionTextArea.setText("Question: ");
 
@@ -193,6 +214,7 @@ public class MainUserInterface {
 
         // Create the "Answer" JTextArea and JScrollPane
         answerTextArea = new JTextArea();
+        answerTextArea.setLineWrap(true);
         answerTextArea.setEditable(false);
         answerTextArea.setText("Answer: ");
 
@@ -201,7 +223,7 @@ public class MainUserInterface {
         this.answerScrollPane.setPreferredSize(new Dimension(380, 240));
         
         //load entries onto scrollBar
-        Map<Integer, QuestionAnswerEntry> entries = data.getEntries();
+        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
         
         for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
         	String question = entry.getValue().getQuestion().getQuestionText();
@@ -211,8 +233,7 @@ public class MainUserInterface {
             button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					questionTextArea.setText("Question: \n" + question);
-					answerTextArea.setText("ChatGPT Response: \n" + answer);
+					displayEntry(entry.getValue());
 				}
             	
             });
