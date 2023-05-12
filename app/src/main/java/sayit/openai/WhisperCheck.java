@@ -1,6 +1,6 @@
 package sayit.openai;
 
-import java.io.InputStream;
+import java.io.File;
 
 /**
  * A wrapper class around an <c>IWhisper</c> instance, which is designed to handle
@@ -8,17 +8,17 @@ import java.io.InputStream;
  */
 public class WhisperCheck {
     private final IWhisper instance;
-    private final InputStream input;
+    private final File input;
     private boolean isExceptionThrown;
 
     /**
      * Creates a new <c>WhisperCheck</c> object with the specified <c>IWhisper</c> instance
-     * and input stream.
+     * and audio file.
      *
      * @param w The <c>IWhisper</c> instance to use.
-     * @param i The input stream to use.
+     * @param i The file containing the audio.
      */
-    public WhisperCheck(IWhisper w, InputStream i) {
+    public WhisperCheck(IWhisper w, File i) {
         this.instance = w;
         this.input = i;
         this.isExceptionThrown = false;

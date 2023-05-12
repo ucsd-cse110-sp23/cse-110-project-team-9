@@ -4,9 +4,8 @@ import sayit.qa.Answer;
 import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +33,8 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
     private static final int NUM_COLUMNS = 3;
     private static final String TSV_HEADER = "id\tquestion\tanswer";
     private static final String DELIMITER = "\t";
+    private static final String NEW_LINE = "\n";
+    private static final String SERIALIZED_NEW_LINE = "~g~r~e~g~m~i~r~a~n~d~a~";
 
     /**
      * The name of the TSV file.
@@ -67,35 +68,40 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
         File file = new File(this._filename);
         // If the file exists, read the contents and set the id to the last id in the file.
         if (file.exists()) {
-            List<String> lines = Files.readAllLines(file.toPath());
-            int maxId = 0;
-            if (lines.size() > 1) {
-                // Skip the first line (i = 0) since that's the CSV header.
-                for (int i = 1; i < lines.size(); ++i) {
-                    String[] columns = lines.get(i).split(DELIMITER);
-                    if (columns.length != NUM_COLUMNS) {
-                        continue;
+            try (FileInputStream stream = new FileInputStream(file);
+                 InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+                 BufferedReader bufferedReader = new BufferedReader(reader)) {
+                List<String> lines = bufferedReader.lines().toList();
+                int maxId = 0;
+                if (lines.size() > 1) {
+                    // Skip the first line (i = 0) since that's the CSV header.
+                    for (int i = 1; i < lines.size(); ++i) {
+                        String[] columns = lines.get(i).split(DELIMITER);
+                        if (columns.length != NUM_COLUMNS) {
+                            continue;
+                        }
+
+                        int id;
+                        // If the id is not a number, skip this line.
+                        // This should not happen, but just in case something does happen,
+                        // we don't want to crash the program.
+                        try {
+                            id = Integer.parseInt(columns[0]);
+                        } catch (Exception e) {
+                            continue;
+                        }
+
+                        maxId = Math.max(id, maxId);
+                        String question = columns[1].replaceAll(SERIALIZED_NEW_LINE, NEW_LINE);
+                        String answer = columns[2].replaceAll(SERIALIZED_NEW_LINE, NEW_LINE);
+
+                        this._entries.put(id, new QuestionAnswerEntry(new Question(question), new Answer(answer)));
                     }
 
-                    int id;
-                    // If the id is not a number, skip this line.
-                    // This should not happen, but just in case something does happen, we don't want to crash the program.
-                    try {
-                        id = Integer.parseInt(columns[0]);
-                    } catch (Exception e) {
-                        continue;
-                    }
-
-                    maxId = Math.max(id, maxId);
-                    String question = columns[1];
-                    String answer = columns[2];
-
-                    this._entries.put(id, new QuestionAnswerEntry(new Question(question), new Answer(answer)));
+                    this._nextId = maxId + 1;
+                } else {
+                    this._nextId = 0;
                 }
-
-                this._nextId = maxId + 1;
-            } else {
-                this._nextId = 0;
             }
         } else if (file.createNewFile()) {
             // If the file doesn't exist, create it and write the header.
@@ -164,11 +170,22 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
             try (FileWriter writer = new FileWriter(file, false)) {
                 writer.write(TSV_HEADER + System.lineSeparator());
                 for (var entry : this._entries.entrySet()) {
+                    String q = entry.getValue()
+                            .getQuestion()
+                            .getQuestionText()
+                            .trim()
+                            .replaceAll(NEW_LINE, SERIALIZED_NEW_LINE);
+                    String a = entry.getValue()
+                            .getAnswer()
+                            .getAnswerText()
+                            .trim()
+                            .replaceAll(NEW_LINE, SERIALIZED_NEW_LINE);
+
                     writer.write(entry.getKey()
                             + DELIMITER
-                            + entry.getValue().getQuestion().getQuestionText()
+                            + q
                             + DELIMITER
-                            + entry.getValue().getAnswer().getAnswerText()
+                            + a
                             + System.lineSeparator());
                 }
             }
