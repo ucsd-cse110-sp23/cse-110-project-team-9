@@ -1,5 +1,6 @@
 package sayit.openai;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -8,7 +9,7 @@ import java.io.InputStream;
  */
 public class WhisperCheck {
     private final IWhisper instance;
-    private final InputStream input;
+    private final File input;
     private boolean isExceptionThrown;
 
     /**
@@ -18,7 +19,7 @@ public class WhisperCheck {
      * @param w The <c>IWhisper</c> instance to use.
      * @param i The input stream to use.
      */
-    public WhisperCheck(IWhisper w, InputStream i) {
+    public WhisperCheck(IWhisper w, File i) {
         this.instance = w;
         this.input = i;
         this.isExceptionThrown = false;

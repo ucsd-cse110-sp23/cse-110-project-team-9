@@ -1,9 +1,16 @@
 package sayit.server;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.Scanner;
+
+import sayit.Constants;
+import sayit.openai.*;
+import sayit.qa.Answer;
+import sayit.qa.Question;
+import sayit.qa.QuestionAnswerEntry;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -50,7 +57,7 @@ public class RequestHandler implements HttpHandler{
       String response = "Invalid GET request";
       URI uri = httpExchange.getRequestURI();
       String query = uri.getRawQuery();
-      if (query.indexOf("/history") > -1) {
+      if (uri.getPath().equals("/history")) {
         return data.getEntries().toString();
       }
       return response;
@@ -63,7 +70,7 @@ public class RequestHandler implements HttpHandler{
       String query = uri.getRawQuery();
 
       //delete single question
-      if (query.indexOf("/delete-question") > -1) {
+      if (uri.getPath().equals("/history")) {
         int ID;
         String value = query.substring(query.indexOf("=") + 1);
         try{//see if ID number can be found
@@ -86,5 +93,85 @@ public class RequestHandler implements HttpHandler{
       }
       return response;
     }
+
+    private String handlePost(HttpExchange httpExchange) throws IOException {
+      
+      String response = "Invalid Post Request";
+      
+      URI uri = httpExchange.getRequestURI();
+      String query = uri.getRawQuery();
+      
+      if (!uri.getPath().equals("/ask")){
+        return response;
+      }
+
+      //read request body 
+      InputStream inStream = httpExchange.getRequestBody();
+      Scanner scanner = new Scanner(inStream);
+      StringBuilder requestBody = new StringBuilder();
+      while (scanner.hasNextLine()) {
+        requestBody.append(scanner.nextLine());
+      };
+
+      // Extract the Base64-encoded audio data from the request body (assumes JSON format)
+      String base64AudioData = extractBase64AudioData(requestBody.toString());
+      
+      // Decode the Base64-encoded audio data into bytes
+      byte[] audioBytes = Base64.getDecoder().decode(base64AudioData);
+
+      // Save the audio bytes as a sound file
+      String soundFilePath = saveAudioFile(audioBytes);
+
+      IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
+      WhisperCheck whisperCheck = new WhisperCheck(whisper, new File(soundFilePath));
+
+      String question = whisperCheck.output();
+
+      if (whisperCheck.isExceptionThrown()) {
+        // Show a message box with an error containing the exception content
+        response = "Unable to transcribe response";
+        return response;
+      }
+
+      ChatGpt chatGpt = new ChatGpt(Constants.OPENAI_API_KEY, 100);
+      String answer;
+
+      try{
+        answer = chatGpt.askQuestion(question);
+      }catch(Exception e){
+        response = "Chat GPT Error";
+        return response;
+      }
+      // Create a new question/answer pair and insert it into the database
+      Question q = new Question(question);
+      Answer a = new Answer(response);
+      QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
+
+      int newID = data.insert(entry);
+
+      response = "New Entry Added: " + newID;
+
+      return response;
+  }
+  
+  private String extractBase64AudioData(String requestBody) {
+    // Extract the Base64-encoded audio data from the request body (example assumes JSON format)
+    // Implement your own logic here based on your specific request format
+    // Example: {"audioData": "<base64-encoded-audio-data>"}
+    // Use a JSON parser to extract the value of the "audioData" field
+    // For simplicity, this example assumes a simple format without error handling
+
+    int startIndex = requestBody.indexOf("\"audioData\": \"") + 14;
+    int endIndex = requestBody.lastIndexOf("\"");
+    return requestBody.substring(startIndex, endIndex);
+  }
+
+  private String saveAudioFile(byte[] audioBytes) throws IOException {
+    String soundFilePath = "question.wav"; // Provide the desired file path
+    try (OutputStream outStream = new FileOutputStream(soundFilePath)) {
+        outStream.write(audioBytes);
+    }
+    return soundFilePath;
+  }
     
 }
