@@ -154,18 +154,6 @@ public class RequestHandler implements HttpHandler{
 
       return response;
   }
-  
-  private String extractBase64AudioData(String requestBody) {
-    // Extract the Base64-encoded audio data from the request body (example assumes JSON format)
-    // Implement your own logic here based on your specific request format
-    // Example: {"audioData": "<base64-encoded-audio-data>"}
-    // Use a JSON parser to extract the value of the "audioData" field
-    // For simplicity, this example assumes a simple format without error handling
-
-    int startIndex = requestBody.indexOf("\"audioData\": \"") + 14;
-    int endIndex = requestBody.lastIndexOf("\"");
-    return requestBody.substring(startIndex, endIndex);
-  }
 
   //save bytes into audiofile
   private String saveAudioFile(byte[] audioBytes) throws IOException {
