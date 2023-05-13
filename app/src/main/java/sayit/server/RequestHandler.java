@@ -1,20 +1,24 @@
 package sayit.server;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Scanner;
-
-import sayit.Constants;
-import sayit.openai.*;
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import sayit.Constants;
+import sayit.openai.ChatGpt;
+import sayit.openai.IWhisper;
+import sayit.openai.Whisper;
+import sayit.openai.WhisperCheck;
+import sayit.qa.Answer;
+import sayit.qa.Question;
+import sayit.qa.QuestionAnswerEntry;
 import sayit.storage.TsvStore;
 
 public class RequestHandler implements HttpHandler{
@@ -73,7 +77,7 @@ public class RequestHandler implements HttpHandler{
       String query = uri.getRawQuery();
 
       //delete single question
-      if (uri.getPath().equals("/history")) {
+      if (uri.getPath().equals("/delete-question")) {
         int ID;
         String value = query.substring(query.indexOf("=") + 1);
         try{//see if ID number can be found
