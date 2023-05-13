@@ -211,7 +211,7 @@ public class MainUserInterface {
                 answerTextArea.setText("Answer: ");
             }
         });
-        //TODO: ADD ACTION LISTENER TO THIS BUTTON
+
         pane.add(toolBar, BorderLayout.PAGE_START);
         scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
         
