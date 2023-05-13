@@ -33,6 +33,9 @@ public class RequestHandler implements HttpHandler{
             } else if (method.equals("POST")) {
               response = handlePost(httpExchange);
             } 
+              else if (method.equals("PUT")){
+              response = handlePost(httpExchange);
+            }
               else if(method.equals("DELETE")){
               response = handleDelete(httpExchange);
             }
@@ -148,7 +151,7 @@ public class RequestHandler implements HttpHandler{
 
       int newID = data.insert(entry);
 
-      response = "New Entry Added: " + newID;
+      response = entry.toString();
 
       data.save();
 
