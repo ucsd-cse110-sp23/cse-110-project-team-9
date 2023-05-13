@@ -119,7 +119,7 @@ public class RequestHandler implements HttpHandler{
       // Save the audio bytes as a sound file
       String soundFilePath = saveAudioFile(audioBytes);
 
-      IWhisper whisper = new Whisper("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");
+      IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
       WhisperCheck whisperCheck = new WhisperCheck(whisper, new File(soundFilePath));
 
       String question = whisperCheck.output();
