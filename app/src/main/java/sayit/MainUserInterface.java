@@ -202,6 +202,8 @@ public class MainUserInterface {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         displayEntry(qaEntry);
+
+                        // keep track of the selected button
                         selectedButton = button;
                     }
 
@@ -249,7 +251,7 @@ public class MainUserInterface {
                             if (selectedButton != null) {
                                 // delete QuestionAnswer pair from database
                                 if (db.delete(selectedButton.getId())) {
-                                    // TODO: specified a success message
+                                    // display a success message
                                     String response = DELETION_SUCCESS_TEXT;
                                     JOptionPane.showMessageDialog(null, response);
                                 }
@@ -266,7 +268,7 @@ public class MainUserInterface {
 
                                 selectedButton = null;
 
-                                // TODO: refactor?
+                                // TODO: refactor event handlers
                             }
                             // if the last selected question was already deleted or no question has yet been
                             // selected
@@ -294,12 +296,9 @@ public class MainUserInterface {
                 answerTextArea.setText(ANSWER_HEADER_TEXT);
             }
         });
-        // TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
 
-        // JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
-        // TODO: ADD ALL QUESTIONS TO THE PANEL
         JScrollPane scrollPane = new JScrollPane(scrollBar);
         // scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200, 500));
@@ -343,7 +342,6 @@ public class MainUserInterface {
         }
 
         // Create panel for each JTextArea and add Panel to the Main Pane
-
         JPanel content = new JPanel();
         content.add(questionScrollPane);
         content.add(answerScrollPane);
