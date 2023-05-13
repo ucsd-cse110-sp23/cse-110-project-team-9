@@ -40,15 +40,13 @@ public class MainUserInterface {
     private JTextArea questionTextArea;
     private JTextArea answerTextArea;
     private JButton deleteButton;
-    private boolean isSelected;
-    private int idSelected;
+    private QuestionButton selectedButton; // tracks the last selected button from sidebar (for deletion)
     private JScrollPane answerScrollPane;
     private JScrollPane questionScrollPane;
     private final JFrame frame;
     private AudioRecorder recorder;
     private TsvStore db;
     private int currentQID;
-    private IStore<QuestionAnswerEntry> database;
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
@@ -98,6 +96,11 @@ public class MainUserInterface {
         return userInterface;
     }
     
+    /**
+     * Display entry in the text boxes
+     * 
+     * @param entry
+     */
     public void displayEntry(QuestionAnswerEntry entry) {
 		questionTextArea.setText("Question: \n\n" + entry.getQuestion().getQuestionText().trim());
 		answerTextArea.setText("ChatGPT Response: \n\n" + entry.getAnswer().getAnswerText().trim());
@@ -153,12 +156,13 @@ public class MainUserInterface {
 				displayEntry(qaEntry);
                 
                 //add data to scrollBar
-                JButton button = new JButton(question);
+                QuestionButton button = new QuestionButton(question, currentQID);
                 button.setPreferredSize(new Dimension(180, 100));
                 button.addActionListener(new ActionListener() {
     				@Override
     				public void actionPerformed(ActionEvent e) {
     					displayEntry(qaEntry);
+                        selectedButton = button;
     				}
                 	
                 });
@@ -195,22 +199,30 @@ public class MainUserInterface {
         // Create deleteQuestion button and add listener for functionality
         this.deleteButton = new RoundButton(trashCanFileName, 40);
         toolBar.add(deleteButton);
+        // deletion functionality on click
         deleteButton.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         try {
-                            //TODO: find which question is selected
-                            if(isSelected){
-                                //delete qa pair from database
-                                if(database.delete(idSelected)){
+                            if(selectedButton != null){
+                                //delete QuestionAnswer pair from database
+                                if(db.delete(selectedButton.getId())){
+                                    //TODO: this is technically an added feature - specified a success message
                                     String response = "Deleted question";
                                     JOptionPane.showMessageDialog(null, response);
-                                    //TODO: specify a success message?
                                 }
-                                // TODO: delete button from UI/sidebar
+                                // delete button from UI/sidebar
+                                scrollBar.remove(selectedButton);
+
+                                //update scrollBar
+                                scrollBar.revalidate();
+                                scrollBar.repaint();
+
+                                selectedButton = null;
 
                                 //TODO: refactor?
                             }
+                            // if the last selected question was already deleted or no question has yet been selected
                             else{
                                 String response = "No question selected";
                                 JOptionPane.showMessageDialog(null, response);
@@ -227,22 +239,7 @@ public class MainUserInterface {
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         //JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
-        JPanel scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
-        for (int i = 0; i < 6; i++) {
-            JButton test = new JButton(String.valueOf(i));
-            scrollBar.add(test);
-
-            // Keep track of which question is selected for the deleteButton
-            test.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        isSelected = true;
-                        //idSelected = test.id;
-                        // TODO: get id from button
-                    }
-                });
-        }
-
+        scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
         //TODO: ADD ALL QUESTIONS TO THE PANEL
         JScrollPane scrollPane = new JScrollPane(scrollBar);
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -273,15 +270,16 @@ public class MainUserInterface {
         
         for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
         	String question = entry.getValue().getQuestion().getQuestionText();
-        	String answer = entry.getValue().getAnswer().getAnswerText();
-            JButton button = new JButton(question);
+            QuestionButton button = new QuestionButton(question, entry.getKey());
             button.setPreferredSize(new Dimension(180, 100));
             button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					displayEntry(entry.getValue());
-				}
-            	
+
+                    //track which button was last selected for deletion
+                    selectedButton = button;
+				}      	
             });
             scrollBar.add(button);
         }
@@ -301,53 +299,25 @@ public class MainUserInterface {
  * Button class for questions on sidebar
  */
 class QuestionButton extends JButton {
-    private Shape shape;
     private int id;
 
     /**
-     * Creates a <c>QuestionButton</c> object with the specified image and size.
+     * Creates a <c>QuestionButton</c> object with the displayName.
      *
-     * @param fileName The file containing the image.
-     * @param size     The size of the button.
+     * @param displayName The text to be displayed on the button.
+     * @param id The ID of the corresponding QuestionAnswerEntry in the database
      */
     public QuestionButton(String displayName, int id) {
-        // TODO: do we want this to change based on the length
+        // TODO: do we want this to change based on the length?
         super(displayName);
         this.setPreferredSize(new Dimension(180, 100));
         this.id = id;
     }
 
-    public int getId(){
-        return this.id;
-    }
-    //updates question and answer boxes with a new entry
-    //commented out until files are linked
-    //public void displayEntry(Entry e){
-    //questionScrollPane.setViewportView(displayer.displayQuestion(e));
-    //answerScrollPane.setViewportView(displayer.displayAnswer(e));
-    //}
-}
-
-/**
- * Button class for questions on sidebar
- */
-class QuestionButton extends JButton {
-    private Shape shape;
-    private int id;
-
     /**
-     * Creates a <c>QuestionButton</c> object with the specified image and size.
-     *
-     * @param fileName The file containing the image.
-     * @param size     The size of the button.
+     * Public getter method for the ID
+     * @return
      */
-    public QuestionButton(String displayName, int id) {
-        // TODO: do we want this to change based on the length
-        super(displayName);
-        this.setPreferredSize(new Dimension(180, 100));
-        this.id = id;
-    }
-
     public int getId(){
         return this.id;
     }
