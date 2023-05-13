@@ -1,5 +1,6 @@
 package sayit.openai;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class MockWhisper implements IWhisper {
@@ -12,7 +13,7 @@ public class MockWhisper implements IWhisper {
     }
 
     @Override
-    public String transcribe(InputStream inputStream) throws OpenAiException {
+    public String transcribe(File file) throws OpenAiException {
         if (this._shouldThrowError) {
             throw new OpenAiException(this._answerOrError);
         }

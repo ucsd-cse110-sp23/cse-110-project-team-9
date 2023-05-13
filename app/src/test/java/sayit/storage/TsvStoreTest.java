@@ -22,7 +22,7 @@ public class TsvStoreTest {
 
     @Test
     public void testAddGetDelete() {
-        Istore.insert(new QuestionAnswerEntry(new Question("What is 1 + 1?"), new Answer("2")));
+        _store.insert(new QuestionAnswerEntry(new Question("What is 1 + 1?"), new Answer("2")));
         _store.insert(new QuestionAnswerEntry(new Question("What is 2 + 2?"), new Answer("4")));
         _store.insert(new QuestionAnswerEntry(new Question("What is 3 + 3?"), new Answer("6")));
 
