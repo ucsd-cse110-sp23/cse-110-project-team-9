@@ -59,32 +59,48 @@ public class MainUserInterface {
     private JScrollPane answerScrollPane;
     private JScrollPane questionScrollPane;
     private final JFrame frame;
-    private AudioRecorder recorder;
+    private static AudioRecorder recorder;
     private TsvStore db;
     private int currentQID;
 
     private MainUserInterface() {
         this.frame = new JFrame(APP_TITLE);
         db = TsvStore.createOrOpenStore(DATA_FILENAME);
-        addComponentsToPane(this.frame.getContentPane());	
+        this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addComponentsToPane(this.frame.getContentPane());
         this.frame.pack();
         this.frame.setVisible(true);
-        this.recorder = null;
+        MainUserInterface.recorder = null;
 
-        //add behavior for closing app
-        //update db
-        //code taken from https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        // add behavior for closing app
+        // update db
+        // code taken from
+        // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        // https://www.codejava.net/java-se/swing/preventing-jframe-window-from-closing
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                if (JOptionPane.showConfirmDialog(frame, 
-                CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE, 
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                int confirmClose = JOptionPane.showConfirmDialog(frame,
+                CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+                // if user confirms closing the window, save and exit
+                if (confirmClose == JOptionPane.YES_OPTION){
+                    // save questions and answers to database
                     db.save();
+
+                    // if there is an audio recording, delete it
+                    if(MainUserInterface.recorder != null){
+                        File audioFile = MainUserInterface.recorder.getRecordingFile();
+                        audioFile.delete();
+                    }
+
+                    // terminate Java VM and exit
                     System.exit(0);
                 }
-                // TODO: currently still exits if no is selected
+
+                // otherwise, close dialog and keep window open
             }
         });
     }
@@ -93,13 +109,16 @@ public class MainUserInterface {
 
     /**
      * <p>
-     * Gets or creates a new instance of the <c>MainUserInterface</c> class. This method is
-     * designed so that there can be at most one instance of the <c>MainUserInterface</c> class
+     * Gets or creates a new instance of the <c>MainUserInterface</c> class. This
+     * method is
+     * designed so that there can be at most one instance of the
+     * <c>MainUserInterface</c> class
      * at any point.
      * </p>
      *
      * <p>
-     * This will also automatically make the user interface visible if it hasn't been initialized.
+     * This will also automatically make the user interface visible if it hasn't
+     * been initialized.
      * </p>
      *
      * @return The instance of the <c>MainUserInterface</c> class.
@@ -111,15 +130,15 @@ public class MainUserInterface {
 
         return userInterface;
     }
-    
+
     /**
      * Display entry in the text boxes
      * 
      * @param entry
      */
     public void displayEntry(QuestionAnswerEntry entry) {
-		questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getQuestion().getQuestionText().trim());
-		answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getAnswer().getAnswerText().trim());
+        questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getQuestion().getQuestionText().trim());
+        answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getAnswer().getAnswerText().trim());
     }
 
     /**
@@ -129,22 +148,22 @@ public class MainUserInterface {
      */
     private void onRecordButtonPress(ActionEvent e) {
         // If we're not recording
-        if (this.recorder == null) {
-            this.recorder = new AudioRecorder();
-            this.recorder.startRecording();
+        if (MainUserInterface.recorder == null) {
+            MainUserInterface.recorder = new AudioRecorder();
+            MainUserInterface.recorder.startRecording();
             this.recordButton.setIcon(ImageHelper.getImageIcon(STOP_BUTTON_FILENAME, 50));
         } else {
             // Start a new thread to transcribe the recording, since we don't want
             // to block the UI thread.
             Thread t = new Thread(() -> {
-                this.recorder.stopRecording();
+                MainUserInterface.recorder.stopRecording();
                 this.recordButton.setEnabled(false);
                 try {
                     Thread.sleep(1000);
                 } catch (Exception ex) {
                     // ...
                 }
-                File recordingFile = this.recorder.getRecordingFile();
+                File recordingFile = MainUserInterface.recorder.getRecordingFile();
                 IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
                 WhisperCheck whisperCheck = new WhisperCheck(whisper, recordingFile);
 
@@ -156,7 +175,7 @@ public class MainUserInterface {
                             TRANSCRIPTION_ERROR_TEXT + question,
                             ERROR_TEXT,
                             JOptionPane.ERROR_MESSAGE);
-
+                    return;
                 }
 
                 ChatGpt chatGpt = new ChatGpt(Constants.OPENAI_API_KEY, 100);
@@ -171,30 +190,30 @@ public class MainUserInterface {
                     return;
                 }
 
-                //store data to database
+                // store data to database
                 QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
                 currentQID = db.insert(qaEntry);
-				displayEntry(qaEntry);
-                
-                //add data to scrollBar
+                displayEntry(qaEntry);
+
+                // add data to scrollBar
                 QuestionButton button = new QuestionButton(question, currentQID);
                 button.setPreferredSize(new Dimension(180, 100));
                 button.addActionListener(new ActionListener() {
-    				@Override
-    				public void actionPerformed(ActionEvent e) {
-    					displayEntry(qaEntry);
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        displayEntry(qaEntry);
                         selectedButton = button;
-    				}
-                	
+                    }
+
                 });
                 scrollBar.add(button);
-                
-                //update scrollBar
+
+                // update scrollBar
                 scrollBar.revalidate();
                 scrollBar.repaint();
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(RECORD_BUTTON_FILENAME, 50));
-                this.recorder = null;
+                MainUserInterface.recorder = null;
                 this.recordButton.setEnabled(true);
                 if (!recordingFile.delete()) {
                     System.err.println(DELETION_ERROR_TEXT);
@@ -227,10 +246,10 @@ public class MainUserInterface {
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         try {
-                            if(selectedButton != null){
-                                //delete QuestionAnswer pair from database
-                                if(db.delete(selectedButton.getId())){
-                                    //TODO: specified a success message
+                            if (selectedButton != null) {
+                                // delete QuestionAnswer pair from database
+                                if (db.delete(selectedButton.getId())) {
+                                    // TODO: specified a success message
                                     String response = DELETION_SUCCESS_TEXT;
                                     JOptionPane.showMessageDialog(null, response);
                                 }
@@ -241,16 +260,17 @@ public class MainUserInterface {
                                 questionTextArea.setText(QUESTION_HEADER_TEXT);
                                 answerTextArea.setText(ANSWER_HEADER_TEXT);
 
-                                //update scrollBar
+                                // update scrollBar
                                 scrollBar.revalidate();
                                 scrollBar.repaint();
 
                                 selectedButton = null;
 
-                                //TODO: refactor?
+                                // TODO: refactor?
                             }
-                            // if the last selected question was already deleted or no question has yet been selected
-                            else{
+                            // if the last selected question was already deleted or no question has yet been
+                            // selected
+                            else {
                                 String response = DELETION_NONE_SELECTED_TEXT;
                                 JOptionPane.showMessageDialog(null, response);
                             }
@@ -259,7 +279,7 @@ public class MainUserInterface {
                             JOptionPane.showMessageDialog(null, ERROR_TEXT + ex.getMessage());
                         }
                     }
-        });
+                });
 
         JButton clearAllButton = new JButton(CLEAR_ALL_BUTTON_TITLE);
         toolBar.add(clearAllButton);
@@ -274,14 +294,14 @@ public class MainUserInterface {
                 answerTextArea.setText(ANSWER_HEADER_TEXT);
             }
         });
-        //TODO: ADD ACTION LISTENER TO THIS BUTTON
+        // TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
 
-        //JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
-        scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
-        //TODO: ADD ALL QUESTIONS TO THE PANEL
+        // JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
+        scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
+        // TODO: ADD ALL QUESTIONS TO THE PANEL
         JScrollPane scrollPane = new JScrollPane(scrollBar);
-        //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        // scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200, 500));
         pane.add(scrollPane, BorderLayout.LINE_START);
 
@@ -300,25 +320,24 @@ public class MainUserInterface {
         answerTextArea.setEditable(false);
         answerTextArea.setText(ANSWER_HEADER_TEXT);
 
-        //Create the "Question" JTextArea and JScrollPane
+        // Create the "Question" JTextArea and JScrollPane
         this.answerScrollPane = new JScrollPane(answerTextArea);
         this.answerScrollPane.setPreferredSize(new Dimension(380, 240));
-        
-        //load entries onto scrollBar
-        
-        
+
+        // load entries onto scrollBar
+
         for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
-        	String question = entry.getValue().getQuestion().getQuestionText();
+            String question = entry.getValue().getQuestion().getQuestionText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
             button.setPreferredSize(new Dimension(180, 100));
             button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					displayEntry(entry.getValue());
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    displayEntry(entry.getValue());
 
-                    //track which button was last selected for deletion
+                    // track which button was last selected for deletion
                     selectedButton = button;
-				}      	
+                }
             });
             scrollBar.add(button);
         }
@@ -344,7 +363,8 @@ class QuestionButton extends JButton {
      * Creates a <c>QuestionButton</c> object with the displayName.
      *
      * @param displayName The text to be displayed on the button.
-     * @param id The ID of the corresponding QuestionAnswerEntry in the database
+     * @param id          The ID of the corresponding QuestionAnswerEntry in the
+     *                    database
      */
     public QuestionButton(String displayName, int id) {
         // TODO: do we want this to change based on the length?
@@ -355,9 +375,10 @@ class QuestionButton extends JButton {
 
     /**
      * Public getter method for the ID
+     * 
      * @return
      */
-    public int getId(){
+    public int getId() {
         return this.id;
     }
 }
