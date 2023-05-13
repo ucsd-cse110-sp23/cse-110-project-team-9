@@ -28,7 +28,7 @@ public class mockServer {
         0
         );
 
-        server.createContext("/",  new RequestHandler(serverStorage));
+        server.createContext("/",  new mockHandler(serverStorage));
         server.setExecutor(threadPoolExecutor);
         server.start();
 

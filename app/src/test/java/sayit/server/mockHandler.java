@@ -23,6 +23,12 @@ import sayit.storage.TsvStore;
 
 public class mockHandler implements HttpHandler{
 
+    private final TsvStore data;
+
+    public mockHandler(TsvStore data) {
+        this.data = data;
+    }
+
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "Request Received";
         String method = httpExchange.getRequestMethod();
@@ -54,7 +60,7 @@ public class mockHandler implements HttpHandler{
         outStream.close();
     }
 
-    private String handleGET(HttpExchange httpExchange){
+    private String handleGet(HttpExchange httpExchange){
         String response = "Invalid GET request";
         URI uri = httpExchange.getRequestURI();
         if (uri.getPath().equals("/history")) {
@@ -63,7 +69,7 @@ public class mockHandler implements HttpHandler{
         return response;
     }
 
-    private String handlePOST(HttpExchange httpExchange){
+    private String handlePost(HttpExchange httpExchange){
         String response = "Invalid GET request";
         URI uri = httpExchange.getRequestURI();
         if (uri.getPath().equals("/ask")) {
