@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.annotation.Nonnull;
+//import javax.annotation.*;
 
 import org.json.*;
 
@@ -34,7 +34,10 @@ public class Whisper implements IWhisper {
      * @throws IOException If an issue occurs with the given connection.
      */
     @Override
-    public String transcribe(@Nonnull File file) throws IOException, OpenAiException {
+
+
+    public String transcribe(File file) throws IOException, OpenAiException {
+
         URL url = new URL(API_ENDPOINT);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
