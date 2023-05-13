@@ -117,6 +117,11 @@ public class MainUserInterface {
             Thread t = new Thread(() -> {
                 this.recorder.stopRecording();
                 this.recordButton.setEnabled(false);
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ex) {
+                    // ...
+                }
                 File recordingFile = this.recorder.getRecordingFile();
                 IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
                 WhisperCheck whisperCheck = new WhisperCheck(whisper, recordingFile);
@@ -183,6 +188,7 @@ public class MainUserInterface {
      * @param pane The pane to add the components to.
      */
     public void addComponentsToPane(Container pane) {
+        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         this.recordButton = new RoundButton(recordButtonFileName, 40);
         this.recordButton.addActionListener(this::onRecordButtonPress);
@@ -194,6 +200,17 @@ public class MainUserInterface {
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         JButton clearAllButton = new JButton("Clear All");
         toolBar.add(clearAllButton);
+        clearAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                db.clearAll();
+                scrollBar.removeAll();
+                scrollBar.revalidate();
+                scrollBar.repaint();
+                questionTextArea.setText("Question: ");
+                answerTextArea.setText("Answer: ");
+            }
+        });
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
         scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
@@ -223,7 +240,7 @@ public class MainUserInterface {
         this.answerScrollPane.setPreferredSize(new Dimension(380, 240));
         
         //load entries onto scrollBar
-        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
+        
         
         for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
         	String question = entry.getValue().getQuestion().getQuestionText();
