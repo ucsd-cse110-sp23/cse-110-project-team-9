@@ -1,12 +1,17 @@
 package sayit;
 
 import sayit.helpers.ImageHelper;
+
 import sayit.openai.ChatGpt;
 import sayit.openai.IWhisper;
 import sayit.openai.Whisper;
 import sayit.openai.WhisperCheck;
-import sayit.qa.*;
-import sayit.storage.*;
+
+import sayit.qa.Answer;
+import sayit.qa.Question;
+import sayit.qa.QuestionAnswerEntry;
+
+import sayit.storage.TsvStore;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,8 +22,10 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
+import java.util.Map;
 
 import javax.swing.*;
 
@@ -27,13 +34,14 @@ public class MainUserInterface {
     private static final String trashCanFileName = "./Pictures/TrashCan.jpg";
     private static final String recordButtonFileName = "./Pictures/RecordButton.jpg";
     private static final String stopButtonFileName = "./Pictures/StopButton.jpg";
+    private static final String dataFileName = "./data.tsv";
 
     private JButton recordButton;
-    private JButton stopButton;
-    private JScrollPane answerScrollPane;
-    private JScrollPane questionScrollPane;
+    private JPanel scrollBar;
     private JTextArea questionTextArea;
     private JTextArea answerTextArea;
+    private JScrollPane answerScrollPane;
+    private JScrollPane questionScrollPane;
     private final JFrame frame;
     private AudioRecorder recorder;
     private TsvStore db;
@@ -41,11 +49,11 @@ public class MainUserInterface {
 
     private MainUserInterface() {
         this.frame = new JFrame(appName);
-        addComponentsToPane(this.frame.getContentPane());
+        db = TsvStore.createOrOpenStore(dataFileName);
+        addComponentsToPane(this.frame.getContentPane());	
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
-        this.db = TsvStore.createOrOpenStore("entries.txt");
 
         //add behavior for closing app
         //update db
@@ -85,6 +93,11 @@ public class MainUserInterface {
         }
 
         return userInterface;
+    }
+    
+    public void displayEntry(QuestionAnswerEntry entry) {
+		questionTextArea.setText("Question: \n\n" + entry.getQuestion().getQuestionText().trim());
+		answerTextArea.setText("ChatGPT Response: \n\n" + entry.getAnswer().getAnswerText().trim());
     }
 
     /**
@@ -131,19 +144,26 @@ public class MainUserInterface {
                     return;
                 }
 
-                // question & response -> database
-
-                //parse question and anser into entry
-                Question q = new Question(question);
-                Answer a = new Answer(response);
-                QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
+                //store data to database
+                QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
+                currentQID = db.insert(qaEntry);
+				displayEntry(qaEntry);
                 
-                //display entry
-                displayEntry(entry);
-
-                //add entry to database file
-                //probably violates srp but idk where we are handling db stuff rn
-                currentQID = db.insert(entry);
+                //add data to scrollBar
+                JButton button = new JButton(question);
+                button.setPreferredSize(new Dimension(180, 100));
+                button.addActionListener(new ActionListener() {
+    				@Override
+    				public void actionPerformed(ActionEvent e) {
+    					displayEntry(qaEntry);
+    				}
+                	
+                });
+                scrollBar.add(button);
+                
+                //update scrollBar
+                scrollBar.revalidate();
+                scrollBar.repaint();
 
                 this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
                 this.recorder = null;
@@ -164,53 +184,61 @@ public class MainUserInterface {
      */
     public void addComponentsToPane(Container pane) {
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        this.recordButton = new RoundButton(recordButtonFileName, 50);
+        this.recordButton = new RoundButton(recordButtonFileName, 40);
         this.recordButton.addActionListener(this::onRecordButtonPress);
 
         toolBar.add(recordButton);
-        this.stopButton = new RoundButton(stopButtonFileName, 40);
-        toolBar.add(stopButton);
 
-        toolBar.add(new RoundButton(trashCanFileName, 40));
+        JButton deleteButton = new RoundButton(trashCanFileName, 40);
+        toolBar.add(deleteButton);
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
-        toolBar.add(new JButton("Clear All"));
+        JButton clearAllButton = new JButton("Clear All");
+        toolBar.add(clearAllButton);
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
-
-        //JTextArea scrollBar = new JTextArea("Questions"); //TEST SCROLL BAR
-        JPanel scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
-        for (int i = 0; i < 6; i++) {
-            JButton test = new JButton(String.valueOf(i));
-            test.setPreferredSize(new Dimension(180, 100));
-            scrollBar.add(test);
-        }
-
-        //TODO: ADD ALL QUESTIONS TO THIE PANEL
+        scrollBar = new JPanel(new GridLayout(0, 1)); //USE THIS FOR APP
+        
         JScrollPane scrollPane = new JScrollPane(scrollBar);
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200, 500));
         pane.add(scrollPane, BorderLayout.LINE_START);
 
-        //Add entry
-        //boxes are hardcoded as of right now, once we get entries figured out I can change it to the answer
-        //im thinking entry object will be passed over to interface and then interface code can fix it
-
         // Create the "Question" JTextArea and JScrollPane
         questionTextArea = new JTextArea();
+        questionTextArea.setLineWrap(true);
         questionTextArea.setEditable(false);
-        questionTextArea.setText("Question: This is a hard coded question");
+        questionTextArea.setText("Question: ");
 
         this.questionScrollPane = new JScrollPane(questionTextArea);
-        this.questionScrollPane.setPreferredSize(new Dimension(380, 250));
+        this.questionScrollPane.setPreferredSize(new Dimension(380, 240));
 
         // Create the "Answer" JTextArea and JScrollPane
         answerTextArea = new JTextArea();
+        answerTextArea.setLineWrap(true);
         answerTextArea.setEditable(false);
-        answerTextArea.setText("Answer: This is a hard coded answer");
+        answerTextArea.setText("Answer: ");
 
         //Create the "Question" JTextArea and JScrollPane
         this.answerScrollPane = new JScrollPane(answerTextArea);
-        this.answerScrollPane.setPreferredSize(new Dimension(380, 250));
+        this.answerScrollPane.setPreferredSize(new Dimension(380, 240));
+        
+        //load entries onto scrollBar
+        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
+        
+        for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
+        	String question = entry.getValue().getQuestion().getQuestionText();
+        	String answer = entry.getValue().getAnswer().getAnswerText();
+            JButton button = new JButton(question);
+            button.setPreferredSize(new Dimension(180, 100));
+            button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					displayEntry(entry.getValue());
+				}
+            	
+            });
+            scrollBar.add(button);
+        }
 
         // Create panel for each JTextArea and add Panel to the Main Pane
 
@@ -219,14 +247,6 @@ public class MainUserInterface {
         content.add(answerScrollPane);
         content.setPreferredSize(new Dimension(500, 500));
         pane.add(content, BorderLayout.CENTER);
-
-    }
-
-    //updates question and answer boxes with a new entry
-    //commented out until files are linked
-    public void displayEntry(QuestionAnswerEntry e){
-        questionTextArea.setText(e.getQuestion().getQuestionText());
-        answerTextArea.setText(e.getAnswer().getAnswerText());
     }
 }
 
