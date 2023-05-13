@@ -29,13 +29,26 @@ import java.util.Map;
 import javax.swing.*;
 
 public class MainUserInterface {
-    private static final String appName = "SayIt Assistant";
-    private static final String trashCanFileName = "./Pictures/TrashCan.jpg";
-    private static final String recordButtonFileName = "./Pictures/RecordButton.jpg";
-    private static final String stopButtonFileName = "./Pictures/StopButton.jpg";
-    private static final String dataFileName = "./data.tsv";
-    private static final String defaultQuestionText = "Question: \n\n";
-    private static final String defaultAnswerText = "ChatGPT Response: \n\n";
+    // Constants for filenames
+    private static final String TRASHCAN_FILENAME = "./Pictures/TrashCan.jpg";
+    private static final String RECORD_BUTTON_FILENAME = "./Pictures/RecordButton.jpg";
+    private static final String STOP_BUTTON_FILENAME = "./Pictures/StopButton.jpg";
+    private static final String DATA_FILENAME = "./data.tsv";
+
+    // Constants for headers and titles
+    private static final String APP_TITLE = "SayIt Assistant";
+    private static final String QUESTION_HEADER_TEXT = "Question: \n\n";
+    private static final String ANSWER_HEADER_TEXT = "ChatGPT Response: \n\n";
+    private static final String CLEAR_ALL_BUTTON_TITLE = "Clear All";
+    private static final String CLOSE_WINDOW_TEXT = "Are you sure you want to close this window?";
+    private static final String CLOSE_WINDOW_TITLE = "Close Window?";
+
+    // Constants for success and error messages
+    private static final String DELETION_SUCCESS_TEXT = "Deleted question";
+    private static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
+    private static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
+    private static final String TRANSCRIPTION_ERROR_TEXT = "Unable to transcribe response. ";
+    private static final String ERROR_TEXT = "Error";
 
     private JButton recordButton;
     private JPanel scrollBar;
@@ -51,8 +64,8 @@ public class MainUserInterface {
     private int currentQID;
 
     private MainUserInterface() {
-        this.frame = new JFrame(appName);
-        db = TsvStore.createOrOpenStore(dataFileName);
+        this.frame = new JFrame(APP_TITLE);
+        db = TsvStore.createOrOpenStore(DATA_FILENAME);
         addComponentsToPane(this.frame.getContentPane());	
         this.frame.pack();
         this.frame.setVisible(true);
@@ -65,7 +78,7 @@ public class MainUserInterface {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 if (JOptionPane.showConfirmDialog(frame, 
-                    "Are you sure you want to close this window?", "Close Window?", 
+                CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE, 
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
                     db.save();
@@ -105,8 +118,8 @@ public class MainUserInterface {
      * @param entry
      */
     public void displayEntry(QuestionAnswerEntry entry) {
-		questionTextArea.setText(defaultQuestionText + entry.getQuestion().getQuestionText().trim());
-		answerTextArea.setText(defaultAnswerText + entry.getAnswer().getAnswerText().trim());
+		questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getQuestion().getQuestionText().trim());
+		answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getAnswer().getAnswerText().trim());
     }
 
     /**
@@ -119,7 +132,7 @@ public class MainUserInterface {
         if (this.recorder == null) {
             this.recorder = new AudioRecorder();
             this.recorder.startRecording();
-            this.recordButton.setIcon(ImageHelper.getImageIcon(stopButtonFileName, 50));
+            this.recordButton.setIcon(ImageHelper.getImageIcon(STOP_BUTTON_FILENAME, 50));
         } else {
             // Start a new thread to transcribe the recording, since we don't want
             // to block the UI thread.
@@ -135,8 +148,8 @@ public class MainUserInterface {
                 if (whisperCheck.isExceptionThrown()) {
                     // Show a message box with an error containing the exception content
                     JOptionPane.showMessageDialog(this.frame,
-                            "Unable to transcribe response. " + question,
-                            "Error",
+                            TRANSCRIPTION_ERROR_TEXT + question,
+                            ERROR_TEXT,
                             JOptionPane.ERROR_MESSAGE);
 
                 }
@@ -147,8 +160,8 @@ public class MainUserInterface {
                     response = chatGpt.askQuestion(question);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this.frame,
-                            "Unable to transcribe response. " + ex.getMessage(),
-                            "Error",
+                            TRANSCRIPTION_ERROR_TEXT + ex.getMessage(),
+                            ERROR_TEXT,
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -175,11 +188,11 @@ public class MainUserInterface {
                 scrollBar.revalidate();
                 scrollBar.repaint();
 
-                this.recordButton.setIcon(ImageHelper.getImageIcon(recordButtonFileName, 50));
+                this.recordButton.setIcon(ImageHelper.getImageIcon(RECORD_BUTTON_FILENAME, 50));
                 this.recorder = null;
                 this.recordButton.setEnabled(true);
                 if (!recordingFile.delete()) {
-                    System.err.println("Unable to delete recording file.");
+                    System.err.println(DELETION_ERROR_TEXT);
                 }
             });
 
@@ -194,13 +207,13 @@ public class MainUserInterface {
      */
     public void addComponentsToPane(Container pane) {
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        this.recordButton = new RoundButton(recordButtonFileName, 40);
+        this.recordButton = new RoundButton(RECORD_BUTTON_FILENAME, 40);
         this.recordButton.addActionListener(this::onRecordButtonPress);
 
         toolBar.add(recordButton);
 
         // Create deleteQuestion button and add listener for functionality
-        this.deleteButton = new RoundButton(trashCanFileName, 40);
+        this.deleteButton = new RoundButton(TRASHCAN_FILENAME, 40);
         toolBar.add(deleteButton);
         // deletion functionality on click
         deleteButton.addActionListener(
@@ -211,15 +224,15 @@ public class MainUserInterface {
                                 //delete QuestionAnswer pair from database
                                 if(db.delete(selectedButton.getId())){
                                     //TODO: specified a success message
-                                    String response = "Deleted question";
+                                    String response = DELETION_SUCCESS_TEXT;
                                     JOptionPane.showMessageDialog(null, response);
                                 }
                                 // delete button from UI/sidebar
                                 scrollBar.remove(selectedButton);
 
                                 // reset question and answer text
-                                questionTextArea.setText(defaultQuestionText);
-                                answerTextArea.setText(defaultAnswerText);
+                                questionTextArea.setText(QUESTION_HEADER_TEXT);
+                                answerTextArea.setText(ANSWER_HEADER_TEXT);
 
                                 //update scrollBar
                                 scrollBar.revalidate();
@@ -231,17 +244,17 @@ public class MainUserInterface {
                             }
                             // if the last selected question was already deleted or no question has yet been selected
                             else{
-                                String response = "No question selected";
+                                String response = DELETION_NONE_SELECTED_TEXT;
                                 JOptionPane.showMessageDialog(null, response);
                             }
                         } catch (Exception ex) {
                             ex.printStackTrace();
-                            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                            JOptionPane.showMessageDialog(null, ERROR_TEXT + ex.getMessage());
                         }
                     }
         });
 
-        toolBar.add(new JButton("Clear All"));
+        toolBar.add(new JButton(CLEAR_ALL_BUTTON_TITLE));
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
 
@@ -257,7 +270,7 @@ public class MainUserInterface {
         questionTextArea = new JTextArea();
         questionTextArea.setLineWrap(true);
         questionTextArea.setEditable(false);
-        questionTextArea.setText(defaultQuestionText);
+        questionTextArea.setText(QUESTION_HEADER_TEXT);
 
         this.questionScrollPane = new JScrollPane(questionTextArea);
         this.questionScrollPane.setPreferredSize(new Dimension(380, 240));
@@ -266,7 +279,7 @@ public class MainUserInterface {
         answerTextArea = new JTextArea();
         answerTextArea.setLineWrap(true);
         answerTextArea.setEditable(false);
-        answerTextArea.setText(defaultAnswerText);
+        answerTextArea.setText(ANSWER_HEADER_TEXT);
 
         //Create the "Question" JTextArea and JScrollPane
         this.answerScrollPane = new JScrollPane(answerTextArea);
