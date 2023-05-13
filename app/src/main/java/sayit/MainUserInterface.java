@@ -34,6 +34,8 @@ public class MainUserInterface {
     private static final String recordButtonFileName = "./Pictures/RecordButton.jpg";
     private static final String stopButtonFileName = "./Pictures/StopButton.jpg";
     private static final String dataFileName = "./data.tsv";
+    private static final String defaultQuestionText = "Question: \n\n";
+    private static final String defaultAnswerText = "ChatGPT Response: \n\n";
 
     private JButton recordButton;
     private JPanel scrollBar;
@@ -69,6 +71,7 @@ public class MainUserInterface {
                     db.save();
                     System.exit(0);
                 }
+                // TODO: currently still exits if no is selected
             }
         });
     }
@@ -102,8 +105,8 @@ public class MainUserInterface {
      * @param entry
      */
     public void displayEntry(QuestionAnswerEntry entry) {
-		questionTextArea.setText("Question: \n\n" + entry.getQuestion().getQuestionText().trim());
-		answerTextArea.setText("ChatGPT Response: \n\n" + entry.getAnswer().getAnswerText().trim());
+		questionTextArea.setText(defaultQuestionText + entry.getQuestion().getQuestionText().trim());
+		answerTextArea.setText(defaultAnswerText + entry.getAnswer().getAnswerText().trim());
     }
 
     /**
@@ -207,12 +210,16 @@ public class MainUserInterface {
                             if(selectedButton != null){
                                 //delete QuestionAnswer pair from database
                                 if(db.delete(selectedButton.getId())){
-                                    //TODO: this is technically an added feature - specified a success message
+                                    //TODO: specified a success message
                                     String response = "Deleted question";
                                     JOptionPane.showMessageDialog(null, response);
                                 }
                                 // delete button from UI/sidebar
                                 scrollBar.remove(selectedButton);
+
+                                // reset question and answer text
+                                questionTextArea.setText(defaultQuestionText);
+                                answerTextArea.setText(defaultAnswerText);
 
                                 //update scrollBar
                                 scrollBar.revalidate();
@@ -250,7 +257,7 @@ public class MainUserInterface {
         questionTextArea = new JTextArea();
         questionTextArea.setLineWrap(true);
         questionTextArea.setEditable(false);
-        questionTextArea.setText("Question: ");
+        questionTextArea.setText(defaultQuestionText);
 
         this.questionScrollPane = new JScrollPane(questionTextArea);
         this.questionScrollPane.setPreferredSize(new Dimension(380, 240));
@@ -259,7 +266,7 @@ public class MainUserInterface {
         answerTextArea = new JTextArea();
         answerTextArea.setLineWrap(true);
         answerTextArea.setEditable(false);
-        answerTextArea.setText("Answer: ");
+        answerTextArea.setText(defaultAnswerText);
 
         //Create the "Question" JTextArea and JScrollPane
         this.answerScrollPane = new JScrollPane(answerTextArea);
