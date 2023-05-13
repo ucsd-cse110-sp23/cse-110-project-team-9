@@ -91,6 +91,7 @@ public class RequestHandler implements HttpHandler{
             response = "All entries cleared";
           }
       }
+      data.save();
       return response;
     }
 
