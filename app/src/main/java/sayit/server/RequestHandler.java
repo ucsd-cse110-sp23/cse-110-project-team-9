@@ -105,24 +105,21 @@ public class RequestHandler implements HttpHandler{
         return response;
       }
 
-      //read request body 
-      InputStream inStream = httpExchange.getRequestBody();
-      Scanner scanner = new Scanner(inStream);
-      StringBuilder requestBody = new StringBuilder();
-      while (scanner.hasNextLine()) {
-        requestBody.append(scanner.nextLine());
-      };
-
-      // Extract the Base64-encoded audio data from the request body (assumes JSON format)
-      String base64AudioData = extractBase64AudioData(requestBody.toString());
-      
-      // Decode the Base64-encoded audio data into bytes
-      byte[] audioBytes = Base64.getDecoder().decode(base64AudioData);
+      // Read the audio data from the request body
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      InputStream inputStream = httpExchange.getRequestBody();
+      byte[] buffer = new byte[8192];
+      int bytesRead;
+      while ((bytesRead = inputStream.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, bytesRead);
+      } 
+      byte[] audioBytes = outputStream.toByteArray();
+      outputStream.close();
 
       // Save the audio bytes as a sound file
       String soundFilePath = saveAudioFile(audioBytes);
 
-      IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
+      IWhisper whisper = new Whisper("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");
       WhisperCheck whisperCheck = new WhisperCheck(whisper, new File(soundFilePath));
 
       String question = whisperCheck.output();
@@ -142,14 +139,17 @@ public class RequestHandler implements HttpHandler{
         response = "Chat GPT Error";
         return response;
       }
+
       // Create a new question/answer pair and insert it into the database
       Question q = new Question(question);
-      Answer a = new Answer(response);
+      Answer a = new Answer(answer);
       QuestionAnswerEntry entry = new QuestionAnswerEntry(q, a);
 
       int newID = data.insert(entry);
 
       response = "New Entry Added: " + newID;
+
+      data.save();
 
       return response;
   }
@@ -166,12 +166,13 @@ public class RequestHandler implements HttpHandler{
     return requestBody.substring(startIndex, endIndex);
   }
 
+  //save bytes into audiofile
   private String saveAudioFile(byte[] audioBytes) throws IOException {
     String soundFilePath = "question.wav"; // Provide the desired file path
     try (OutputStream outStream = new FileOutputStream(soundFilePath)) {
         outStream.write(audioBytes);
     }
     return soundFilePath;
-  }
+}
     
 }

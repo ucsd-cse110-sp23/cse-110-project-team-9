@@ -36,5 +36,7 @@ public class webServer {
 
         System.out.println("Server started on port " + SERVER_PORT);
 
+        AudioFileConverter a = new AudioFileConverter();
+
     }
 }

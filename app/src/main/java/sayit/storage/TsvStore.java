@@ -1,5 +1,6 @@
 package sayit.storage;
 
+import sayit.IStore;
 import sayit.qa.Answer;
 import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
