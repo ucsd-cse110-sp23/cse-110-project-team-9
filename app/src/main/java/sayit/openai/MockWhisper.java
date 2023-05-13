@@ -1,7 +1,6 @@
 package sayit.openai;
 
 import java.io.File;
-import java.io.InputStream;
 
 public class MockWhisper implements IWhisper {
     private final boolean _shouldThrowError;

@@ -90,9 +90,9 @@ public interface IStore<T> {
     boolean save();
 
     /**
-     * Gets the number of entries in the store.
+     * Gets the entries in the store.
      *
-     * @return The number of entries in the store.
+     * @return The entries in the store.
      */
     Map<Integer, T> getEntries();
 
