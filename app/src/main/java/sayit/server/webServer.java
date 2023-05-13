@@ -20,7 +20,7 @@ public class webServer {
         Executors.newFixedThreadPool(10);
 
         // create a TsvStore to store data
-        TsvStore serverStorage = TsvStore.createOrOpenStore("entries.tsv");
+        TsvStore serverStorage = TsvStore.createOrOpenStore("data.tsv");
 
 
         // create a server
