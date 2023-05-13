@@ -139,6 +139,11 @@ public class MainUserInterface {
             Thread t = new Thread(() -> {
                 this.recorder.stopRecording();
                 this.recordButton.setEnabled(false);
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ex) {
+                    // ...
+                }
                 File recordingFile = this.recorder.getRecordingFile();
                 IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
                 WhisperCheck whisperCheck = new WhisperCheck(whisper, recordingFile);
@@ -206,6 +211,7 @@ public class MainUserInterface {
      * @param pane The pane to add the components to.
      */
     public void addComponentsToPane(Container pane) {
+        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         this.recordButton = new RoundButton(RECORD_BUTTON_FILENAME, 40);
         this.recordButton.addActionListener(this::onRecordButtonPress);
@@ -215,6 +221,7 @@ public class MainUserInterface {
         // Create deleteQuestion button and add listener for functionality
         this.deleteButton = new RoundButton(TRASHCAN_FILENAME, 40);
         toolBar.add(deleteButton);
+
         // deletion functionality on click
         deleteButton.addActionListener(
                 new ActionListener() {
@@ -254,7 +261,19 @@ public class MainUserInterface {
                     }
         });
 
-        toolBar.add(new JButton(CLEAR_ALL_BUTTON_TITLE));
+        JButton clearAllButton = new JButton(CLEAR_ALL_BUTTON_TITLE);
+        toolBar.add(clearAllButton);
+        clearAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                db.clearAll();
+                scrollBar.removeAll();
+                scrollBar.revalidate();
+                scrollBar.repaint();
+                questionTextArea.setText(QUESTION_HEADER_TEXT);
+                answerTextArea.setText(ANSWER_HEADER_TEXT);
+            }
+        });
         //TODO: ADD ACTION LISTENER TO THIS BUTTON
         pane.add(toolBar, BorderLayout.PAGE_START);
 
@@ -286,7 +305,7 @@ public class MainUserInterface {
         this.answerScrollPane.setPreferredSize(new Dimension(380, 240));
         
         //load entries onto scrollBar
-        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
+        
         
         for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
         	String question = entry.getValue().getQuestion().getQuestionText();
