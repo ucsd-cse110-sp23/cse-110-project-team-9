@@ -10,7 +10,7 @@ import sayit.openai.WhisperCheck;
 import sayit.qa.Answer;
 import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
-
+import sayit.server.RequestSender;
 import sayit.storage.TsvStore;
 
 import java.awt.BorderLayout;
@@ -24,6 +24,7 @@ import java.awt.Shape;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.swing.*;
@@ -48,6 +49,7 @@ public class MainUserInterface {
     private static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
     private static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
     private static final String TRANSCRIPTION_ERROR_TEXT = "Unable to transcribe response. ";
+    private static final String SERVER_ERROR_TEXT = "Unable to connect to server";
     private static final String ERROR_TEXT = "Error";
 
     private JButton recordButton;
@@ -164,32 +166,33 @@ public class MainUserInterface {
                     // ...
                 }
                 File recordingFile = MainUserInterface.recorder.getRecordingFile();
-                IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
-                WhisperCheck whisperCheck = new WhisperCheck(whisper, recordingFile);
 
-                String question = whisperCheck.output();
-
-                if (whisperCheck.isExceptionThrown()) {
-                    // Show a message box with an error containing the exception content
-                    JOptionPane.showMessageDialog(this.frame,
-                            TRANSCRIPTION_ERROR_TEXT + question,
-                            ERROR_TEXT,
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                ChatGpt chatGpt = new ChatGpt(Constants.OPENAI_API_KEY, 100);
-                String response;
+                String serverResponse;
                 try {
-                    response = chatGpt.askQuestion(question);
-                } catch (Exception ex) {
+                    serverResponse = RequestSender.sendPostRequest("/ask", recordingFile);
+                } catch (IOException e1) {
                     JOptionPane.showMessageDialog(this.frame,
-                            TRANSCRIPTION_ERROR_TEXT + ex.getMessage(),
-                            ERROR_TEXT,
-                            JOptionPane.ERROR_MESSAGE);
+                        SERVER_ERROR_TEXT,
+                        ERROR_TEXT,
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                //if Post request goes through, response should always contain ID:
+                //easy to tell if request was successful or not
+                //show a message box with an error containing the server response
+                if(serverResponse.indexOf("ID:") == -1){
+                    JOptionPane.showMessageDialog(this.frame,
+                        TRANSCRIPTION_ERROR_TEXT + " " + serverResponse,
+                        ERROR_TEXT,
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                //get quetion and answer strings from server resposne to make QA object
+                String question = serverResponse.substring(serverResponse.indexOf("Q: ") + 1, serverResponse.indexOf(" / A: "));
+                String response = serverResponse.substring(serverResponse.indexOf(" / A: ") , serverResponse.indexOf(" ID: "));
+                
                 // store data to database
                 QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
                 currentQID = db.insert(qaEntry);

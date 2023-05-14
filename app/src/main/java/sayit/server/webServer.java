@@ -4,16 +4,21 @@ import sayit.storage.*;
 import com.sun.net.httpserver.*;
 import java.net.InetSocketAddress;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class webServer {
+
+
+/*
+ * class for server to handle busines logic
+ */
+public class WebServer {
     // initialize server port and hostname
     private static final int SERVER_PORT = 8100;
     private static final String SERVER_HOSTNAME = "localhost";
 
 
+    //main method to start up server
     public static void main(String[] args) throws IOException {
         // create a thread pool to handle requests
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) 

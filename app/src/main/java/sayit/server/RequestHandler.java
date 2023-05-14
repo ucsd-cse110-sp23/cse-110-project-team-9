@@ -56,6 +56,7 @@ public class RequestHandler implements HttpHandler{
     /*
      * general handle method for any incoming HTTP request to the server
      * @param httpExchange should be the HTTP exchange made by the request
+     * @throws IOException if the HTTP request is invalid or not of a type the server can handle
      */
     public void handle(HttpExchange httpExchange) throws IOException {
         //method variablse
@@ -90,9 +91,12 @@ public class RequestHandler implements HttpHandler{
     }
 
     /*
-     * method to handle get request
+     * method to handle GET request
+     * request should return question history
      * @param httpExchange, httpExchange for request passed through by handle()
+     * @throws IOException if the GET request is broken
      * proper command is /history, all others will send back base response
+     * @return a string with the server response
      */
     private String handleGet(HttpExchange httpExchange) throws IOException {
       //set up method variablse
@@ -107,7 +111,15 @@ public class RequestHandler implements HttpHandler{
       return response;
     }
 
-    //handle request for Delete
+    
+    /*
+     * Method to handle DELETE request
+     * @param httpExchange, httpExchange for request passed through by handle()
+     * @throws IOEXception if the DELETE request is broken
+     * Checks for two possible endpoints, /delete-question and /clear-all
+     * /delete-question deletes a single entry, and /clear-all clears all entries
+     * @return a string with the server response
+     */
     private String handleDelete(HttpExchange httpExchange) throws IOException{
       String response = "Invalid Delete request";
       URI uri = httpExchange.getRequestURI();
@@ -118,34 +130,45 @@ public class RequestHandler implements HttpHandler{
         int ID;
         String value = query.substring(query.indexOf("=") + 1);
         try{//see if ID number can be found
-           ID = Integer.valueOf(query.substring(query.indexOf("=") + 1));
+          ID = Integer.valueOf(value);
         }catch(Exception e){
           return response;
         }
-        if (data.delete(ID)) {//check for correct deletion
-          response = "Deleted entry {}" + ID + "}";
-        } else {
-          response = "No entry found for " + ID;
+        if(data.delete(ID)) {//check for correct deletion
+          response = "Deleted entry {" + ID + "}";
+        }else {
+          response = "No entry found for {" + ID + "}";
         }
       }
 
       //seeing if clear all was queried
-      if (query.indexOf("/clear-all") > -1){
+      if (uri.getPath().equals("/clear-all")){
           if(data.clearAll()){
             response = "All entries cleared";
           }
       }
+
       data.save();
       return response;
     }
 
+    /*
+     * method to handle POST(and PUT) request
+     * request should include raw bytes for an audio file that will be recombined into a file
+     * audio will be transcribed with the Whisper API and then given to the Chat GPT AI
+     * server should respond with question and answer
+     * @param httpExchange, httpExchange for request passed through by handle()
+     * @throws IOException if the POST or PUT request is broken
+     * proper command is /ask, all others will send back base response
+     * @return a string with the server response
+     */
     private String handlePost(HttpExchange httpExchange) throws IOException {
       
       String response = "Invalid Post Request";
       
       URI uri = httpExchange.getRequestURI();
-      String query = uri.getRawQuery();
       
+      //check endpoint
       if (!uri.getPath().equals("/ask")){
         return response;
       }
@@ -155,26 +178,30 @@ public class RequestHandler implements HttpHandler{
       InputStream inputStream = httpExchange.getRequestBody();
       byte[] buffer = new byte[8192];
       int bytesRead;
+
       while ((bytesRead = inputStream.read(buffer)) != -1) {
         outputStream.write(buffer, 0, bytesRead);
-      } 
+      }
+
+      //get bytes from request
       byte[] audioBytes = outputStream.toByteArray();
       outputStream.close();
 
       // Save the audio bytes as a sound file
       String soundFilePath = saveAudioFile(audioBytes);
 
+      //access Whisper API
       IWhisper whisper = new Whisper(Constants.OPENAI_API_KEY);
       WhisperCheck whisperCheck = new WhisperCheck(whisper, new File(soundFilePath));
 
       String question = whisperCheck.output();
 
       if (whisperCheck.isExceptionThrown()) {
-        // Show a message box with an error containing the exception content
-        response = "Unable to transcribe response";
+        response = question;
         return response;
       }
 
+      //if audio is transcribed, pass to Chat GPT
       ChatGpt chatGpt = new ChatGpt(Constants.OPENAI_API_KEY, 100);
       String answer;
 
@@ -192,20 +219,25 @@ public class RequestHandler implements HttpHandler{
 
       int newID = data.insert(entry);
 
-      response = entry.toString();
+      response = entry.toString() + " ID: " + newID;
 
       data.save();
 
       return response;
   }
 
-  //save bytes into audiofile
+  /*
+   * method to take bytes of audio and convert to a file
+   * @param audioBytes, byte array as created from server erquest
+   * @throws IOException if there is a problem with the output stream
+   * @return a string for the Path of the file which will be turned into a new file
+   */
   private String saveAudioFile(byte[] audioBytes) throws IOException {
     String soundFilePath = "question.wav"; // Provide the desired file path
     try (OutputStream outStream = new FileOutputStream(soundFilePath)) {
-        outStream.write(audioBytes);
+      outStream.write(audioBytes);
     }
     return soundFilePath;
-}
+  }
     
 }

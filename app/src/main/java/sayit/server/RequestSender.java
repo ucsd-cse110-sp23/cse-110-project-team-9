@@ -38,7 +38,7 @@ public class RequestSender {
      * Send get request
      * @ param endpoint: command we have set up for the server.
      * @ return will return the response from the server that can be picked up from the UI if successful and handled otherwise
-     * @ throws IOException
+     * @ throws IOException if connection fails
      */
     public static String sendGetRequest(String endpoint) throws IOException {
 
@@ -81,6 +81,7 @@ public class RequestSender {
      * Method to Send Post request
      * @param endpoint, string for the command sent to the server
      * @param audioFile, file passed in from the audio recoder
+     * @ throws IOException if connection fails
      * @return returns a String containing the server response
      */
     public static String sendPostRequest(String endpoint, File audioFile) throws IOException {
@@ -133,12 +134,15 @@ public class RequestSender {
     /*
      * Method to Send Delete Request
      * @param endpoint, a string containing the command for the server, either for Delete or Clear
+     * @param toDel, should be the ID number of a question that needs to be deleted from server storage for the /delete-question endpoint
+     * toDel can be anything
+     * @ throws IOException if connection fails
      * @return a string with the server response
      */
-    public static String sendDeleteRequest(String endpoint) throws IOException {
+    public static String sendDeleteRequest(String endpoint, String toDel) throws IOException {
 
         //set up method variables
-        String url = BASE_URL + endpoint;
+        String url = BASE_URL + endpoint + "?id=" + toDel;
         HttpURLConnection connection = null;
         StringBuilder responseBuilder = new StringBuilder();
 
