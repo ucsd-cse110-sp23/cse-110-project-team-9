@@ -117,7 +117,7 @@ public class RequestSender {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                    responseBuilder.append(line).append("\n");
+                        responseBuilder.append(line).append("\n");
                     }
                 }
             } else {

@@ -20,9 +20,9 @@ public class sendRequestTest{
 
     @Test
     public void testPost() throws IOException{
-        File testFile = new File("app/src/test/java/sayit/server/test.wav");
+        File testFile = new File("C:/Users/cmast/Desktop/CSE110/cse-110-project-team-9/app/src/test/java/sayit/server/test.wav");
         assertEquals("POST", RequestSender.sendPostRequest("/ask", testFile));
-        assertEquals("Invalid POST request", RequestSender.sendPostRequest("/send", null));
+        assertEquals("Invalid POST request", RequestSender.sendPostRequest("/send", testFile));
     }
 
     @Test

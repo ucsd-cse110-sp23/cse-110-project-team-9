@@ -69,13 +69,31 @@ public class mockHandler implements HttpHandler{
         return response;
     }
 
-    private String handlePost(HttpExchange httpExchange){
-        String response = "Invalid POST request";
-        URI uri = httpExchange.getRequestURI();
-        if (uri.getPath().equals("/ask")) {
-            return "POST";
-        }
+    private String handlePost(HttpExchange httpExchange) throws IOException{
+      String response = "Invalid POST Request";
+      
+      URI uri = httpExchange.getRequestURI();
+      
+      //check endpoint
+      if (!uri.getPath().equals("/ask")){
         return response;
+      }
+
+      // Read the audio data from the request body
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      InputStream inputStream = httpExchange.getRequestBody();
+      byte[] buffer = new byte[8192];
+      int bytesRead;
+
+      while ((bytesRead = inputStream.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+
+      //get bytes from request
+      byte[] audioBytes = outputStream.toByteArray();
+      outputStream.close();
+
+      return "POST";
     }
 
     private String handleDelete(HttpExchange httpExchange){

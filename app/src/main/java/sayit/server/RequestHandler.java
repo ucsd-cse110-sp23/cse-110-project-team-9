@@ -121,7 +121,7 @@ public class RequestHandler implements HttpHandler{
      * @return a string with the server response
      */
     private String handleDelete(HttpExchange httpExchange) throws IOException{
-      String response = "Invalid Delete request";
+      String response = "Invalid DELETE request";
       URI uri = httpExchange.getRequestURI();
       String query = uri.getRawQuery();
 
@@ -164,7 +164,7 @@ public class RequestHandler implements HttpHandler{
      */
     private String handlePost(HttpExchange httpExchange) throws IOException {
       
-      String response = "Invalid Post Request";
+      String response = "Invalid POST Request";
       
       URI uri = httpExchange.getRequestURI();
       
