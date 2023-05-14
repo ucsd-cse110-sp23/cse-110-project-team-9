@@ -296,6 +296,7 @@ public class MainUserInterface {
                 answerTextArea.setText(ANSWER_HEADER_TEXT);
             }
         });
+      
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
