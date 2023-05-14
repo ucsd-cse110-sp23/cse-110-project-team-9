@@ -33,6 +33,8 @@ import sayit.storage.TsvStore;
  * Post or Put requests to send an audio file to the server to be transcribed and then put into Chat GPT
  * </p>
  * <p>
+ * Credit: some of the code is taken from CSE110 Lab 6
+ * Chat GPT used for audio encoding protocol
  * The following assumptions are made for this store:
  *     <ul>
  *         <li>Audio file will be transcribed into bytes and included in HTTP request.

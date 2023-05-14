@@ -70,7 +70,7 @@ public class mockHandler implements HttpHandler{
     }
 
     private String handlePost(HttpExchange httpExchange) throws IOException{
-      String response = "Invalid POST Request";
+      String response = "Invalid POST request";
       
       URI uri = httpExchange.getRequestURI();
       
