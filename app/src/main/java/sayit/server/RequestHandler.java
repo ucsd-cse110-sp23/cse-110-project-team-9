@@ -21,35 +21,65 @@ import sayit.qa.Question;
 import sayit.qa.QuestionAnswerEntry;
 import sayit.storage.TsvStore;
 
+
+/**
+ * <p>
+ * Request Handler for the web server
+ * </p>
+ * <p>
+ * We need the server to handle a few different request types
+ * Get requests to get the entry history from the server
+ * Delete requests to either delete a single entry or clear all entries
+ * Post or Put requests to send an audio file to the server to be transcribed and then put into Chat GPT
+ * </p>
+ * <p>
+ * The following assumptions are made for this store:
+ *     <ul>
+ *         <li>Audio file will be transcribed into bytes and included in HTTP request.
+ *              Server will be running for this file to be accessed</li>
+ *     </ui>
+ * </p>
+ */
 public class RequestHandler implements HttpHandler{
+
+    //storage for the server
     private final TsvStore data;
 
+    //Request Handler Constructor
+    /*
+     * @ param data, TsvStore to keep track of changes made through server requests
+     */
     public RequestHandler(TsvStore data) {
         this.data = data;
     }
 
+    /*
+     * general handle method for any incoming HTTP request to the server
+     * @param httpExchange should be the HTTP exchange made by the request
+     */
     public void handle(HttpExchange httpExchange) throws IOException {
+        //method variablse
         String response = "Request Received";
         String method = httpExchange.getRequestMethod();
+
+        //identify request type and call method to handle each type if applicable
         try {
-            if (method.equals("GET")) {
+          if (method.equals("GET")) {
               response = handleGet(httpExchange);
-            } else if (method.equals("POST")) {
+          } else if (method.equals("POST")) {
               response = handlePost(httpExchange);
-            } 
-              else if (method.equals("PUT")){
+          } else if (method.equals("PUT")){
               response = handlePost(httpExchange);
-            }
-              else if(method.equals("DELETE")){
+          } else if(method.equals("DELETE")){
               response = handleDelete(httpExchange);
-            }
-              else {
+          }
+          else{
               throw new Exception("Not Valid Request Method");
-            }
+          }
         }catch (Exception e) {
-            System.out.println("An erroneous request");
-            response = e.toString();
-            e.printStackTrace();
+          System.out.println("An erroneous request");
+          response = e.toString();
+          e.printStackTrace();
         } 
 
         //Sending back response to the client
@@ -59,11 +89,18 @@ public class RequestHandler implements HttpHandler{
         outStream.close();
     }
 
-    //handle request for history
+    /*
+     * method to handle get request
+     * @param httpExchange, httpExchange for request passed through by handle()
+     * proper command is /history, all others will send back base response
+     */
     private String handleGet(HttpExchange httpExchange) throws IOException {
+      //set up method variablse
       String response = "Invalid GET request";
       URI uri = httpExchange.getRequestURI();
       String query = uri.getRawQuery();
+
+      //check for proper endpoint
       if (uri.getPath().equals("/history")) {
         return data.getEntries().toString();
       }

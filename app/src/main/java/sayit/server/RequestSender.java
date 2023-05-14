@@ -2,6 +2,7 @@ package sayit.server;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -79,12 +80,12 @@ public class RequestSender {
     /*
      * Method to Send Post request
      * @param endpoint, string for the command sent to the server
+     * @param audioFile, file passed in from the audio recoder
      * @return returns a String containing the server response
      */
-    public static String sendPostRequest(String endpoint) throws IOException {
+    public static String sendPostRequest(String endpoint, File audioFile) throws IOException {
         
-        //method varioables 
-        String audioFilePath = "/path/to/audio/file.wav";
+        //method variables 
         String url = BASE_URL + endpoint;
         StringBuilder responseBuilder = new StringBuilder();
         URL requestUrl = new URL(url);
@@ -98,7 +99,7 @@ public class RequestSender {
         //convert audio file into bytes
         try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
 
-            FileInputStream fileInputStream = new FileInputStream(audioFilePath)) {
+            FileInputStream fileInputStream = new FileInputStream(audioFile)) {
             byte[] buffer = new byte[8192];
             int bytesRead;
 
