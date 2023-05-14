@@ -96,6 +96,7 @@ public class RequestSender {
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/octet-stream");
+        connection.connect();
 
         //convert audio file into bytes
         try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
@@ -122,8 +123,8 @@ public class RequestSender {
             } else {
                 return "Request error";
             }
-
-        } finally {
+            
+        }finally {
             connection.disconnect();
        
         }

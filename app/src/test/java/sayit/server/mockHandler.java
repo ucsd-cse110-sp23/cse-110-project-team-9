@@ -70,7 +70,7 @@ public class mockHandler implements HttpHandler{
     }
 
     private String handlePost(HttpExchange httpExchange){
-        String response = "Invalid GET request";
+        String response = "Invalid POST request";
         URI uri = httpExchange.getRequestURI();
         if (uri.getPath().equals("/ask")) {
             return "POST";
@@ -79,12 +79,20 @@ public class mockHandler implements HttpHandler{
     }
 
     private String handleDelete(HttpExchange httpExchange){
-        String response = "Invalid Delete request";
+        String response = "Invalid DELETE request";
         URI uri = httpExchange.getRequestURI();
-        if (uri.getPath().equals("delete-question")) {
-            return "DELETE";
+        String query = uri.getRawQuery();
+        int ID;
+        String value = query.substring(query.indexOf("=") + 1);
+        try{//see if ID number can be found
+          ID = Integer.valueOf(value);
+        }catch(Exception e){
+          return response;
         }
-        else if(uri.getPath().equals("clear-all")){
+        if (uri.getPath().equals("/delete-question")) {
+            return "DELETE{" + value + "}";
+        }
+        else if(uri.getPath().equals("/clear-all")){
             return "CLEAR"; 
         }
         return response;
