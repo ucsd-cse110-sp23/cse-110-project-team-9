@@ -46,6 +46,8 @@ public class AudioRecorder {
 
 
 class InternalAudioRecorder implements Runnable {
+    private static final String AUDIO_FILENAME = "recording.wav";
+
     private File value;
     private TargetDataLine targetDataLine;
 
@@ -61,7 +63,7 @@ class InternalAudioRecorder implements Runnable {
         // the number of bits in each sample of a sound that has been digitized.
         int sampleSizeInBits = 16;
         // the number of audio channels in this format (1 for mono, 2 for stereo).
-        int channels = 2;
+        int channels = 1;
         // whether the data is signed or unsigned.
         boolean signed = true;
         // whether the audio data is stored in big-endian or little-endian order.
@@ -96,7 +98,7 @@ class InternalAudioRecorder implements Runnable {
             // The AudioInputStream that will be used to write the audio data to a file
             AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
             // the file that will contain the audio data
-            File audioFile = new File("recording.wav");
+            File audioFile = new File(AUDIO_FILENAME);
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, audioFile);
             this.value = audioFile;
         } catch (Exception ex) {

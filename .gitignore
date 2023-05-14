@@ -12,3 +12,4 @@ bin/
 # Configuration files
 token.txt
 *.tsv
+.DS_Store
