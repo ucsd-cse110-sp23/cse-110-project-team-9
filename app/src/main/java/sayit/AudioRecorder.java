@@ -46,6 +46,8 @@ public class AudioRecorder {
 
 
 class InternalAudioRecorder implements Runnable {
+    private static final String AUDIO_FILENAME = "recording.wav";
+
     private File value;
     private TargetDataLine targetDataLine;
 
@@ -96,7 +98,7 @@ class InternalAudioRecorder implements Runnable {
             // The AudioInputStream that will be used to write the audio data to a file
             AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
             // the file that will contain the audio data
-            File audioFile = new File("recording.wav");
+            File audioFile = new File(AUDIO_FILENAME);
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, audioFile);
             this.value = audioFile;
         } catch (Exception ex) {
