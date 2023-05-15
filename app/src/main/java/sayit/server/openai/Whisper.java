@@ -1,4 +1,4 @@
-package sayit.openai;
+package sayit.server.openai;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -34,7 +34,10 @@ public class Whisper implements IWhisper {
      * @throws IOException If an issue occurs with the given connection.
      */
     @Override
+
+
     public String transcribe(File file) throws IOException, OpenAiException {
+
         URL url = new URL(API_ENDPOINT);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");

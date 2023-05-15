@@ -1,4 +1,4 @@
-package sayit.openai;
+package sayit.server.openai;
 
 import org.json.JSONObject;
 

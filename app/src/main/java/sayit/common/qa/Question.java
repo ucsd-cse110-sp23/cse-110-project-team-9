@@ -1,4 +1,4 @@
-package sayit.qa;
+package sayit.common.qa;
 
 /**
  * Represents a question asked by a user.

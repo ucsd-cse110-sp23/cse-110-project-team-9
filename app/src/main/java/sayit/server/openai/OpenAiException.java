@@ -1,4 +1,4 @@
-package sayit.openai;
+package sayit.server.openai;
 
 /**
  * Represents an error that occurred from either the Whisper or ChatGPT APIs.

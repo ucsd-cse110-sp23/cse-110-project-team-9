@@ -1,10 +1,13 @@
 package sayit.storage;
 
-import java.io.File;
 import org.junit.jupiter.api.Test;
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
+import sayit.common.qa.Answer;
+import sayit.common.qa.Question;
+import sayit.common.qa.QuestionAnswerEntry;
+import sayit.server.storage.IStore;
+import sayit.server.storage.TsvStore;
+
+import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +23,8 @@ public class ClearAllTest {
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
 
         //Tests when the file is empty
-        assertEquals(true, store.clearAll());
+        assert store != null;
+        assertTrue(store.clearAll());
         assertEquals(0, file.length());
 
         //Tests when the file has one Question-Answer Entry
@@ -29,7 +33,7 @@ public class ClearAllTest {
         store.save();
         // Note: 18 is the default length of file because of header
         assertNotEquals(18, file.length());
-        assertEquals(true, store.clearAll());
+        assertTrue(store.clearAll());
         assertEquals(0, file.length());
 
         //Tests when the file has multiple Question-Answer Entries.
@@ -37,8 +41,7 @@ public class ClearAllTest {
         store.insert(new QuestionAnswerEntry(new Question("What is 2 + 2?"), new Answer("4")));
         store.save();
         assertNotEquals(18, file.length());
-        assertEquals(true, store.clearAll());
+        assertTrue(store.clearAll());
         assertEquals(0, file.length());
-
     }
 }

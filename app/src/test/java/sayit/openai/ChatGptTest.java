@@ -1,6 +1,8 @@
 package sayit.openai;
 
 import org.junit.jupiter.api.Test;
+import sayit.server.openai.IChatGpt;
+import sayit.server.openai.OpenAiException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

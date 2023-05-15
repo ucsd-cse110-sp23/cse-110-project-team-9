@@ -1,4 +1,4 @@
-package sayit;
+package sayit.server;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -7,6 +7,16 @@ import java.nio.file.Files;
  * A class containing some relevant constants.
  */
 public final class Constants {
+    /**
+     * The default server port.
+     */
+    public static final int SERVER_PORT = 8100;
+
+    /**
+     * The default server hostname.
+     */
+    public static final String SERVER_HOSTNAME = "localhost";
+
     /**
      * The OpenAI API key. It might be worth checking if this is an empty string
      * before letting the rest of the application run; if this is an empty string,
