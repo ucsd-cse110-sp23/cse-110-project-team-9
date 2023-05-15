@@ -1,7 +1,7 @@
-package sayit.storage;
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
+package sayit.server.storage;
+import sayit.common.qa.Answer;
+import sayit.common.qa.Question;
+import sayit.common.qa.QuestionAnswerEntry;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

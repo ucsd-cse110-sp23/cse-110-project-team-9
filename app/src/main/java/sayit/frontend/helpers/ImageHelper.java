@@ -1,4 +1,4 @@
-package sayit.helpers;
+package sayit.frontend.helpers;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

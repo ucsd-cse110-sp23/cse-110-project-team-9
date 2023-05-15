@@ -1,17 +1,10 @@
-package sayit;
+package sayit.frontend;
 
-import sayit.helpers.ImageHelper;
+import sayit.frontend.helpers.ImageHelper;
 
-import sayit.openai.ChatGpt;
-import sayit.openai.IWhisper;
-import sayit.openai.Whisper;
-import sayit.openai.WhisperCheck;
-
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
-import sayit.server.RequestSender;
-import sayit.storage.TsvStore;
+import sayit.common.qa.QuestionAnswerEntry;
+import sayit.frontend.helpers.Pair;
+import sayit.server.Constants;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -62,12 +55,13 @@ public class MainUserInterface {
     private JScrollPane questionScrollPane;
     private final JFrame frame;
     private static AudioRecorder recorder;
-    private TsvStore db;
-    private int currentQID;
+
+    private final RequestSender requestSender;
 
     private MainUserInterface() {
+        this.requestSender = RequestSender.getInstance(Constants.SERVER_HOSTNAME, Constants.SERVER_PORT);
+
         this.frame = new JFrame(APP_TITLE);
-        db = TsvStore.createOrOpenStore(DATA_FILENAME);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addComponentsToPane(this.frame.getContentPane());
         this.frame.pack();
@@ -83,17 +77,14 @@ public class MainUserInterface {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 int confirmClose = JOptionPane.showConfirmDialog(frame,
-                CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
+                        CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
 
                 // if user confirms closing the window, save and exit
-                if (confirmClose == JOptionPane.YES_OPTION){
-                    // save questions and answers to database
-                    db.save();
-
+                if (confirmClose == JOptionPane.YES_OPTION) {
                     // if there is an audio recording, delete it
-                    if(MainUserInterface.recorder != null){
+                    if (MainUserInterface.recorder != null) {
                         File audioFile = MainUserInterface.recorder.getRecordingFile();
                         audioFile.delete();
                     }
@@ -135,7 +126,7 @@ public class MainUserInterface {
 
     /**
      * Display entry in the text boxes
-     * 
+     *
      * @param entry
      */
     public void displayEntry(QuestionAnswerEntry entry) {
@@ -167,39 +158,23 @@ public class MainUserInterface {
                 }
                 File recordingFile = MainUserInterface.recorder.getRecordingFile();
 
-                String serverResponse;
+                Pair<Integer, QuestionAnswerEntry> serverResponse;
                 try {
-                    serverResponse = RequestSender.sendPostRequest("/ask", recordingFile);
+                    serverResponse = this.requestSender.askQuestion(recordingFile);
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(this.frame,
-                        SERVER_ERROR_TEXT,
-                        ERROR_TEXT,
-                        JOptionPane.ERROR_MESSAGE);
+                            SERVER_ERROR_TEXT,
+                            ERROR_TEXT,
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                //if Post request goes through, response should always contain ID:
-                //easy to tell if request was successful or not
-                //show a message box with an error containing the server response
-                if(serverResponse.indexOf("ID:") == -1){
-                    JOptionPane.showMessageDialog(this.frame,
-                        TRANSCRIPTION_ERROR_TEXT + " " + serverResponse,
-                        ERROR_TEXT,
-                        JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                //get quetion and answer strings from server resposne to make QA object
-                String question = serverResponse.substring(serverResponse.indexOf("Q: ") + 1, serverResponse.indexOf(" / A: "));
-                String response = serverResponse.substring(serverResponse.indexOf(" / A: ") , serverResponse.indexOf(" ID: "));
-                
                 // store data to database
-                QuestionAnswerEntry qaEntry = new QuestionAnswerEntry(new Question(question), new Answer(response));
-                currentQID = db.insert(qaEntry);
+                QuestionAnswerEntry qaEntry = serverResponse.getSecond();
                 displayEntry(qaEntry);
 
                 // add data to scrollBar
-                QuestionButton button = new QuestionButton(question, currentQID);
+                QuestionButton button = new QuestionButton(qaEntry.getQuestion().getQuestionText(), serverResponse.getFirst());
                 button.setPreferredSize(new Dimension(180, 100));
                 button.addActionListener(new ActionListener() {
                     @Override
@@ -235,7 +210,17 @@ public class MainUserInterface {
      * @param pane The pane to add the components to.
      */
     public void addComponentsToPane(Container pane) {
-        Map<Integer, QuestionAnswerEntry> entries = db.getEntries();
+        Map<Integer, QuestionAnswerEntry> entries = null;
+        try {
+            entries = this.requestSender.getHistory();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this.frame,
+                    e.getMessage(),
+                    ERROR_TEXT,
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         this.recordButton = new RoundButton(RECORD_BUTTON_FILENAME, 40);
         this.recordButton.addActionListener(this::onRecordButtonPress);
@@ -247,59 +232,66 @@ public class MainUserInterface {
         toolBar.add(deleteButton);
 
         // deletion functionality on click
-        deleteButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        try {
-                            if (selectedButton != null) {
-                                // delete QuestionAnswer pair from database
-                                if (db.delete(selectedButton.getId())) {
-                                    // display a success message
-                                    String response = DELETION_SUCCESS_TEXT;
-                                    JOptionPane.showMessageDialog(null, response);
-                                }
-                                // delete button from UI/sidebar
-                                scrollBar.remove(selectedButton);
-
-                                // reset question and answer text
-                                questionTextArea.setText(QUESTION_HEADER_TEXT);
-                                answerTextArea.setText(ANSWER_HEADER_TEXT);
-
-                                // update scrollBar
-                                scrollBar.revalidate();
-                                scrollBar.repaint();
-
-                                selectedButton = null;
-
-                                // TODO: refactor event handlers
-                            }
-                            // if the last selected question was already deleted or no question has yet been
-                            // selected
-                            else {
-                                String response = DELETION_NONE_SELECTED_TEXT;
-                                JOptionPane.showMessageDialog(null, response);
-                            }
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            JOptionPane.showMessageDialog(null, ERROR_TEXT + ex.getMessage());
-                        }
+        deleteButton.addActionListener(e -> {
+            try {
+                if (selectedButton != null) {
+                    // delete QuestionAnswer pair from database
+                    boolean deleted;
+                    try {
+                        deleted = this.requestSender.delete(selectedButton.getId());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        deleted = false;
                     }
-                });
+
+                    if (deleted) {
+                        JOptionPane.showMessageDialog(null, DELETION_SUCCESS_TEXT);
+                    }
+                    // delete button from UI/sidebar
+                    scrollBar.remove(selectedButton);
+
+                    // reset question and answer text
+                    questionTextArea.setText(QUESTION_HEADER_TEXT);
+                    answerTextArea.setText(ANSWER_HEADER_TEXT);
+
+                    // update scrollBar
+                    scrollBar.revalidate();
+                    scrollBar.repaint();
+
+                    selectedButton = null;
+
+                    // TODO: refactor event handlers
+                }
+                // if the last selected question was already deleted or no question has yet been
+                // selected
+                else {
+                    String response = DELETION_NONE_SELECTED_TEXT;
+                    JOptionPane.showMessageDialog(null, response);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ERROR_TEXT + ex.getMessage());
+            }
+        });
 
         JButton clearAllButton = new JButton(CLEAR_ALL_BUTTON_TITLE);
         toolBar.add(clearAllButton);
-        clearAllButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                db.clearAll();
-                scrollBar.removeAll();
-                scrollBar.revalidate();
-                scrollBar.repaint();
-                questionTextArea.setText(QUESTION_HEADER_TEXT);
-                answerTextArea.setText(ANSWER_HEADER_TEXT);
+        clearAllButton.addActionListener(e -> {
+            try {
+                this.requestSender.clearHistory();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex.getMessage());
+                return;
             }
+
+            scrollBar.removeAll();
+            scrollBar.revalidate();
+            scrollBar.repaint();
+            questionTextArea.setText(QUESTION_HEADER_TEXT);
+            answerTextArea.setText(ANSWER_HEADER_TEXT);
         });
-      
+
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
@@ -377,7 +369,7 @@ class QuestionButton extends JButton {
 
     /**
      * Public getter method for the ID
-     * 
+     *
      * @return
      */
     public int getId() {

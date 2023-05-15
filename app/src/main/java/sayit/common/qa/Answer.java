@@ -1,4 +1,4 @@
-package sayit.qa;
+package sayit.common.qa;
 
 /**
  * Represents an answer to a question from ChatGPT.

@@ -1,4 +1,4 @@
-package sayit;
+package sayit.frontend;
 
 import javax.sound.sampled.*;
 import java.io.File;
