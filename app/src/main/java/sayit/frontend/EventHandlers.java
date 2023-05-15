@@ -64,6 +64,8 @@ public final class EventHandlers {
                     ui.getScrollBar().revalidate();
                     ui.getScrollBar().repaint();
 
+                    ui.setSelectedButton(button);
+
                     ui.getRecordButton().setIcon(ImageHelper.getImageIcon(RECORD_BUTTON_FILENAME, 50));
                     ui.setRecorder(null);
                     ui.getRecordButton().setEnabled(true);
