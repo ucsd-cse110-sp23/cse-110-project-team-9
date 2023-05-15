@@ -1,25 +1,16 @@
 package sayit.frontend;
 
-import sayit.frontend.helpers.ImageHelper;
-
 import sayit.common.qa.QuestionAnswerEntry;
+import sayit.frontend.helpers.ImageHelper;
 import sayit.server.Constants;
 
-import static sayit.frontend.FrontEndConstants.*;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Shape;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.Map;
 
-import javax.swing.*;
+import static sayit.frontend.FrontEndConstants.*;
 
 /**
  * The main user interface for the application.

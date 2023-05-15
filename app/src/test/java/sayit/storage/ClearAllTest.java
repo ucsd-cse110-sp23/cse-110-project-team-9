@@ -1,12 +1,13 @@
 package sayit.storage;
 
-import java.io.File;
 import org.junit.jupiter.api.Test;
 import sayit.common.qa.Answer;
 import sayit.common.qa.Question;
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.server.storage.IStore;
 import sayit.server.storage.TsvStore;
+
+import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +43,5 @@ public class ClearAllTest {
         assertNotEquals(18, file.length());
         assertTrue(store.clearAll());
         assertEquals(0, file.length());
-
     }
 }

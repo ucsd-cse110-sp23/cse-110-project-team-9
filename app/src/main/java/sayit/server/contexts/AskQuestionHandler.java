@@ -6,8 +6,8 @@ import org.json.JSONObject;
 import sayit.common.qa.Answer;
 import sayit.common.qa.Question;
 import sayit.common.qa.QuestionAnswerEntry;
-import sayit.server.openai.IWhisper;
 import sayit.server.openai.IChatGpt;
+import sayit.server.openai.IWhisper;
 import sayit.server.openai.WhisperCheck;
 import sayit.server.storage.IStore;
 

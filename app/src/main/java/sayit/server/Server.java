@@ -25,9 +25,10 @@ public class Server {
 
     /**
      * Creates a new server.
+     *
      * @param storage The storage to use.
-     * @param host The host to use.
-     * @param port The port to use.
+     * @param host    The host to use.
+     * @param port    The port to use.
      * @param whisper The <c>whisper</c> instance to use.
      * @param chatgpt The <c>ChatGPT</c> instance to use.
      */

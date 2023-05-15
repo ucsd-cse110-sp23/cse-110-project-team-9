@@ -10,6 +10,7 @@ import java.io.OutputStream;
 public final class Helper {
     /**
      * Saves the audio file to the disk.
+     *
      * @param audioBytes The audio bytes to save.
      * @return The path to the saved file.
      * @throws IOException If there is an error writing to the file.
