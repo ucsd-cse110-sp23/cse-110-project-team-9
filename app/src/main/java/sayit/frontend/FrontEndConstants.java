@@ -18,6 +18,5 @@ public final class FrontEndConstants {
     public static final String DELETION_SUCCESS_TEXT = "Deleted question";
     public static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
     public static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
-    public static final String SERVER_ERROR_TEXT = "Unable to connect to server";
     public static final String ERROR_TEXT = "Error";
 }

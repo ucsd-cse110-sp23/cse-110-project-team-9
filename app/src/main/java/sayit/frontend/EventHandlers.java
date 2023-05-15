@@ -46,7 +46,7 @@ public final class EventHandlers {
                     try {
                         serverResponse = ui.getRequestSender().askQuestion(recordingFile);
                     } catch (IOException e1) {
-                        JOptionPane.showMessageDialog(ui.getFrame(), SERVER_ERROR_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
