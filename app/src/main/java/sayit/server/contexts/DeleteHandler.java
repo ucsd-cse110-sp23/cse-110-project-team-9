@@ -7,13 +7,29 @@ import sayit.server.storage.IStore;
 
 import java.io.IOException;
 
+/**
+ * Handles a DELETE request for deleting a question.
+ * The endpoint will be <c>/delete-question</c>.
+ */
 public class DeleteHandler implements HttpHandler {
     private final IStore<QuestionAnswerEntry> data;
 
+    /**
+     * Creates a new instance of the <c>AskQuestionHandler</c> class.
+     *
+     * @param data The store to use.
+     */
     public DeleteHandler(IStore<QuestionAnswerEntry> data) {
         this.data = data;
     }
 
+    /**
+     * Handles the request.
+     *
+     * @param exchange the exchange containing the request from the
+     *                 client and used to send the response
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("DELETE")) {

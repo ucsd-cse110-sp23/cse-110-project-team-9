@@ -7,7 +7,14 @@ import java.nio.file.Files;
  * A class containing some relevant constants.
  */
 public final class Constants {
+    /**
+     * The default server port.
+     */
     public static final int SERVER_PORT = 8100;
+
+    /**
+     * The default server hostname.
+     */
     public static final String SERVER_HOSTNAME = "localhost";
 
     /**

@@ -27,12 +27,26 @@ public class AskQuestionHandler implements HttpHandler {
     private final IWhisper whisper;
     private final IChatGpt chatGpt;
 
+    /**
+     * Creates a new instance of the <c>AskQuestionHandler</c> class.
+     *
+     * @param data    The store to use.
+     * @param whisper The <c>Whisper</c> instance to use.
+     * @param chatGpt The <c>ChatGPT</c> instance to use.
+     */
     public AskQuestionHandler(IStore<QuestionAnswerEntry> data, IWhisper whisper, IChatGpt chatGpt) {
         this.data = data;
         this.whisper = whisper;
         this.chatGpt = chatGpt;
     }
 
+    /**
+     * Handles the request.
+     *
+     * @param httpExchange the exchange containing the request from the
+     *                     client and used to send the response
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         // Make sure we have a POST request here

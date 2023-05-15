@@ -4,12 +4,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * A helper class for the server.
+ */
 public final class Helper {
-    /*
-     * method to take bytes of audio and convert to a file
-     * @param audioBytes, byte array as created from server erquest
-     * @throws IOException if there is a problem with the output stream
-     * @return a string for the Path of the file which will be turned into a new file
+    /**
+     * Saves the audio file to the disk.
+     * @param audioBytes The audio bytes to save.
+     * @return The path to the saved file.
+     * @throws IOException If there is an error writing to the file.
      */
     public static String saveAudioFile(byte[] audioBytes) throws IOException {
         String soundFilePath = "question.wav"; // Provide the desired file path

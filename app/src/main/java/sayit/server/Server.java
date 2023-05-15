@@ -15,11 +15,22 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * The server class that handles all the requests.
+ */
 public class Server {
     private final HttpServer _server;
 
     private final int _port;
 
+    /**
+     * Creates a new server.
+     * @param storage The storage to use.
+     * @param host The host to use.
+     * @param port The port to use.
+     * @param whisper The <c>whisper</c> instance to use.
+     * @param chatgpt The <c>ChatGPT</c> instance to use.
+     */
     public Server(IStore<QuestionAnswerEntry> storage, String host, int port, IWhisper whisper, IChatGpt chatgpt) {
         this._port = port;
 
@@ -41,6 +52,9 @@ public class Server {
         this._server.setExecutor(threadPoolExecutor);
     }
 
+    /**
+     * Starts the server. It is recommended that this is called in a separate thread.
+     */
     public void start() {
         this._server.start();
         System.out.println("Server started on port " + this._port);
