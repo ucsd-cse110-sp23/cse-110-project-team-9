@@ -21,22 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>
- * A class that contains static methods to make requests to our HTTP server to access the busines logic of our project
- * </p>
- * <p>
- * Send request for GET, which should return the question history.
- * Send Request for POST/OR Put which takes sends an audio file to the server for whisper and chat GPT.
- * Send DELETE request to either delete a single entry or clear all entriews
- * </p>
- * <p>
- * The following assumptions are made for this class:
- *     <ul>
- *         <li> Calls from UI will contain endpoint and Audio File for POST or PUT exists.</li>
- *     </ui>
- * </p>
+ * A class that contains static methods to make requests to our HTTP server to
+ * access the business logic of our project.
  */
-
 public final class RequestSender {
 
     private final URL askQuestionUrl;
@@ -58,6 +45,14 @@ public final class RequestSender {
         }
     }
 
+    /**
+     * Gets an instance of the <c>RequestSender</c> class. It is guaranteed that
+     * only one instance of this class will be created.
+     *
+     * @param host The host to use.
+     * @param port The port to use.
+     * @return An instance of the <c>RequestSender</c> class.
+     */
     public static RequestSender getInstance(String host, int port) {
         if (requestSender == null) {
             requestSender = new RequestSender(host, port);
@@ -65,6 +60,13 @@ public final class RequestSender {
         return requestSender;
     }
 
+    /**
+     * Sends a request to the server to ask a question to ChatGPT.
+     *
+     * @param audioFile The audio file to send.
+     * @return A pair with the first item being the ID and the second item being the question and the answer.
+     * @throws IOException If an error occurs while sending the request.
+     */
     public Pair<Integer, QuestionAnswerEntry> askQuestion(File audioFile) throws IOException {
         //make connection
         HttpURLConnection connection = (HttpURLConnection) askQuestionUrl.openConnection();
@@ -73,7 +75,7 @@ public final class RequestSender {
         connection.setRequestProperty("Content-Type", "application/octet-stream");
         connection.connect();
 
-        //convert audio file into bytes
+        // Convert audio file into bytes
         try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
              FileInputStream fileInputStream = new FileInputStream(audioFile)) {
             byte[] buffer = new byte[1024];
@@ -101,21 +103,19 @@ public final class RequestSender {
             );
         } finally {
             connection.disconnect();
-
         }
     }
 
+    /**
+     * Sends a request to the server to get the history of questions and answers.
+     *
+     * @return A map with the ID as the key and the question and answer as the value.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
     public Map<Integer, QuestionAnswerEntry> getHistory() throws IOException, URISyntaxException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .uri(historyUrl.toURI())
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = sendRequest(historyUrl.toURI(), RequestType.GET);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
@@ -136,19 +136,18 @@ public final class RequestSender {
         return entries;
     }
 
+    /**
+     * Sends a request to the server to delete a question and answer entry.
+     *
+     * @param id The ID of the entry to delete.
+     * @return True if the entry was deleted, false otherwise.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
     public boolean delete(int id) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(deleteEntryUrl + "?id=" + id);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .DELETE()
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
@@ -157,19 +156,16 @@ public final class RequestSender {
         return response.body().equals("true");
     }
 
+    /**
+     * Sends a request to the server to clear the history of questions and answers.
+     *
+     * @return True if the history was cleared, false otherwise.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
     public boolean clearHistory() throws IOException, URISyntaxException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .DELETE()
-                .uri(clearHistoryUrl.toURI())
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString());
-
+        HttpResponse<String> response = sendRequest(clearHistoryUrl.toURI(), RequestType.DELETE);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
@@ -177,7 +173,44 @@ public final class RequestSender {
         return response.body().equals("true");
     }
 
+    enum RequestType {
+        GET,
+        DELETE
+    }
 
+    /**
+     * Sends a request to the server.
+     *
+     * @param uri  The URI to send the request to.
+     * @param type The type of request to send.
+     * @return The response from the server.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    private static HttpResponse<String> sendRequest(URI uri, RequestType type) throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        var request = HttpRequest
+                .newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json");
+
+        switch (type) {
+            case GET -> request.GET();
+            case DELETE -> request.DELETE();
+        }
+
+        return client.send(
+                request.build(),
+                HttpResponse.BodyHandlers.ofString());
+    }
+
+    /**
+     * Gets the body of the connection.
+     *
+     * @param connection The connection to get the body of.
+     * @return The body of the connection.
+     * @throws IOException If an error occurs while getting the body.
+     */
     private static String getConnectionBody(HttpURLConnection connection) throws IOException {
         StringBuilder resp = new StringBuilder();
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
