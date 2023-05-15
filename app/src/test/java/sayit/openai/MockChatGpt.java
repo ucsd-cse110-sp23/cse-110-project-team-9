@@ -1,18 +1,19 @@
 package sayit.openai;
 
-import java.io.File;
+import sayit.server.openai.IChatGpt;
+import sayit.server.openai.OpenAiException;
 
-public class MockWhisper implements IWhisper {
+public class MockChatGpt implements IChatGpt {
     private final boolean _shouldThrowError;
     private final String _answerOrError;
 
-    public MockWhisper(boolean shouldThrowError, String withMsg) {
+    public MockChatGpt(boolean shouldThrowError, String withMsg) {
         this._shouldThrowError = shouldThrowError;
         this._answerOrError = withMsg;
     }
 
     @Override
-    public String transcribe(File file) throws OpenAiException {
+    public String askQuestion(String prompt) throws OpenAiException {
         if (this._shouldThrowError) {
             throw new OpenAiException(this._answerOrError);
         }

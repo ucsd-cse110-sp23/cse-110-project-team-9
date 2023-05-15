@@ -1,4 +1,4 @@
-package sayit.storage;
+package sayit.server.storage;
 
 import java.util.Map;
 

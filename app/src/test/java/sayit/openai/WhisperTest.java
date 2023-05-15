@@ -1,6 +1,7 @@
 package sayit.openai;
 
 import org.junit.jupiter.api.Test;
+import sayit.server.openai.WhisperCheck;
 
 import static org.junit.jupiter.api.Assertions.*;
 

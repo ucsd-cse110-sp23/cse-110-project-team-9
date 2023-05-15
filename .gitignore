@@ -11,5 +11,8 @@ bin/
 
 # Configuration files
 token.txt
+
+# Misc. files
 *.tsv
 .DS_Store
+*.wav

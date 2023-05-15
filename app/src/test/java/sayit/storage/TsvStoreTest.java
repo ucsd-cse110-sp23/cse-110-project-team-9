@@ -3,9 +3,11 @@ package sayit.storage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
+import sayit.common.qa.Answer;
+import sayit.common.qa.Question;
+import sayit.common.qa.QuestionAnswerEntry;
+import sayit.server.storage.IStore;
+import sayit.server.storage.TsvStore;
 
 import java.io.File;
 

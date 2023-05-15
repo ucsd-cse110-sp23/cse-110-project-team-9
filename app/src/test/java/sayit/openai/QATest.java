@@ -1,9 +1,10 @@
 package sayit.openai;
 
 import org.junit.jupiter.api.Test;
-import sayit.qa.Answer;
-import sayit.qa.QuestionAnswerEntry;
-import sayit.qa.Question;
+import sayit.common.qa.Answer;
+import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.Question;
+import sayit.server.openai.WhisperCheck;
 
 import static org.junit.jupiter.api.Assertions.*;
 

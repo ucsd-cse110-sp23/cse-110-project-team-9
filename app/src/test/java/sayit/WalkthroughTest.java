@@ -1,12 +1,14 @@
 package sayit;
 
 import org.junit.jupiter.api.Test;
-import sayit.openai.*;
-import sayit.qa.Answer;
-import sayit.qa.Question;
-import sayit.qa.QuestionAnswerEntry;
-import sayit.storage.IStore;
-import sayit.storage.TsvStore;
+import sayit.openai.MockChatGpt;
+import sayit.openai.MockWhisper;
+import sayit.server.openai.*;
+import sayit.common.qa.Answer;
+import sayit.common.qa.Question;
+import sayit.common.qa.QuestionAnswerEntry;
+import sayit.server.storage.IStore;
+import sayit.server.storage.TsvStore;
 
 import java.io.IOException;
 
