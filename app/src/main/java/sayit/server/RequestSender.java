@@ -17,7 +17,7 @@ import java.net.URL;
  * Send request for GET, which should return the question history. 
  * Send Request for POST/OR Put which takes sends an audio file to the server for whisper and chat GPT. 
  * Send DELETE request to either delete a single entry or clear all entriews
- * Credit: Chat GPT used for audio encoding protocol and debugging response builder
+ * Credit: Chat GPT used for audio encoding protocol and debugging response builder 
  * </p>
  * <p>
  * The following assumptions are made for this class:
