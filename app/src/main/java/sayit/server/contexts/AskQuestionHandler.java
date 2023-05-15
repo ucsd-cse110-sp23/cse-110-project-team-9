@@ -56,6 +56,7 @@ public class AskQuestionHandler implements HttpHandler {
             return;
         }
 
+        System.out.println("Received POST request for /ask");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         InputStream inputStream = httpExchange.getRequestBody();
         byte[] buffer = new byte[1024];

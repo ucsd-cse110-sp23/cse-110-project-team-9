@@ -38,6 +38,8 @@ public class ClearAllHandler implements HttpHandler {
             return;
         }
 
+        System.out.println("Received DELETE request for /clear-all");
+
         String result = String.valueOf(data.clearAll());
         data.save();
         httpExchange.sendResponseHeaders(200, result.length());

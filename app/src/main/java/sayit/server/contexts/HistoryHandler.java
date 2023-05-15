@@ -40,6 +40,8 @@ public class HistoryHandler implements HttpHandler {
             return;
         }
 
+        System.out.println("Received GET request for /history");
+
         JSONArray history = new JSONArray();
         for (var item : data.getEntries().entrySet()) {
             JSONObject entry = new JSONObject();

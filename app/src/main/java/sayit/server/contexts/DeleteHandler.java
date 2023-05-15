@@ -38,8 +38,11 @@ public class DeleteHandler implements HttpHandler {
             return;
         }
 
+        System.out.println("Received DELETE request for /delete-question");
+
         String query = exchange.getRequestURI().getQuery();
         if (query == null) {
+            System.out.println("\tNo query string found.");
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
@@ -47,6 +50,7 @@ public class DeleteHandler implements HttpHandler {
 
         String[] querySplit = query.split("=");
         if (querySplit.length != 2 || !querySplit[0].equals("id")) {
+            System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
@@ -56,11 +60,13 @@ public class DeleteHandler implements HttpHandler {
         try {
             id = Integer.parseInt(querySplit[1]);
         } catch (NumberFormatException e) {
+            System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
         }
 
+        System.out.println("\twith ID: " + id);
         if (!data.getEntries().containsKey(id)) {
             exchange.sendResponseHeaders(404, 0);
             exchange.close();
