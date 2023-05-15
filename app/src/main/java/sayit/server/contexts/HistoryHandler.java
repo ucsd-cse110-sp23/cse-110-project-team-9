@@ -8,6 +8,7 @@ import sayit.common.qa.QuestionAnswerEntry;
 import sayit.server.storage.IStore;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Handles a GET request for getting the history of questions and answers.
@@ -51,8 +52,10 @@ public class HistoryHandler implements HttpHandler {
             history.put(entry);
         }
 
-        httpExchange.sendResponseHeaders(200, history.toString().length());
-        httpExchange.getResponseBody().write(history.toString().getBytes());
+        String response = history.toString();
+        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        httpExchange.sendResponseHeaders(200, bytes.length);
+        httpExchange.getResponseBody().write(bytes);
         httpExchange.close();
     }
 }

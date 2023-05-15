@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static sayit.server.Helper.saveAudioFile;
 
@@ -113,8 +114,9 @@ public class AskQuestionHandler implements HttpHandler {
         obj.put("id", newID);
 
         response = obj.toString();
-        httpExchange.sendResponseHeaders(200, response.length());
-        httpExchange.getResponseBody().write(response.getBytes());
+        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        httpExchange.sendResponseHeaders(200, bytes.length);
+        httpExchange.getResponseBody().write(bytes);
         httpExchange.close();
     }
 }
