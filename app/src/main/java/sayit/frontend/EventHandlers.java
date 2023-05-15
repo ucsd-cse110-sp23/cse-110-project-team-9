@@ -116,6 +116,7 @@ public final class EventHandlers {
             ui.getScrollBar().repaint();
             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
             ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
+            ui.setSelectedButton(null);
         };
     }
 
