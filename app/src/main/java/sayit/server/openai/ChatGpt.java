@@ -9,6 +9,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+/**
+ * A class designed to handle ChatGPT requests.
+ */
 public class ChatGpt implements IChatGpt {
     private static final URI API_URI;
 
@@ -21,13 +24,26 @@ public class ChatGpt implements IChatGpt {
     }
 
     private static final String MODEL = "text-davinci-003";
+    // https://platform.openai.com/docs/models/gpt-3-5
+    // See max tokens.
+    private static final int DEFAULT_MAX_TOKENS = 2048;
+
 
     private final int _maxTokens;
     private final String _apiKey;
     private double _temperature;
 
     /**
-     * Creates a new instance of the <c>ChatGpt</c> class with the specified API key.
+     * Creates a new instance of the <c>ChatGpt</c> class with the specified API key and default token.
+     *
+     * @param apiKey The API key to use for the ChatGPT API.
+     */
+    public ChatGpt(String apiKey) {
+        this(apiKey, DEFAULT_MAX_TOKENS);
+    }
+
+    /**
+     * Creates a new instance of the <c>ChatGpt</c> class with the specified API key and token.
      *
      * @param apiKey    The API key to use for the ChatGPT API.
      * @param maxTokens The maximum number of tokens to return.
