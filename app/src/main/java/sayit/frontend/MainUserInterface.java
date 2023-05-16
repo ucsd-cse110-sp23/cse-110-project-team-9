@@ -2,7 +2,7 @@ package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.helpers.ImageHelper;
-import sayit.server.Constants;
+import sayit.server.ServerConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +42,7 @@ public class MainUserInterface {
     }
 
     private MainUserInterface() {
-        this.requestSender = RequestSender.getInstance(Constants.SERVER_HOSTNAME, Constants.SERVER_PORT);
+        this.requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, ServerConstants.SERVER_PORT);
 
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -67,7 +67,9 @@ public class MainUserInterface {
                     // if there is an audio recording, delete it
                     if (MainUserInterface.this.recorder != null) {
                         File audioFile = MainUserInterface.this.recorder.getRecordingFile();
-                        audioFile.delete();
+                        if (!audioFile.delete()) {
+                            System.err.println("Failed to delete audio file: " + audioFile.getAbsolutePath());
+                        }
                     }
 
                     // terminate Java VM and exit

@@ -1,5 +1,8 @@
 package sayit.frontend;
 
+/**
+ * Various constants specifically for the frontend code.
+ */
 public final class FrontEndConstants {
     // Constants for filenames
     public static final String TRASHCAN_FILENAME = "./Pictures/TrashCan.jpg";
