@@ -35,18 +35,23 @@ public final class EventHandlers {
                 Thread t = new Thread(() -> {
                     ui.getRecorder().stopRecording();
                     ui.getRecordButton().setEnabled(false);
+
+                    // Just so the file can be saved to the disk
                     try {
                         Thread.sleep(1000);
                     } catch (Exception ex) {
                         // ...
                     }
-                    File recordingFile = ui.getRecorder().getRecordingFile();
 
+                    File recordingFile = ui.getRecorder().getRecordingFile();
                     Pair<Integer, QuestionAnswerEntry> serverResponse;
                     try {
                         serverResponse = ui.getRequestSender().askQuestion(recordingFile);
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        ui.getRecordButton().setIcon(ImageHelper.getImageIcon(RECORD_BUTTON_FILENAME, 50));
+                        ui.setRecorder(null);
+                        ui.getRecordButton().setEnabled(true);
                         return;
                     }
 
