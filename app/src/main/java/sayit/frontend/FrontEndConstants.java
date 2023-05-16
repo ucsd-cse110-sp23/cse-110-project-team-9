@@ -21,5 +21,9 @@ public final class FrontEndConstants {
     public static final String DELETION_SUCCESS_TEXT = "Deleted question";
     public static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
     public static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
+    public static final String SERVER_UNAVAILABLE_TEXT = "The server is currently offline "
+            + "and cannot handle any requests. This functionality is currently unavailable.";
+    public static final String APP_CANNOT_RUN_TEXT = "The server is currently offline and cannot handle"
+            + " any requests, and will terminate.";
     public static final String ERROR_TEXT = "Error";
 }

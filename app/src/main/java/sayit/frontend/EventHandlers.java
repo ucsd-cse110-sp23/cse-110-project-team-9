@@ -25,6 +25,11 @@ public final class EventHandlers {
      */
     public static ActionListener onRecordButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (ui.getRecorder() == null) {
                 ui.setRecorder(new AudioRecorder());
                 ui.getRecorder().startRecording();
@@ -108,6 +113,11 @@ public final class EventHandlers {
      */
     public static ActionListener onClearAllButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try {
                 ui.getRequestSender().clearHistory();
             } catch (Exception ex) {
@@ -133,6 +143,11 @@ public final class EventHandlers {
      */
     public static ActionListener onDeleteButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try {
                 if (ui.getSelectedButton() != null) {
                     // delete QuestionAnswer pair from database

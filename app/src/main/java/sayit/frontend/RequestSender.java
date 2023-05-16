@@ -25,6 +25,7 @@ public final class RequestSender {
     private final URL historyUrl;
     private final URL clearHistoryUrl;
     private final URL deleteEntryUrl;
+    private final URL pingUrl;
 
     private static RequestSender requestSender;
 
@@ -35,6 +36,7 @@ public final class RequestSender {
             this.historyUrl = new URL("http://" + host + ":" + port + "/history");
             this.clearHistoryUrl = new URL("http://" + host + ":" + port + "/clear-all");
             this.deleteEntryUrl = new URL("http://" + host + ":" + port + "/delete-question");
+            this.pingUrl = new URL("http://" + host + ":" + port + "/ping");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -56,14 +58,32 @@ public final class RequestSender {
     }
 
     /**
+     * Sends a request to the server to see if it's alive.
+     *
+     * @return <c>true</c> if the server is alive, <c>false</c> otherwise.
+     */
+    public boolean isAlive() {
+        try {
+            HttpResponse<String> response = sendRequest(pingUrl.toURI(), RequestType.GET);
+            return response.statusCode() == HttpURLConnection.HTTP_OK;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    /**
+     * <p>
      * Sends a request to the server to ask a question to ChatGPT.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
      *
      * @param audioFile The audio file to send.
      * @return A pair with the first item being the ID and the second item being the question and the answer.
      * @throws IOException If an error occurs while sending the request.
      */
     public Pair<Integer, QuestionAnswerEntry> askQuestion(File audioFile) throws IOException {
-        //make connection
         HttpURLConnection connection = (HttpURLConnection) askQuestionUrl.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
@@ -102,7 +122,12 @@ public final class RequestSender {
     }
 
     /**
+     * <p>
      * Sends a request to the server to get the history of questions and answers.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
      *
      * @return A map with the ID as the key and the question and answer as the value.
      * @throws IOException          If an error occurs while sending the request.
@@ -111,7 +136,6 @@ public final class RequestSender {
      */
     public Map<Integer, QuestionAnswerEntry> getHistory() throws IOException, URISyntaxException, InterruptedException {
         HttpResponse<String> response = sendRequest(historyUrl.toURI(), RequestType.GET);
-
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
@@ -132,7 +156,12 @@ public final class RequestSender {
     }
 
     /**
+     * <p>
      * Sends a request to the server to delete a question and answer entry.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
      *
      * @param id The ID of the entry to delete.
      * @return True if the entry was deleted, false otherwise.
@@ -152,7 +181,12 @@ public final class RequestSender {
     }
 
     /**
+     * <p>
      * Sends a request to the server to clear the history of questions and answers.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
      *
      * @return True if the history was cleared, false otherwise.
      * @throws IOException          If an error occurs while sending the request.

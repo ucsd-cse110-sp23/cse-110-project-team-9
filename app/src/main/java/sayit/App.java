@@ -1,8 +1,8 @@
 package sayit;
 
 import sayit.frontend.MainUserInterface;
-import sayit.server.ServerConstants;
 import sayit.server.Server;
+import sayit.server.ServerConstants;
 import sayit.server.openai.ChatGpt;
 import sayit.server.openai.Whisper;
 import sayit.server.storage.TsvStore;
