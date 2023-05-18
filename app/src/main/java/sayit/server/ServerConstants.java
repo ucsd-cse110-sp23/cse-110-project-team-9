@@ -4,9 +4,9 @@ import java.io.File;
 import java.nio.file.Files;
 
 /**
- * A class containing some relevant constants.
+ * A class containing constants for the server.
  */
-public final class Constants {
+public final class ServerConstants {
     /**
      * The default server port.
      */

@@ -2,7 +2,7 @@ package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.helpers.ImageHelper;
-import sayit.server.Constants;
+import sayit.server.ServerConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,18 +31,10 @@ public class MainUserInterface {
 
     private AudioRecorder recorder;
 
-    public AudioRecorder getRecorder() {
-        return recorder;
-    }
-
     private final RequestSender requestSender;
 
-    public RequestSender getRequestSender() {
-        return requestSender;
-    }
-
     private MainUserInterface() {
-        this.requestSender = RequestSender.getInstance(Constants.SERVER_HOSTNAME, Constants.SERVER_PORT);
+        this.requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, ServerConstants.SERVER_PORT);
 
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -67,7 +59,9 @@ public class MainUserInterface {
                     // if there is an audio recording, delete it
                     if (MainUserInterface.this.recorder != null) {
                         File audioFile = MainUserInterface.this.recorder.getRecordingFile();
-                        audioFile.delete();
+                        if (!audioFile.delete()) {
+                            System.err.println("Failed to delete audio file: " + audioFile.getAbsolutePath());
+                        }
                     }
 
                     // terminate Java VM and exit
@@ -119,6 +113,15 @@ public class MainUserInterface {
      * @param pane The pane to add the components to.
      */
     public void addComponentsToPane(Container pane) {
+        if (!this.requestSender.isAlive()) {
+            JOptionPane.showMessageDialog(this.frame,
+                    APP_CANNOT_RUN_TEXT,
+                    ERROR_TEXT,
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+            return;
+        }
+
         Map<Integer, QuestionAnswerEntry> entries;
         try {
             entries = this.requestSender.getHistory();
@@ -260,6 +263,24 @@ public class MainUserInterface {
      */
     public void setRecorder(AudioRecorder recorder) {
         this.recorder = recorder;
+    }
+
+    /**
+     * Gets the request sender.
+     *
+     * @return The request sender.
+     */
+    public RequestSender getRequestSender() {
+        return requestSender;
+    }
+
+    /**
+     * Gets the recorder object. This will be <c>null</c> if the user is not recording.
+     *
+     * @return The recorder object.
+     */
+    public AudioRecorder getRecorder() {
+        return recorder;
     }
 }
 

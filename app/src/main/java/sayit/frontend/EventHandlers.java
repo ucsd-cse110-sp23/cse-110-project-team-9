@@ -25,6 +25,11 @@ public final class EventHandlers {
      */
     public static ActionListener onRecordButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (ui.getRecorder() == null) {
                 ui.setRecorder(new AudioRecorder());
                 ui.getRecorder().startRecording();
@@ -35,18 +40,23 @@ public final class EventHandlers {
                 Thread t = new Thread(() -> {
                     ui.getRecorder().stopRecording();
                     ui.getRecordButton().setEnabled(false);
+
+                    // Just so the file can be saved to the disk
                     try {
                         Thread.sleep(1000);
                     } catch (Exception ex) {
                         // ...
                     }
-                    File recordingFile = ui.getRecorder().getRecordingFile();
 
+                    File recordingFile = ui.getRecorder().getRecordingFile();
                     Pair<Integer, QuestionAnswerEntry> serverResponse;
                     try {
                         serverResponse = ui.getRequestSender().askQuestion(recordingFile);
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        ui.getRecordButton().setIcon(ImageHelper.getImageIcon(RECORD_BUTTON_FILENAME, 50));
+                        ui.setRecorder(null);
+                        ui.getRecordButton().setEnabled(true);
                         return;
                     }
 
@@ -103,6 +113,11 @@ public final class EventHandlers {
      */
     public static ActionListener onClearAllButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try {
                 ui.getRequestSender().clearHistory();
             } catch (Exception ex) {
@@ -128,6 +143,11 @@ public final class EventHandlers {
      */
     public static ActionListener onDeleteButtonPress(MainUserInterface ui) {
         return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try {
                 if (ui.getSelectedButton() != null) {
                     // delete QuestionAnswer pair from database

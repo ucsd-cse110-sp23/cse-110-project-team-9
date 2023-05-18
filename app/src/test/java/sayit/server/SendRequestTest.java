@@ -22,13 +22,13 @@ public class SendRequestTest {
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
         assertNotNull(store);
         Server server = new Server(store,
-                Constants.SERVER_HOSTNAME,
+                ServerConstants.SERVER_HOSTNAME,
                 8222,
                 new MockWhisper(false, "Hello world."),
                 new MockChatGpt(false, "Hello there."));
         new Thread(server::start).start();
 
-        var requestSender = RequestSender.getInstance(Constants.SERVER_HOSTNAME, 8222);
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8222);
         // Wait for server to start
         Thread.sleep(2000);
 
@@ -49,13 +49,13 @@ public class SendRequestTest {
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
         assertNotNull(store);
         Server server = new Server(store,
-                Constants.SERVER_HOSTNAME,
+                ServerConstants.SERVER_HOSTNAME,
                 8176,
                 new MockWhisper(false, "ABC"),
                 new MockChatGpt(false, "DEF"));
         new Thread(server::start).start();
 
-        var requestSender = RequestSender.getInstance(Constants.SERVER_HOSTNAME, 8176);
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8176);
         // Wait for server to start
         Thread.sleep(2000);
 

@@ -2,10 +2,7 @@ package sayit.server;
 
 import com.sun.net.httpserver.HttpServer;
 import sayit.common.qa.QuestionAnswerEntry;
-import sayit.server.contexts.AskQuestionHandler;
-import sayit.server.contexts.ClearAllHandler;
-import sayit.server.contexts.DeleteHandler;
-import sayit.server.contexts.HistoryHandler;
+import sayit.server.contexts.*;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
 import sayit.server.storage.IStore;
@@ -50,6 +47,7 @@ public class Server {
         this._server.createContext("/history", new HistoryHandler(storage));
         this._server.createContext("/delete-question", new DeleteHandler(storage));
         this._server.createContext("/clear-all", new ClearAllHandler(storage));
+        this._server.createContext("/ping", new PingHandler());
         this._server.setExecutor(threadPoolExecutor);
     }
 
