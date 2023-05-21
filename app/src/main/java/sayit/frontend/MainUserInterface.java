@@ -16,7 +16,6 @@ import static sayit.frontend.FrontEndConstants.*;
  * The main user interface for the application.
  */
 public class MainUserInterface {
-    private JButton recordButton;
 
     private JPanel scrollBar;
 
