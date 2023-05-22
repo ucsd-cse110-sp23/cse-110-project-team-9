@@ -1,5 +1,6 @@
 package sayit;
 
+import sayit.frontend.LoginUserInterface;
 import sayit.frontend.MainUserInterface;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
@@ -17,6 +18,6 @@ public class App {
                     new ChatGpt(ServerConstants.OPENAI_API_KEY));
             s.start();
         }).start();
-        MainUserInterface.getInstance();
+        LoginUserInterface.getInstance();
     }
 }

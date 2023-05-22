@@ -16,6 +16,7 @@ import static sayit.frontend.FrontEndConstants.*;
  * The main user interface for the application.
  */
 public class MainUserInterface {
+	private JButton startButton;
 
     private JPanel scrollBar;
 
@@ -133,20 +134,9 @@ public class MainUserInterface {
         }
 
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        this.recordButton = new RoundButton(RECORD_BUTTON_FILENAME, 40);
-        this.recordButton.addActionListener(EventHandlers.onRecordButtonPress(this));
-
-        toolBar.add(recordButton);
-
-        // Create deleteQuestion button and add listener for functionality
-        JButton deleteButton = new RoundButton(TRASHCAN_FILENAME, 40);
-        toolBar.add(deleteButton);
-
-        // Deletion functionality on click
-        deleteButton.addActionListener(EventHandlers.onDeleteButtonPress(this));
-        JButton clearAllButton = new JButton(CLEAR_ALL_BUTTON_TITLE);
-        toolBar.add(clearAllButton);
-        clearAllButton.addActionListener(EventHandlers.onClearAllButtonPress(this));
+        startButton = new JButton("START");
+        toolBar.add(startButton);
+        //TODO: ADD START BUTTON ACTION LISTENER
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
@@ -190,15 +180,6 @@ public class MainUserInterface {
         content.add(answerScrollPane);
         content.setPreferredSize(new Dimension(500, 500));
         pane.add(content, BorderLayout.CENTER);
-    }
-
-    /**
-     * Gets the record button.
-     *
-     * @return The record button.
-     */
-    public JButton getRecordButton() {
-        return recordButton;
     }
 
     /**
