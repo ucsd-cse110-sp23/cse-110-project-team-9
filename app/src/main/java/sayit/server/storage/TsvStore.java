@@ -126,7 +126,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return <c>true</c> if the entry was deleted, <c>false</c> otherwise.
      */
     public boolean delete(int id) {
-        return this._writer.removeEntryBy(obj -> obj.getId() == id) > 0;
+        return this._writer.removeEntriesBy(obj -> obj.getId() == id) > 0;
     }
 
     /**

@@ -96,7 +96,7 @@ public class TsvWriter<T> {
      * @param pred The predicate to use to determine which entries to remove.
      * @return The number of entries removed.
      */
-    public int removeEntryBy(Predicate<T> pred) {
+    public int removeEntriesBy(Predicate<T> pred) {
         int count = 0;
         for (int i = this._entries.size() - 1; i >= 0; --i) {
             if (pred.test(this._entries.get(i))) {
