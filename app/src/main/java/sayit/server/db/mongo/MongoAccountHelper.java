@@ -2,19 +2,20 @@ package sayit.server.db.mongo;
 
 import com.mongodb.client.MongoCollection;
 import sayit.server.db.mongo.doctypes.SayItAccount;
+import sayit.server.db.common.IAccountHelper;
 
 import static com.mongodb.client.model.Filters.eq;
 
 /**
  * A class containing several helper methods to interact with the <c>accounts</c> collection.
  */
-public final class AccountHelper {
+public final class MongoAccountHelper implements IAccountHelper {
     public static final String ACCOUNTS_COLLECTION = "accounts";
-    private static AccountHelper _instance;
+    private static MongoAccountHelper _instance;
 
     private final MongoCollection<SayItAccount> _sayItAccounts;
 
-    private AccountHelper(MongoWrapper wrapper) {
+    private MongoAccountHelper(MongoWrapper wrapper) {
         this._sayItAccounts = wrapper.getSayItDatabase().getCollection(ACCOUNTS_COLLECTION, SayItAccount.class);
     }
 
@@ -24,9 +25,9 @@ public final class AccountHelper {
      * @param wrapper The <c>MongoWrapper</c> instance to use.
      * @return The <c>AccountHelper</c> instance.
      */
-    public static AccountHelper getOrCreateInstance(MongoWrapper wrapper) {
+    public static MongoAccountHelper getOrCreateInstance(MongoWrapper wrapper) {
         if (_instance == null) {
-            _instance = new AccountHelper(wrapper);
+            _instance = new MongoAccountHelper(wrapper);
         }
 
         return _instance;
