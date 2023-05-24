@@ -2,7 +2,10 @@ package sayit.server.db.common;
 
 import sayit.server.db.mongo.doctypes.SayItAccount;
 
-public interface IAccountHelper {
+/**
+ * An interface containing several helper methods to interact with the <c>accounts</c> collection.
+ */
+public interface IAccountHelper extends ISaveable {
     /**
      * Gets an account by username.
      *

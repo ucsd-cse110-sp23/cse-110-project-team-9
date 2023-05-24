@@ -1,8 +1,8 @@
 package sayit.server.db.mongo;
 
 import com.mongodb.client.MongoCollection;
-import sayit.server.db.mongo.doctypes.SayItAccount;
 import sayit.server.db.common.IAccountHelper;
+import sayit.server.db.mongo.doctypes.SayItAccount;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -39,6 +39,7 @@ public final class MongoAccountHelper implements IAccountHelper {
      * @param username The username to search for.
      * @return The account, or null if none exists.
      */
+    @Override
     public SayItAccount getAccount(String username) {
         return this._sayItAccounts.find(eq(SayItAccount.USERNAME_FIELD, username)).first();
     }
@@ -48,7 +49,14 @@ public final class MongoAccountHelper implements IAccountHelper {
      *
      * @param account The account to create.
      */
+    @Override
     public void createAccount(SayItAccount account) {
         this._sayItAccounts.insertOne(account);
+    }
+
+
+    @Override
+    public void save() {
+        // Do nothing, since Mongo automatically handles saving.
     }
 }

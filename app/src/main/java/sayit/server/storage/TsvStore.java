@@ -1,12 +1,13 @@
 package sayit.server.storage;
 
 import sayit.common.qa.Answer;
+import sayit.common.qa.IdQaEntry;
 import sayit.common.qa.Question;
 import sayit.common.qa.QuestionAnswerEntry;
+import sayit.server.db.store.ITsvStrategy;
+import sayit.server.db.store.TsvWriter;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,27 +31,12 @@ import java.util.Map;
  * </p>
  */
 public class TsvStore implements IStore<QuestionAnswerEntry> {
-    private static final int NUM_COLUMNS = 3;
-    private static final String TSV_HEADER = "id\tquestion\tanswer";
-    private static final String DELIMITER = "\t";
-    private static final String NEW_LINE = "\n";
-    private static final String SERIALIZED_NEW_LINE = "~g~r~e~g~m~i~r~a~n~d~a~";
-
-    /**
-     * The name of the TSV file.
-     */
-    private final String _filename;
-
     /**
      * The id of the next entry to be added to the TSV file.
      */
     private int _nextId;
 
-    /**
-     * The entries in the TSV file. The key is the id of the entry, and the value is the <c>QuestionAnswerEntry</c>.
-     * This is acting as a "cache" of some sorts, so we don't have to constantly read from the file.
-     */
-    private final HashMap<Integer, QuestionAnswerEntry> _entries;
+    private final TsvWriter<IdQaEntry> _writer;
 
     /**
      * Creates a new TsvStore object.
@@ -60,54 +46,33 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @throws IOException If there is an error reading or writing to the specified file.
      */
     private TsvStore(String filename) throws IOException {
-        this._filename = filename.endsWith(".tsv") ? filename : filename + ".tsv";
-        this._nextId = 0;
-        this._entries = new HashMap<>();
-
-        // Check if the file exists, and create it if it doesn't.
-        File file = new File(this._filename);
-        // If the file exists, read the contents and set the id to the last id in the file.
-        if (file.exists()) {
-            try (FileInputStream stream = new FileInputStream(file);
-                 InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-                 BufferedReader bufferedReader = new BufferedReader(reader)) {
-                List<String> lines = bufferedReader.lines().toList();
-                int maxId = 0;
-                if (lines.size() > 1) {
-                    // Skip the first line (i = 0) since that's the CSV header.
-                    for (int i = 1; i < lines.size(); ++i) {
-                        String[] columns = lines.get(i).split(DELIMITER);
-                        if (columns.length != NUM_COLUMNS) {
-                            continue;
-                        }
-
-                        int id;
-                        // If the id is not a number, skip this line.
-                        // This should not happen, but just in case something does happen,
-                        // we don't want to crash the program.
-                        try {
-                            id = Integer.parseInt(columns[0]);
-                        } catch (Exception e) {
-                            continue;
-                        }
-
-                        maxId = Math.max(id, maxId);
-                        String question = columns[1].replaceAll(SERIALIZED_NEW_LINE, NEW_LINE);
-                        String answer = columns[2].replaceAll(SERIALIZED_NEW_LINE, NEW_LINE);
-
-                        this._entries.put(id, new QuestionAnswerEntry(new Question(question), new Answer(answer)));
-                    }
-
-                    this._nextId = maxId + 1;
-                } else {
-                    this._nextId = 0;
-                }
+        this._writer = TsvWriter.createWriter(List.of("id", "question", "answer"), filename, new ITsvStrategy<>() {
+            @Override
+            public IdQaEntry parse(String[] columns) {
+                return new IdQaEntry(
+                        Integer.parseInt(columns[0]),
+                        new Question(columns[1]),
+                        new Answer(columns[2]));
             }
-        } else if (file.createNewFile()) {
-            // If the file doesn't exist, create it and write the header.
-            Files.write(file.toPath(), TSV_HEADER.getBytes());
+
+            @Override
+            public String[] write(IdQaEntry obj) {
+                return new String[]{
+                        Integer.toString(obj.getId()),
+                        obj.getQuestion().getQuestionText(),
+                        obj.getAnswer().getAnswerText()
+                };
+            }
+        });
+
+        assert this._writer != null;
+        if (this._writer.size() == 0) {
+            this._nextId = 0;
         } else {
-            throw new IOException("Unable to create file " + this._filename);
+            this._nextId = this._writer.getEntries().stream()
+                    .map(IdQaEntry::getId)
+                    .max(Integer::compareTo)
+                    .orElse(0) + 1;
         }
     }
 
@@ -128,12 +93,12 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
     /**
      * Inserts the <c>QuestionAnswerEntry</c> into the store.
      *
-     * @param entry The entry to insert.
+     * @param entry The entry to insert. The ID does not need to be set.
      * @return The id of the inserted entry.
      */
     public int insert(QuestionAnswerEntry entry) {
         int thisId = this._nextId;
-        this._entries.put(thisId, entry);
+        this._writer.addEntry(new IdQaEntry(thisId, entry.getQuestion(), entry.getAnswer()));
         this._nextId++;
         return thisId;
     }
@@ -145,7 +110,13 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return The <c>QuestionAnswerEntry</c> with the specified id, or <c>null</c> if it doesn't exist.
      */
     public QuestionAnswerEntry get(int id) {
-        return this._entries.get(id);
+        for (IdQaEntry entry : this._writer.getEntries()) {
+            if (entry.getId() == id) {
+                return entry;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -155,7 +126,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return <c>true</c> if the entry was deleted, <c>false</c> otherwise.
      */
     public boolean delete(int id) {
-        return this._entries.remove(id) != null;
+        return this._writer.removeEntryBy(obj -> obj.getId() == id) > 0;
     }
 
     /**
@@ -165,35 +136,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return <c>true</c> if the save was successful, <c>false</c> otherwise.
      */
     public boolean save() {
-        try {
-            File file = new File(this._filename);
-            try (FileWriter writer = new FileWriter(file, false)) {
-                writer.write(TSV_HEADER + System.lineSeparator());
-                for (var entry : this._entries.entrySet()) {
-                    String q = entry.getValue()
-                            .getQuestion()
-                            .getQuestionText()
-                            .trim()
-                            .replaceAll(NEW_LINE, SERIALIZED_NEW_LINE);
-                    String a = entry.getValue()
-                            .getAnswer()
-                            .getAnswerText()
-                            .trim()
-                            .replaceAll(NEW_LINE, SERIALIZED_NEW_LINE);
-
-                    writer.write(entry.getKey()
-                            + DELIMITER
-                            + q
-                            + DELIMITER
-                            + a
-                            + System.lineSeparator());
-                }
-            }
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return this._writer.save();
     }
 
     /**
@@ -202,7 +145,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return The number of entries in the store.
      */
     public int size() {
-        return this._entries.size();
+        return this._writer.size();
     }
 
     /**
@@ -211,7 +154,12 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return An immutable map of all entries in the store.
      */
     public Map<Integer, QuestionAnswerEntry> getEntries() {
-        return Map.copyOf(this._entries);
+        HashMap<Integer, IdQaEntry> entries = new HashMap<>();
+        for (IdQaEntry entry : this._writer.getEntries()) {
+            entries.put(entry.getId(), entry);
+        }
+
+        return Map.copyOf(entries);
     }
 
     /**
@@ -220,9 +168,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @return <c>true</c> if the file was deleted, <c>false</c> otherwise.
      */
     public boolean clearAll() {
-        this._entries.clear();
         this._nextId = 0;
-        File file = new File(this._filename);
-        return file.delete();
+        return this._writer.clearAll();
     }
 }
