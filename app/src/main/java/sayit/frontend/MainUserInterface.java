@@ -16,7 +16,7 @@ import static sayit.frontend.FrontEndConstants.*;
  * The main user interface for the application.
  */
 public class MainUserInterface {
-	private JButton startButton;
+    private JButton startButton;
 
     private JPanel scrollBar;
 
@@ -49,10 +49,8 @@ public class MainUserInterface {
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                int confirmClose = JOptionPane.showConfirmDialog(frame,
-                        CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
+                int confirmClose = JOptionPane.showConfirmDialog(frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 // if user confirms closing the window, save and exit
                 if (confirmClose == JOptionPane.YES_OPTION) {
@@ -76,10 +74,8 @@ public class MainUserInterface {
     /**
      * <p>
      * Gets or creates a new instance of the <c>MainUserInterface</c> class. This
-     * method is
-     * designed so that there can be at most one instance of the
-     * <c>MainUserInterface</c> class
-     * at any point.
+     * method is designed so that there can be at most one instance of the
+     * <c>MainUserInterface</c> class at any point.
      * </p>
      *
      * <p>
@@ -114,10 +110,7 @@ public class MainUserInterface {
      */
     public void addComponentsToPane(Container pane) {
         if (!this.requestSender.isAlive()) {
-            JOptionPane.showMessageDialog(this.frame,
-                    APP_CANNOT_RUN_TEXT,
-                    ERROR_TEXT,
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this.frame, APP_CANNOT_RUN_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             System.exit(0);
             return;
         }
@@ -126,17 +119,14 @@ public class MainUserInterface {
         try {
             entries = this.requestSender.getHistory();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this.frame,
-                    e.getMessage(),
-                    ERROR_TEXT,
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this.frame, e.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         startButton = new JButton("START");
         toolBar.add(startButton);
-        //TODO: ADD START BUTTON ACTION LISTENER
+        // TODO: ADD START BUTTON ACTION LISTENER
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
@@ -210,9 +200,11 @@ public class MainUserInterface {
     }
 
     /**
-     * Gets the button associated with the question that is currently being displayed.
+     * Gets the button associated with the question that is currently being
+     * displayed.
      *
-     * @return The button associated with the question that is currently being displayed.
+     * @return The button associated with the question that is currently being
+     *         displayed.
      */
     public QuestionButton getSelectedButton() {
         return selectedButton;
@@ -255,7 +247,8 @@ public class MainUserInterface {
     }
 
     /**
-     * Gets the recorder object. This will be <c>null</c> if the user is not recording.
+     * Gets the recorder object. This will be <c>null</c> if the user is not
+     * recording.
      *
      * @return The recorder object.
      */
