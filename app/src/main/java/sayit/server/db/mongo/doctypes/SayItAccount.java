@@ -1,4 +1,4 @@
-package sayit.server.db.doctypes;
+package sayit.server.db.mongo.doctypes;
 
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;

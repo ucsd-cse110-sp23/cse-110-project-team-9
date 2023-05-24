@@ -1,4 +1,4 @@
-package sayit.server.db;
+package sayit.server.db.mongo;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;

@@ -1,7 +1,7 @@
-package sayit.server.db;
+package sayit.server.db.mongo;
 
 import com.mongodb.client.MongoCollection;
-import sayit.server.db.doctypes.SayItAccount;
+import sayit.server.db.mongo.doctypes.SayItAccount;
 
 import static com.mongodb.client.model.Filters.eq;
 
