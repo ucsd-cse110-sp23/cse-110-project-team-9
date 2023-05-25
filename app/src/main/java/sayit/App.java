@@ -1,7 +1,6 @@
 package sayit;
 
 import sayit.frontend.LoginUserInterface;
-import sayit.frontend.MainUserInterface;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
 import sayit.server.db.mongo.MongoAccountHelper;
@@ -23,6 +22,6 @@ public class App {
                 .build();
 
         s.start();
-        MainUserInterface.getInstance();
+        LoginUserInterface.getInstance();
     }
 }

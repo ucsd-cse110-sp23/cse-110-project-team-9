@@ -22,4 +22,22 @@ public final class Helper {
         }
         return soundFilePath;
     }
+
+    /**
+     * Gets a single query parameter from a query string.
+     * @param query The query string (possibly null).
+     * @param parameterName The name of the parameter to get.
+     * @return The value of the parameter.
+     */
+    public static String getSingleQueryParameter(String query, String parameterName) {
+        if (query == null) {
+            return null;
+        }
+
+        String[] querySplit = query.split("=");
+        if (querySplit.length != 2 || !querySplit[0].equals(parameterName)) {
+            return null;
+        }
+        return querySplit[1];
+    }
 }

@@ -3,7 +3,6 @@ package sayit.frontend;
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TEXT;
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TITLE;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 
@@ -86,7 +85,7 @@ public class LoginUserInterface {
     /**
      * Adds the specified components to this user interface.
      *
-     * @param pane The pane to add the components to.
+     * @param contentPane The pane to add the components to.
      */
     private void addComponentsToPane(Container contentPane) {
 

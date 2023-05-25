@@ -57,6 +57,7 @@ public class Server {
 
         if (accountHelper != null) {
             this._server.createContext("/create-account", new CreateAccountHandler(accountHelper));
+            this._server.createContext("/check-account", new CheckAccountExistHandler(accountHelper));
         }
 
         this._server.createContext("/ping", new PingHandler());

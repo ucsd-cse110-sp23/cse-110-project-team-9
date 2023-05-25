@@ -6,6 +6,7 @@ import sayit.common.qa.Answer;
 import sayit.common.qa.Question;
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.helpers.Pair;
+import sayit.server.ServerConstants;
 
 import java.io.*;
 import java.net.*;
@@ -27,6 +28,7 @@ public final class RequestSender {
     private final URL deleteEntryUrl;
     private final URL pingUrl;
     private final URL createAccountUrl;
+    private final URL checkAccountUrl;
 
     private static RequestSender requestSender;
 
@@ -39,6 +41,7 @@ public final class RequestSender {
             this.deleteEntryUrl = new URL("http://" + host + ":" + port + "/delete-question");
             this.pingUrl = new URL("http://" + host + ":" + port + "/ping");
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
+            this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -55,6 +58,20 @@ public final class RequestSender {
     public static RequestSender getInstance(String host, int port) {
         if (requestSender == null) {
             requestSender = new RequestSender(host, port);
+        }
+        return requestSender;
+    }
+
+
+    /**
+     * Gets an instance of the <c>RequestSender</c> class with the default host
+     * and port. It is guaranteed that only one instance of this class will be created.
+     *
+     * @return An instance of the <c>RequestSender</c> class.
+     */
+    public static RequestSender getInstance() {
+        if (requestSender == null) {
+            requestSender = new RequestSender(ServerConstants.SERVER_HOSTNAME, ServerConstants.SERVER_PORT);
         }
         return requestSender;
     }
@@ -192,6 +209,26 @@ public final class RequestSender {
     public boolean delete(int id) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(deleteEntryUrl + "?id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
+
+        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
+        }
+
+        return response.body().equals("true");
+    }
+
+    /**
+     * Checks if the username is already taken.
+     *
+     * @param username The username to check.
+     * @return True if the username is taken, false otherwise.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI(checkAccountUrl + "?username=" + username);
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());

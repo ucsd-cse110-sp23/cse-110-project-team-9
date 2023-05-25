@@ -3,6 +3,7 @@ package sayit.server.contexts;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import sayit.common.qa.QuestionAnswerEntry;
+import sayit.server.Helper;
 import sayit.server.storage.IStore;
 
 import java.io.IOException;
@@ -41,15 +42,8 @@ public class DeleteHandler implements HttpHandler {
         System.out.println("Received DELETE request for /delete-question");
 
         String query = exchange.getRequestURI().getQuery();
-        if (query == null) {
-            System.out.println("\tNo query string found.");
-            exchange.sendResponseHeaders(400, 0);
-            exchange.close();
-            return;
-        }
-
-        String[] querySplit = query.split("=");
-        if (querySplit.length != 2 || !querySplit[0].equals("id")) {
+        String idString = Helper.getSingleQueryParameter(query, "id");
+        if (idString == null) {
             System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
@@ -58,7 +52,7 @@ public class DeleteHandler implements HttpHandler {
 
         int id;
         try {
-            id = Integer.parseInt(querySplit[1]);
+            id = Integer.parseInt(idString);
         } catch (NumberFormatException e) {
             System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);

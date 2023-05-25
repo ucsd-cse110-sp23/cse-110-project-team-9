@@ -2,7 +2,6 @@ package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.helpers.ImageHelper;
-import sayit.server.ServerConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,11 +30,7 @@ public class MainUserInterface {
 
     private AudioRecorder recorder;
 
-    private final RequestSender requestSender;
-
     private MainUserInterface() {
-        this.requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, ServerConstants.SERVER_PORT);
-
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addComponentsToPane(this.frame.getContentPane());
@@ -109,7 +104,7 @@ public class MainUserInterface {
      * @param pane The pane to add the components to.
      */
     public void addComponentsToPane(Container pane) {
-        if (!this.requestSender.isAlive()) {
+        if (!RequestSender.getInstance().isAlive()) {
             JOptionPane.showMessageDialog(this.frame, APP_CANNOT_RUN_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             System.exit(0);
             return;
@@ -117,7 +112,7 @@ public class MainUserInterface {
 
         Map<Integer, QuestionAnswerEntry> entries;
         try {
-            entries = this.requestSender.getHistory();
+            entries = RequestSender.getInstance().getHistory();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this.frame, e.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             return;
@@ -235,15 +230,6 @@ public class MainUserInterface {
      */
     public void setRecorder(AudioRecorder recorder) {
         this.recorder = recorder;
-    }
-
-    /**
-     * Gets the request sender.
-     *
-     * @return The request sender.
-     */
-    public RequestSender getRequestSender() {
-        return requestSender;
     }
 
     /**
