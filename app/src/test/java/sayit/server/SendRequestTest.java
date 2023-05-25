@@ -5,48 +5,16 @@ import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
-import sayit.server.db.store.TsvAccountHelper;
 import sayit.server.storage.IStore;
 import sayit.server.storage.TsvStore;
 
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static sayit.ServerConstants.DUMMY_FILE;
+import static sayit.ServerConstants.PORT;
 
 public class SendRequestTest {
-    private static final int PORT = 9172;
-    private static final String DUMMY_FILE = "build.gradle.kts";
-
-    @Test
-    public void testCreateAccount() throws Exception {
-        var file = new File("createAccount.tsv");
-        if (file.exists()) {
-            assertTrue(file.delete());
-        }
-
-        Server server = Server.builder()
-                .setHost(ServerConstants.SERVER_HOSTNAME)
-                .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "Hello world."))
-                .setChatGpt(new MockChatGpt(false, "Hello there."))
-                .setAccountHelper(new TsvAccountHelper("createAccount.tsv"))
-                .build();
-        server.start();
-
-        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
-        // Wait for server to start
-        Thread.sleep(2000);
-
-        assertTrue(requestSender.createAccount("testCreateAccount", "testCreateAccount"));
-        assertTrue(requestSender.createAccount("testCreateAccount2", "testCreateAccount2"));
-        assertFalse(requestSender.createAccount("testCreateAccount2", "testCreateAccount2"));
-        assertTrue(requestSender.createAccount("testCreateAccount3", "testCreateAccount3"));
-        assertFalse(requestSender.createAccount("testCreateAccount", "testCreateAccount"));
-        assertFalse(requestSender.createAccount("testCreateAccount3", "testCreateAccount3"));
-
-        server.stop();
-        assertTrue(file.delete());
-    }
 
     @Test
     public void testAskQuestion() throws Exception {
