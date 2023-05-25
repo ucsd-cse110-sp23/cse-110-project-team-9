@@ -77,7 +77,7 @@ public final class EventHandlers {
                 return;
             }
 
-            if (!passwordField.getText().equals(LoginUserInterface.getInstance().getPassword())) {
+            if (!passwordField.getText().equals(instance.getPassword())) {
                 JOptionPane.showMessageDialog(null, VERIFICATION_FAILED_PROMPT);
                 return;
             }
@@ -88,7 +88,7 @@ public final class EventHandlers {
                 boolean created = RequestSender
                         .getInstance()
                         .createAccount(username,
-                                LoginUserInterface.getInstance().getPassword());
+                                instance.getPassword());
 
                 if (!created) {
                     JOptionPane.showMessageDialog(null, UNKNOWN_ERROR_PROMPT);
@@ -100,7 +100,7 @@ public final class EventHandlers {
                 return;
             }
 
-            LoginUserInterface.getInstance().close(); // close the login UI
+            instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
         };
     }
