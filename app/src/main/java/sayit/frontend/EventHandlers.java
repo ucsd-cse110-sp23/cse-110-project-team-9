@@ -90,4 +90,70 @@ public final class EventHandlers {
             }
         };
     }
+
+    /**
+     * Handles the event when the user presses the Start button from the sidebar (the
+     * question/answer history button).
+     *
+     * @param ui     The <c>MainUserInterface</c> object.
+     * @param qa     The <c>QuestionAnswerEntry</c> object.
+     * @param button The <c>QuestionButton</c> object.
+     * @return An <c>ActionListener</c> object.
+     */
+    public static ActionListener onStartButtonPress(MainUserInterface ui) {
+        return e -> {
+            if (!ui.getRequestSender().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (ui.getRecorder() == null) {
+                ui.setRecorder(new AudioRecorder());
+                ui.getRecorder().startRecording();
+            } else {
+                // Start a new thread to transcribe the recording, since we don't want
+                // to block the UI thread.
+                Thread t = new Thread(() -> {
+                    ui.getRecorder().stopRecording();
+                    ui.getStartButton().setEnabled(false);
+
+                    // Just so the file can be saved to the disk
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception ex) {
+                        // ...
+                    }
+
+                    /*
+                     * TODO Jimmy
+                     * you are going to need to figure out how excatly the server is going to handle things
+                     * start button just sends file for now
+                     */
+
+                    File recordingFile = ui.getRecorder().getRecordingFile();
+                    Pair<Integer, QuestionAnswerEntry> serverResponse;//server should respond with JSON because this will eventually be all request
+                    try {
+                        serverResponse = ui.getRequestSender().askQuestion(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                    } catch (IOException e1) {
+                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        ui.setRecorder(null);
+                        ui.getStartButton().setEnabled(true);
+                        return;
+                    }
+
+                    /*
+                     * We need some way to handle the server response JSON here
+                     * Maybe another file of helper methods that we can just pass it too
+                     */
+
+                    ui.setRecorder(null);
+                    ui.getStartButton().setEnabled(true);
+                    if (!recordingFile.delete()) {
+                        System.err.println(DELETION_ERROR_TEXT);
+                    }
+                });
+
+                t.start();
+            }
+        };
 }

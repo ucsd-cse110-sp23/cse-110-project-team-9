@@ -211,6 +211,14 @@ public class MainUserInterface {
     }
 
     /**
+     * Gets the Start button
+     * @return The Start button
+     */
+    public JButton getStartButton(){
+        return startButton;
+    }
+
+    /**
      * Sets the button that was last selected in the sidebar.
      *
      * @param selectedButton The button that was last selected.

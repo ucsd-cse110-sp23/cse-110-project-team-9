@@ -73,7 +73,7 @@ public final class RequestSender {
 
     /**
      * <p>
-     * Sends a request to the server to ask a question to ChatGPT.
+     * Sends a request to the server to handle a voice prompt
      * </p>
      * <p>
      * It is assumed that the server is up.
