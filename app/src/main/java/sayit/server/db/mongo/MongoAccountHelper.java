@@ -20,10 +20,10 @@ public final class MongoAccountHelper implements IAccountHelper {
     }
 
     /**
-     * Gets, or creates, a new instance of the <c>AccountHelper</c> class.
+     * Gets, or creates, a new instance of the <c>MongoAccountHelper</c> class.
      *
      * @param wrapper The <c>MongoWrapper</c> instance to use.
-     * @return The <c>AccountHelper</c> instance.
+     * @return The <c>MongoAccountHelper</c> instance.
      */
     public static MongoAccountHelper getOrCreateInstance(MongoWrapper wrapper) {
         if (_instance == null) {

@@ -25,7 +25,7 @@ public class SayItAccount {
     private String password;
 
     /**
-     * Create a new <c>MongoSayItAccount</c> with no properties set. Required for
+     * Create a new <c>SayItAccount</c> with no properties set. Required for
      * serialization and deserialization.
      */
     @BsonCreator
@@ -33,7 +33,7 @@ public class SayItAccount {
     }
 
     /**
-     * Create a new <c>MongoSayItAccount</c> with the specified username, and password.
+     * Create a new <c>SayItAccount</c> with the specified username, and password.
      *
      * @param username The username
      * @param password The password

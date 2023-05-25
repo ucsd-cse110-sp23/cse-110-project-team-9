@@ -34,6 +34,11 @@ public class TsvAccountHelper implements IAccountHelper {
                 });
     }
 
+    /**
+     * Gets the account by username.
+     * @param username The username to search for.
+     * @return The account, or null if none exists.
+     */
     @Override
     public SayItAccount getAccount(String username) {
         return this._writer.getEntries().stream()
@@ -42,6 +47,10 @@ public class TsvAccountHelper implements IAccountHelper {
                 .orElse(null);
     }
 
+    /**
+     * Inserts a new <c>SayItAccount</c> into the database.
+     * @param account The account to create.
+     */
     @Override
     public void createAccount(SayItAccount account) {
         this._writer.addEntry(account);
