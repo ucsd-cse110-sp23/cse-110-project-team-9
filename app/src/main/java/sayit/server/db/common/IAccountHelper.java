@@ -1,6 +1,6 @@
 package sayit.server.db.common;
 
-import sayit.server.db.mongo.doctypes.SayItAccount;
+import sayit.server.db.doctypes.SayItAccount;
 
 /**
  * An interface containing several helper methods to interact with the <c>accounts</c> collection.

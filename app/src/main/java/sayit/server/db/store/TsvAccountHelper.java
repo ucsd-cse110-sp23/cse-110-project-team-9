@@ -1,7 +1,7 @@
 package sayit.server.db.store;
 
 import sayit.server.db.common.IAccountHelper;
-import sayit.server.db.mongo.doctypes.SayItAccount;
+import sayit.server.db.doctypes.SayItAccount;
 
 import java.util.List;
 
