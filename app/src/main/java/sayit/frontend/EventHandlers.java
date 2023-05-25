@@ -40,13 +40,14 @@ public final class EventHandlers {
     /**
      * Handles the event when the user presses the create button.
      *
+     * @param instance The <c>LoginUserInterface</c> object.
      * @return An <c>ActionListener</c> object.
      */
-    public static ActionListener onCreateButtonPress() {
+    public static ActionListener onCreateButtonPress(LoginUserInterface instance) {
         return e -> {
             // check valid input
-            if (LoginUserInterface.getInstance().getEmail().length() == 0
-                    || LoginUserInterface.getInstance().getPassword().length() == 0) {
+            if (instance.getEmail().length() == 0
+                    || instance.getPassword().length() == 0) {
                 JOptionPane.showMessageDialog(null, INVALID_INPUT_PROMPT);
                 return;
             }
@@ -107,9 +108,10 @@ public final class EventHandlers {
     /**
      * Handles the event when the user presses the login button.
      *
+     * @param instance The <c>LoginUserInterface</c> object.
      * @return An <c>ActionListener</c> object.
      */
-    public static ActionListener onLoginButtonPress() {
+    public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
             LoginUserInterface.getInstance().close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
