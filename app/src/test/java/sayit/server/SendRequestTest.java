@@ -1,6 +1,6 @@
 package sayit.server;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
@@ -21,11 +21,14 @@ public class SendRequestTest {
         }
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
         assertNotNull(store);
-        Server server = new Server(store,
-                ServerConstants.SERVER_HOSTNAME,
-                8222,
-                new MockWhisper(false, "Hello world."),
-                new MockChatGpt(false, "Hello there."));
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(8222)
+                .setWhisper(new MockWhisper(false, "Hello world."))
+                .setChatGpt(new MockChatGpt(false, "Hello there."))
+                .setStorage(store)
+                .build();
+
         new Thread(server::start).start();
 
         var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8222);
@@ -48,11 +51,14 @@ public class SendRequestTest {
         }
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
         assertNotNull(store);
-        Server server = new Server(store,
-                ServerConstants.SERVER_HOSTNAME,
-                8176,
-                new MockWhisper(false, "ABC"),
-                new MockChatGpt(false, "DEF"));
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(8176)
+                .setWhisper(new MockWhisper(false, "ABC"))
+                .setChatGpt(new MockChatGpt(false, "DEF"))
+                .setStorage(store)
+                .build();
+
         new Thread(server::start).start();
 
         var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8176);
