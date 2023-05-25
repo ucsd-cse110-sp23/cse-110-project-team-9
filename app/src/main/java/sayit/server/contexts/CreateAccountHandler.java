@@ -55,6 +55,17 @@ public class CreateAccountHandler implements HttpHandler {
             return;
         }
 
+        if (this._accountHelper.getAccount(username) != null) {
+            System.out.println("\tbut account already exists.");
+            exchange.sendResponseHeaders(409, 0);
+            exchange.close();
+            return;
+        }
+
+        System.out.println("\tand created account");
+        System.out.println("\t\twith username: " + username);
+        System.out.println("\t\twith password: " + "*".repeat(password.length()));
+
         this._accountHelper.createAccount(new SayItAccount(username, password));
         this._accountHelper.save();
         exchange.sendResponseHeaders(200, 0);

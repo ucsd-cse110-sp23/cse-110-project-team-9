@@ -82,7 +82,8 @@ public final class RequestSender {
      * @throws IOException        If an error occurs while sending the request.
      * @throws URISyntaxException If an error occurs while sending the request.
      */
-    public boolean createAccount(String username, String password) throws IOException, URISyntaxException, InterruptedException {
+    public boolean createAccount(String username, String password)
+            throws IOException, URISyntaxException, InterruptedException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("username", username);
         parameters.put("password", password);
@@ -242,7 +243,6 @@ public final class RequestSender {
             RequestType type,
             Map<String, Object> body
     ) throws IOException, InterruptedException {
-
         HttpClient client = HttpClient.newHttpClient();
         var request = HttpRequest
                 .newBuilder()

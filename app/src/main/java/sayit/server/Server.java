@@ -20,6 +20,7 @@ public class Server {
     private final HttpServer _server;
 
     private final int _port;
+    private Thread _serverThread;
 
     /**
      * Creates a new server.
@@ -72,11 +73,20 @@ public class Server {
     }
 
     /**
-     * Starts the server. It is recommended that this is called in a separate thread.
+     * Starts the server.
      */
     public void start() {
-        this._server.start();
+        this._serverThread = new Thread(this._server::start);
+        this._serverThread.start();
         System.out.println("Server started on port " + this._port);
+    }
+
+    /**
+     * Stops the server.
+     */
+    public void stop() {
+        this._server.stop(0);
+        System.out.println("Server stopped on port " + this._port);
     }
 
     /**
