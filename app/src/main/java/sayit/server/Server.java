@@ -54,6 +54,10 @@ public class Server {
             this._server.createContext("/clear-all", new ClearAllHandler(storage));
         }
 
+        if (accountHelper != null) {
+            this._server.createContext("/create-account", new CreateAccountHandler(accountHelper));
+        }
+
         this._server.createContext("/ping", new PingHandler());
         this._server.setExecutor(threadPoolExecutor);
     }

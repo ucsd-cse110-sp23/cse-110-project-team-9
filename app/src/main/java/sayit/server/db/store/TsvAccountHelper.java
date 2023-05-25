@@ -10,17 +10,17 @@ import java.util.List;
  * TSV file.
  */
 public class TsvAccountHelper implements IAccountHelper {
-    private static final String ACCOUNTS_FILE = "accounts.tsv";
-
     private final TsvWriter<SayItAccount> _writer;
 
     /**
      * Create a new <c>TsvAccountHelper</c> instance.
+     *
+     * @param fileName The name of the file to use.
      */
-    public TsvAccountHelper() {
+    public TsvAccountHelper(String fileName) {
         this._writer = TsvWriter.createWriter(
                 List.of(SayItAccount.USERNAME_FIELD, SayItAccount.PASSWORD_FIELD),
-                ACCOUNTS_FILE,
+                fileName,
                 new ITsvStrategy<>() {
                     @Override
                     public SayItAccount parse(String[] columns) {
@@ -36,6 +36,7 @@ public class TsvAccountHelper implements IAccountHelper {
 
     /**
      * Gets the account by username.
+     *
      * @param username The username to search for.
      * @return The account, or null if none exists.
      */
@@ -49,6 +50,7 @@ public class TsvAccountHelper implements IAccountHelper {
 
     /**
      * Inserts a new <c>SayItAccount</c> into the database.
+     *
      * @param account The account to create.
      */
     @Override

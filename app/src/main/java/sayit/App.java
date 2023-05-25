@@ -11,6 +11,7 @@ import sayit.server.storage.TsvStore;
 
 public class App {
     public static void main(String[] args) {
+
         new Thread(() -> {
             MongoWrapper mongo = MongoWrapper.getOrCreateInstance(ServerConstants.MONGO_URI);
             Server s = Server.builder()

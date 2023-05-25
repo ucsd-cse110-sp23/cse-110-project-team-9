@@ -30,6 +30,7 @@ import java.util.Map;
  *     </ui>
  * </p>
  */
+@Deprecated
 public class TsvStore implements IStore<QuestionAnswerEntry> {
     /**
      * The id of the next entry to be added to the TSV file.

@@ -11,6 +11,7 @@ bin/
 
 # Configuration files
 token.txt
+mongo.txt
 
 # Misc. files
 *.tsv

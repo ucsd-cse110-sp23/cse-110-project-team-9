@@ -9,18 +9,18 @@ import java.util.List;
  * A class containing several helper methods to interact with the <c>prompts</c> TSV file.
  */
 public class TsvPromptHelper implements IPromptHelper {
-    private static final String PROMPTS_FILE = "prompts.tsv";
-
     private final TsvWriter<SayItPrompt> _writer;
 
     /**
      * Create a new <c>TsvAccountHelper</c> instance.
+     *
+     * @param fileName The name of the file to use.
      */
-    public TsvPromptHelper() {
+    public TsvPromptHelper(String fileName) {
         this._writer = TsvWriter.createWriter(
                 List.of(SayItPrompt.USERNAME_FIELD, SayItPrompt.TIMESTAMP_FIELD,
                         SayItPrompt.TYPE_FIELD, SayItPrompt.TITLE_FIELD, SayItPrompt.RESULT_FIELD),
-                PROMPTS_FILE,
+                fileName,
                 new ITsvStrategy<>() {
                     @Override
                     public SayItPrompt parse(String[] columns) {
@@ -37,6 +37,7 @@ public class TsvPromptHelper implements IPromptHelper {
 
     /**
      * Gets all prompts by username.
+     *
      * @param username The username to search for.
      * @return The list of prompts, or null if none exist.
      */
@@ -49,6 +50,7 @@ public class TsvPromptHelper implements IPromptHelper {
 
     /**
      * Inserts a new <c>SayItPrompt</c> into the TSV file.
+     *
      * @param prompt The prompt to create.
      */
     @Override
