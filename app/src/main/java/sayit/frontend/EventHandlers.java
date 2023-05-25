@@ -113,7 +113,7 @@ public final class EventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
-            LoginUserInterface.getInstance().close(); // close the login UI
+            instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
         };
     }
