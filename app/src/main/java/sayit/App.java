@@ -1,5 +1,6 @@
 package sayit;
 
+import sayit.frontend.LoginUserInterface;
 import sayit.frontend.MainUserInterface;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
@@ -11,7 +12,6 @@ import sayit.server.storage.TsvStore;
 
 public class App {
     public static void main(String[] args) {
-
         MongoWrapper mongo = MongoWrapper.getOrCreateInstance(ServerConstants.MONGO_URI);
         Server s = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
