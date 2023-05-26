@@ -96,17 +96,17 @@ public final class EventHandlers {
      * question/answer history button).
      *
      * @param ui     The <c>MainUserInterface</c> object.
-     * @param qa     The <c>QuestionAnswerEntry</c> object.
-     * @param button The <c>QuestionButton</c> object.
      * @return An <c>ActionListener</c> object.
      */
     public static ActionListener onStartButtonPress(MainUserInterface ui) {
         return e -> {
+            //check everything is good
             if (!ui.getRequestSender().isAlive()) {
                 JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            //eiter record/stop recording
             if (ui.getRecorder() == null) {
                 ui.setRecorder(new AudioRecorder());
                 ui.getRecorder().startRecording();
@@ -156,4 +156,5 @@ public final class EventHandlers {
                 t.start();
             }
         };
+    }
 }
