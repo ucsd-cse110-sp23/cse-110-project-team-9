@@ -123,7 +123,6 @@ public class WalkthroughTest {
 
         // Let's save the new question and answer to the store.
         loadedStore.insert(new QuestionAnswerEntry(new Question(transcription), new Answer(response)));
-
         // And make sure it's actually there
         assertEquals(new QuestionAnswerEntry(new Question("What is the meaning of life?"), new Answer("42")), loadedStore.get(0));
 

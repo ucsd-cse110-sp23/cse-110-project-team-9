@@ -1,6 +1,6 @@
 package sayit.server;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
@@ -11,8 +11,11 @@ import sayit.server.storage.TsvStore;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static sayit.ServerConstants.DUMMY_FILE;
+import static sayit.ServerConstants.PORT;
 
 public class SendRequestTest {
+
     @Test
     public void testAskQuestion() throws Exception {
         var file = new File("testAskQuestion.tsv");
@@ -21,22 +24,26 @@ public class SendRequestTest {
         }
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
         assertNotNull(store);
-        Server server = new Server(store,
-                ServerConstants.SERVER_HOSTNAME,
-                8222,
-                new MockWhisper(false, "Hello world."),
-                new MockChatGpt(false, "Hello there."));
-        new Thread(server::start).start();
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(new MockWhisper(false, "Hello world."))
+                .setChatGpt(new MockChatGpt(false, "Hello there."))
+                .setStorage(store)
+                .build();
 
-        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8222);
+        server.start();
+
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
         // Wait for server to start
         Thread.sleep(2000);
 
-        var resp = requestSender.askQuestion(new File("build.gradle.kts"));
+        var resp = requestSender.askQuestion(new File(DUMMY_FILE));
         assertEquals("Hello world.", resp.getSecond().getQuestion().getQuestionText());
         assertEquals("Hello there.", resp.getSecond().getAnswer().getAnswerText());
         assertEquals(0, resp.getFirst());
 
+        server.stop();
         assertTrue(store.clearAll());
     }
 
@@ -48,19 +55,22 @@ public class SendRequestTest {
         }
         IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
         assertNotNull(store);
-        Server server = new Server(store,
-                ServerConstants.SERVER_HOSTNAME,
-                8176,
-                new MockWhisper(false, "ABC"),
-                new MockChatGpt(false, "DEF"));
-        new Thread(server::start).start();
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(new MockWhisper(false, "ABC"))
+                .setChatGpt(new MockChatGpt(false, "DEF"))
+                .setStorage(store)
+                .build();
 
-        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8176);
+        server.start();
+
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
         // Wait for server to start
         Thread.sleep(2000);
 
         for (int i = 0; i < 15; i++) {
-            requestSender.askQuestion(new File("build.gradle.kts"));
+            requestSender.askQuestion(new File(DUMMY_FILE));
             Thread.sleep(100);
         }
 
@@ -69,6 +79,69 @@ public class SendRequestTest {
             assertTrue(history.containsKey(i));
         }
 
+        server.stop();
+        assertTrue(store.clearAll());
+    }
+
+    @Test
+    public void testClearAll() throws Exception {
+        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
+        assertNotNull(store);
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(new MockWhisper(false, "ABC"))
+                .setChatGpt(new MockChatGpt(false, "DEF"))
+                .setStorage(store)
+                .build();
+        server.start();
+
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
+        // Wait for server to start
+        Thread.sleep(2000);
+
+        for (int i = 0; i < 100; i++) {
+            requestSender.askQuestion(new File(DUMMY_FILE));
+            Thread.sleep(100);
+        }
+
+        assertEquals(100, requestSender.getHistory().size());
+        assertEquals(100, store.size());
+        assertTrue(requestSender.clearHistory());
+        assertTrue(requestSender.getHistory().isEmpty());
+        assertTrue(store.getEntries().isEmpty());
+
+        server.stop();
+        assertTrue(store.clearAll());
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testDelete.tsv");
+        assertNotNull(store);
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(new MockWhisper(false, "CSE 110"))
+                .setChatGpt(new MockChatGpt(false, "is a class."))
+                .setStorage(store)
+                .build();
+        server.start();
+
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8273);
+        // Wait for server to start
+        Thread.sleep(2000);
+
+        requestSender.askQuestion(new File(DUMMY_FILE));
+        requestSender.askQuestion(new File(DUMMY_FILE));
+
+        assertEquals(2, requestSender.getHistory().size());
+        assertEquals(2, store.size());
+        assertTrue(requestSender.delete(0));
+        assertEquals(1, requestSender.getHistory().size());
+        assertEquals(1, store.size());
+
+        server.stop();
         assertTrue(store.clearAll());
     }
 }
