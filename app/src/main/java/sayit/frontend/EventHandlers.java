@@ -145,6 +145,11 @@ public final class EventHandlers {
                         return;
                     }
 
+                    //TESTING REMOVE LATER
+                    //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
+                    QuestionAnswerEntry qaEntry = serverResponse.getSecond();
+                    ui.displayEntry(qaEntry);
+
                     /*
                      * We need some way to handle the server response JSON here
                      * Maybe another file of helper methods that we can just pass it too
