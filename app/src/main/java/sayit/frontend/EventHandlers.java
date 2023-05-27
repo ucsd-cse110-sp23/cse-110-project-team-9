@@ -1,9 +1,13 @@
 package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
+import sayit.frontend.helpers.Pair;
+import sayit.server.ServerConstants;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * A class that contains static methods to handle events in the UI.
@@ -128,7 +132,7 @@ public final class EventHandlers {
     public static ActionListener onStartButtonPress(MainUserInterface ui) {
         return e -> {
             //check everything is good
-            if (!ui.getRequestSender().isAlive()) {
+            if (!RequestSender.getInstance().isAlive()) {
                 JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -163,7 +167,7 @@ public final class EventHandlers {
                     File recordingFile = ui.getRecorder().getRecordingFile();
                     Pair<Integer, QuestionAnswerEntry> serverResponse;//server should respond with JSON because this will eventually be all request
                     try {
-                        serverResponse = ui.getRequestSender().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         ui.setRecorder(null);
