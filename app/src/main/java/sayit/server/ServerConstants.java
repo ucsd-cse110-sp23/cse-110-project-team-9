@@ -37,4 +37,25 @@ public final class ServerConstants {
 
         OPENAI_API_KEY = apiKey;
     }
+
+    /**
+     * The MongoDB connection URI. It might be worth checking if this is an empty
+     * string before letting the rest of the application run; if this is an empty
+     * string, this implies that we have not set up the MongoDB connection yet so
+     * none of the MongoDB-related functions will work.
+     */
+    public static final String MONGO_URI;
+
+    static {
+        String mongoUri = "";
+        try {
+            var configFile = new File("mongo.txt");
+            mongoUri = Files.readString(configFile.toPath()).trim();
+        } catch (Exception e) {
+            System.err.println("Failed to read MongoDB URI from mongo_uri.txt. See stack trace below.");
+            e.printStackTrace();
+        }
+
+        MONGO_URI = mongoUri;
+    }
 }
