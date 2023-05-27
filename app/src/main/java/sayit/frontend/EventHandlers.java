@@ -110,12 +110,15 @@ public final class EventHandlers {
             if (ui.getRecorder() == null) {
                 ui.setRecorder(new AudioRecorder());
                 ui.getRecorder().startRecording();
+                ui.getStartButton().setText("RECORDING");
             } else {
                 // Start a new thread to transcribe the recording, since we don't want
                 // to block the UI thread.
                 Thread t = new Thread(() -> {
                     ui.getRecorder().stopRecording();
                     ui.getStartButton().setEnabled(false);
+                    ui.getStartButton().setText("PROCESSING");
+
 
                     // Just so the file can be saved to the disk
                     try {
@@ -133,11 +136,12 @@ public final class EventHandlers {
                     File recordingFile = ui.getRecorder().getRecordingFile();
                     Pair<Integer, QuestionAnswerEntry> serverResponse;//server should respond with JSON because this will eventually be all request
                     try {
-                        serverResponse = ui.getRequestSender().askQuestion(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                        serverResponse = ui.getRequestSender().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         ui.setRecorder(null);
                         ui.getStartButton().setEnabled(true);
+                        ui.getStartButton().setText("START");
                         return;
                     }
 
@@ -148,6 +152,7 @@ public final class EventHandlers {
 
                     ui.setRecorder(null);
                     ui.getStartButton().setEnabled(true);
+                    ui.getStartButton().setText("START");
                     if (!recordingFile.delete()) {
                         System.err.println(DELETION_ERROR_TEXT);
                     }
