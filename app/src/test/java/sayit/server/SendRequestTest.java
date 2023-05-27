@@ -32,7 +32,7 @@ public class SendRequestTest {
         // Wait for server to start
         Thread.sleep(2000);
 
-        var resp = requestSender.askQuestion(new File("build.gradle.kts"));
+        var resp = requestSender.sendRecording(new File("build.gradle.kts"));
         assertEquals("Hello world.", resp.getSecond().getQuestion().getQuestionText());
         assertEquals("Hello there.", resp.getSecond().getAnswer().getAnswerText());
         assertEquals(0, resp.getFirst());
@@ -60,7 +60,7 @@ public class SendRequestTest {
         Thread.sleep(2000);
 
         for (int i = 0; i < 15; i++) {
-            requestSender.askQuestion(new File("build.gradle.kts"));
+            requestSender.sendRecording(new File("build.gradle.kts"));
             Thread.sleep(100);
         }
 
