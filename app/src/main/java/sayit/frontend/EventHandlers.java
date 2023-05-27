@@ -2,7 +2,7 @@ package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
 import sayit.frontend.helpers.Pair;
-import sayit.server.ServerConstants;
+import sayit.frontend.FrontEndConstants;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -133,7 +133,7 @@ public final class EventHandlers {
         return e -> {
             //check everything is good
             if (!RequestSender.getInstance().isAlive()) {
-                JOptionPane.showMessageDialog(ui.getFrame(), SERVER_UNAVAILABLE_TEXT, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT, FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -169,7 +169,7 @@ public final class EventHandlers {
                     try {
                         serverResponse = RequestSender.getInstance().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
                     } catch (IOException e1) {
-                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         ui.setRecorder(null);
                         ui.getStartButton().setEnabled(true);
                         ui.getStartButton().setText("START");
@@ -190,7 +190,7 @@ public final class EventHandlers {
                     ui.getStartButton().setEnabled(true);
                     ui.getStartButton().setText("START");
                     if (!recordingFile.delete()) {
-                        System.err.println(DELETION_ERROR_TEXT);
+                        System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
                     }
                 });
 
