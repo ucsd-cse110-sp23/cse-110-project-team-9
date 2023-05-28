@@ -38,7 +38,9 @@ public class SendRequestTest {
         // Wait for server to start
         Thread.sleep(2000);
 
-        var resp = requestSender.askQuestion(new File(DUMMY_FILE));
+
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE));
+      
         assertEquals("Hello world.", resp.getSecond().getQuestion().getQuestionText());
         assertEquals("Hello there.", resp.getSecond().getAnswer().getAnswerText());
         assertEquals(0, resp.getFirst());
@@ -70,7 +72,9 @@ public class SendRequestTest {
         Thread.sleep(2000);
 
         for (int i = 0; i < 15; i++) {
-            requestSender.askQuestion(new File(DUMMY_FILE));
+
+            requestSender.sendRecording(new File(DUMMY_FILE));
+          
             Thread.sleep(100);
         }
 
@@ -101,7 +105,7 @@ public class SendRequestTest {
         Thread.sleep(2000);
 
         for (int i = 0; i < 100; i++) {
-            requestSender.askQuestion(new File(DUMMY_FILE));
+            requestSender.sendRecording(new File(DUMMY_FILE));
             Thread.sleep(100);
         }
 
@@ -132,8 +136,8 @@ public class SendRequestTest {
         // Wait for server to start
         Thread.sleep(2000);
 
-        requestSender.askQuestion(new File(DUMMY_FILE));
-        requestSender.askQuestion(new File(DUMMY_FILE));
+        requestSender.sendRecording(new File(DUMMY_FILE));
+        requestSender.sendRecording(new File(DUMMY_FILE));
 
         assertEquals(2, requestSender.getHistory().size());
         assertEquals(2, store.size());

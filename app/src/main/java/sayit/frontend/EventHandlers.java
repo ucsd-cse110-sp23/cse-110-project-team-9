@@ -1,9 +1,13 @@
 package sayit.frontend;
 
 import sayit.common.qa.QuestionAnswerEntry;
+import sayit.frontend.helpers.Pair;
+import sayit.frontend.FrontEndConstants;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * A class that contains static methods to handle events in the UI.
@@ -115,6 +119,83 @@ public final class EventHandlers {
         return e -> {
             instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
+        };
+    }
+
+    /**
+     * Handles the event when the user presses the Start button from the sidebar (the
+     * question/answer history button).
+     *
+     * @param ui     The <c>MainUserInterface</c> object.
+     * @return An <c>ActionListener</c> object.
+     */
+    public static ActionListener onStartButtonPress(MainUserInterface ui) {
+        return e -> {
+            //check everything is good
+            if (!RequestSender.getInstance().isAlive()) {
+                JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT, FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            //eiter record/stop recording
+            if (ui.getRecorder() == null) {
+                ui.setRecorder(new AudioRecorder());
+                ui.getRecorder().startRecording();
+                ui.getStartButton().setText("RECORDING");
+            } else {
+                // Start a new thread to transcribe the recording, since we don't want
+                // to block the UI thread.
+                Thread t = new Thread(() -> {
+                    ui.getRecorder().stopRecording();
+                    ui.getStartButton().setEnabled(false);
+                    ui.getStartButton().setText("PROCESSING");
+
+
+                    // Just so the file can be saved to the disk
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception ex) {
+                        // ...
+                    }
+
+                    /*
+                     * TODO: Jimmy
+                     * you are going to need to figure out how excatly the server is going to handle things
+                     * start button just sends file for now
+                     */
+
+                    File recordingFile = ui.getRecorder().getRecordingFile();
+                    Pair<Integer, QuestionAnswerEntry> serverResponse;//server should respond with JSON because this will eventually be all request
+                    try {
+                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                    } catch (IOException e1) {
+                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        ui.setRecorder(null);
+                        ui.getStartButton().setEnabled(true);
+                        ui.getStartButton().setText("START");
+                        return;
+                    }
+
+                    //TODO: TESTING REMOVE LATER
+                    //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
+                    QuestionAnswerEntry qaEntry = serverResponse.getSecond();
+                    ui.displayEntry(qaEntry);
+
+                    /*
+                     * We need some way to handle the server response JSON here
+                     * Maybe another file of helper methods that we can just pass it too
+                     */
+
+                    ui.setRecorder(null);
+                    ui.getStartButton().setEnabled(true);
+                    ui.getStartButton().setText("START");
+                    if (!recordingFile.delete()) {
+                        System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
+                    }
+                });
+
+                t.start();
+            }
         };
     }
 }

@@ -110,7 +110,7 @@ public final class RequestSender {
 
     /**
      * <p>
-     * Sends a request to the server to ask a question to ChatGPT.
+     * Sends a request to the server to handle a voice prompt
      * </p>
      * <p>
      * It is assumed that the server is up.
@@ -120,7 +120,7 @@ public final class RequestSender {
      * @return A pair with the first item being the ID and the second item being the question and the answer.
      * @throws IOException If an error occurs while sending the request.
      */
-    public Pair<Integer, QuestionAnswerEntry> askQuestion(File audioFile) throws IOException {
+    public Pair<Integer, QuestionAnswerEntry> sendRecording(File audioFile) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) askQuestionUrl.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
@@ -146,6 +146,9 @@ public final class RequestSender {
             }
 
             JSONObject json = new JSONObject(response);
+
+            //TODO: change how response is handled because it may not be an entry
+            //this will need to be changed from pair to a more general parsing of the returned server JSON
             return new Pair<>(
                     json.getInt("id"),
                     new QuestionAnswerEntry(

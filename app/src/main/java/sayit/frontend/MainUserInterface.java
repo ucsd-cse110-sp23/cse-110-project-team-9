@@ -121,7 +121,7 @@ public class MainUserInterface {
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         startButton = new JButton("START");
         toolBar.add(startButton);
-        // TODO: ADD START BUTTON ACTION LISTENER
+        startButton.addActionListener(EventHandlers.onStartButtonPress(this));
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
@@ -203,6 +203,14 @@ public class MainUserInterface {
      */
     public QuestionButton getSelectedButton() {
         return selectedButton;
+    }
+
+    /**
+     * Gets the Start button
+     * @return The Start button
+     */
+    public JButton getStartButton(){
+        return startButton;
     }
 
     /**
