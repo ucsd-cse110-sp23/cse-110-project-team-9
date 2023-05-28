@@ -147,6 +147,7 @@ public final class RequestSender {
 
             JSONObject json = new JSONObject(response);
 
+            //TODO: change how response is handled because it may not be an entry
             //this will need to be changed from pair to a more general parsing of the returned server JSON
             return new Pair<>(
                     json.getInt("id"),

@@ -159,7 +159,7 @@ public final class EventHandlers {
                     }
 
                     /*
-                     * TODO Jimmy
+                     * TODO: Jimmy
                      * you are going to need to figure out how excatly the server is going to handle things
                      * start button just sends file for now
                      */
@@ -176,7 +176,7 @@ public final class EventHandlers {
                         return;
                     }
 
-                    //TESTING REMOVE LATER
+                    //TODO: TESTING REMOVE LATER
                     //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
                     QuestionAnswerEntry qaEntry = serverResponse.getSecond();
                     ui.displayEntry(qaEntry);
