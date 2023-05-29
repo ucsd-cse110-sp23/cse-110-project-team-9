@@ -2,7 +2,8 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
+import sayit.server.db.common.IPromptHelper;
 import sayit.server.storage.IStore;
 
 import java.io.IOException;
@@ -12,16 +13,14 @@ import java.io.IOException;
  * The endpoint will be <c>/delete-question</c>.
  */
 public class ClearAllHandler implements HttpHandler {
-    private final IStore<QuestionAnswerEntry> data;
+    private final IPromptHelper pHelper;
 
     /**
      * Creates a new instance of the <c>AskQuestionHandler</c> class.
      *
-     * @param data The store to use.
+     * @param helper The Prompt Helper to use.
      */
-    public ClearAllHandler(IStore<QuestionAnswerEntry> data) {
-        this.data = data;
-    }
+    public ClearAllHandler(IPromptHelper helper) { this.pHelper = helper; }
 
     /**
      * Handles the request.

@@ -3,7 +3,7 @@ package sayit.common.qa;
 /**
  * Represents an answer to a question from ChatGPT.
  */
-public class Answer {
+public class ProgramOutput {
     private String _text;
 
     /**
@@ -11,7 +11,7 @@ public class Answer {
      *
      * @param s The answer to set.
      */
-    public Answer(String s) {
+    public ProgramOutput(String s) {
         this._text = s;
     }
 
@@ -21,7 +21,7 @@ public class Answer {
      *
      * @param s The answer to set.
      */
-    public void setAnswer(String s) {
+    public void setOutput(String s) {
         this._text = s;
     }
 
@@ -30,7 +30,7 @@ public class Answer {
      *
      * @return The answer.
      */
-    public String getAnswerText() {
+    public String getOutputText() {
         return this._text;
     }
 
@@ -42,7 +42,7 @@ public class Answer {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Answer o) {
+        if (obj instanceof ProgramOutput o) {
             return this._text.equals(o._text);
         }
 

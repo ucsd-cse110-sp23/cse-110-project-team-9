@@ -59,6 +59,30 @@ public class TsvPromptHelper implements IPromptHelper {
     }
 
     /**
+     * Deletes the <c>SayItPrompt</c> from the database.
+     *
+     * @param username The username of the prompt
+     * @param timestamp The timestamp of the prompt
+     * @param type The type of prompt
+     * @param title The title of the prompt
+     * @param result The result of the prompt
+     */
+    @Override
+    public void deletePrompt(String username, long timestamp, String type, String title, String result) {
+
+    }
+
+    /**
+     * Clears all <c>SayItPrompt</c> under the specific username.
+     *
+     * @param username The username
+     */
+    @Override
+    public void clearAllPrompts(String username) {
+
+    }
+
+    /**
      * Saves the TSV file.
      */
     @Override

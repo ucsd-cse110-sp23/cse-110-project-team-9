@@ -2,9 +2,9 @@ package sayit.frontend;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sayit.common.qa.Answer;
-import sayit.common.qa.Question;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.ProgramOutput;
+import sayit.common.qa.UserInput;
+import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.helpers.Pair;
 import sayit.server.ServerConstants;
 
@@ -120,7 +120,7 @@ public final class RequestSender {
      * @return A pair with the first item being the ID and the second item being the question and the answer.
      * @throws IOException If an error occurs while sending the request.
      */
-    public Pair<Integer, QuestionAnswerEntry> sendRecording(File audioFile) throws IOException {
+    public Pair<Integer, InputOutputEntry> sendRecording(File audioFile) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) askQuestionUrl.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
@@ -151,9 +151,9 @@ public final class RequestSender {
             //this will need to be changed from pair to a more general parsing of the returned server JSON
             return new Pair<>(
                     json.getInt("id"),
-                    new QuestionAnswerEntry(
-                            new Question(json.getString("question")),
-                            new Answer(json.getString("answer"))
+                    new InputOutputEntry(
+                            new UserInput(json.getString("question")),
+                            new ProgramOutput(json.getString("answer"))
                     )
             );
         } finally {
@@ -174,22 +174,22 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public Map<Integer, QuestionAnswerEntry> getHistory() throws IOException, URISyntaxException, InterruptedException {
+    public Map<Integer, InputOutputEntry> getHistory() throws IOException, URISyntaxException, InterruptedException {
         HttpResponse<String> response = sendRequest(historyUrl.toURI(), RequestType.GET, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
 
         JSONArray json = new JSONArray(response.body());
-        HashMap<Integer, QuestionAnswerEntry> entries = new HashMap<>();
+        HashMap<Integer, InputOutputEntry> entries = new HashMap<>();
         for (int i = 0; i < json.length(); i++) {
             JSONObject entry = json.getJSONObject(i);
-            QuestionAnswerEntry questionAnswerEntry = new QuestionAnswerEntry(
-                    new Question(entry.getString("question")),
-                    new Answer(entry.getString("answer"))
+            InputOutputEntry inputOutputEntry = new InputOutputEntry(
+                    new UserInput(entry.getString("question")),
+                    new ProgramOutput(entry.getString("answer"))
             );
             int id = entry.getInt("id");
-            entries.put(id, questionAnswerEntry);
+            entries.put(id, inputOutputEntry);
         }
 
         return entries;

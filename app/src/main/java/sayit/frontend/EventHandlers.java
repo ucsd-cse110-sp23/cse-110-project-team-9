@@ -1,8 +1,7 @@
 package sayit.frontend;
 
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.helpers.Pair;
-import sayit.frontend.FrontEndConstants;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -33,7 +32,7 @@ public final class EventHandlers {
      * @param button The <c>QuestionButton</c> object.
      * @return An <c>ActionListener</c> object.
      */
-    public static ActionListener onQaButtonPress(MainUserInterface ui, QuestionAnswerEntry qa, QuestionButton button) {
+    public static ActionListener onQaButtonPress(MainUserInterface ui, InputOutputEntry qa, QuestionButton button) {
         return e -> {
             ui.displayEntry(qa);
             // track which button was last selected for deletion
@@ -165,7 +164,7 @@ public final class EventHandlers {
                      */
 
                     File recordingFile = ui.getRecorder().getRecordingFile();
-                    Pair<Integer, QuestionAnswerEntry> serverResponse;//server should respond with JSON because this will eventually be all request
+                    Pair<Integer, InputOutputEntry> serverResponse;//server should respond with JSON because this will eventually be all request
                     try {
                         serverResponse = RequestSender.getInstance().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
                     } catch (IOException e1) {
@@ -176,9 +175,12 @@ public final class EventHandlers {
                         return;
                     }
 
+                    //TODO
+
+
                     //TODO: TESTING REMOVE LATER
                     //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
-                    QuestionAnswerEntry qaEntry = serverResponse.getSecond();
+                    InputOutputEntry qaEntry = serverResponse.getSecond();
                     ui.displayEntry(qaEntry);
 
                     /*

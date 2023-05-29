@@ -1,6 +1,6 @@
 package sayit.frontend;
 
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.helpers.ImageHelper;
 
 import javax.swing.*;
@@ -93,9 +93,9 @@ public class MainUserInterface {
      *
      * @param entry The entry to display.
      */
-    public void displayEntry(QuestionAnswerEntry entry) {
-        questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getQuestion().getQuestionText().trim());
-        answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getAnswer().getAnswerText().trim());
+    public void displayEntry(InputOutputEntry entry) {
+        questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getInput().getInputText().trim());
+        answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getOutput().getOutputText().trim());
     }
 
     /**
@@ -110,7 +110,7 @@ public class MainUserInterface {
             return;
         }
 
-        Map<Integer, QuestionAnswerEntry> entries;
+        Map<Integer, InputOutputEntry> entries;
         try {
             entries = RequestSender.getInstance().getHistory();
         } catch (Exception e) {
@@ -151,8 +151,8 @@ public class MainUserInterface {
 
         // load entries onto scrollBar
 
-        for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
-            String question = entry.getValue().getQuestion().getQuestionText();
+        for (Map.Entry<Integer, InputOutputEntry> entry : entries.entrySet()) {
+            String question = entry.getValue().getInput().getInputText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
             button.setPreferredSize(new Dimension(180, 100));
             button.addActionListener(EventHandlers.onQaButtonPress(this, entry.getValue(), button));

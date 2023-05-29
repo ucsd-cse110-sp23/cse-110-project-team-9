@@ -1,7 +1,7 @@
 package sayit.server;
 
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static sayit.ServerConstants.DUMMY_FILE;
 import static sayit.ServerConstants.PORT;
 
-public class SendRequestTest {
+public class SendUserInputTest {
 
     @Test
     public void testAskQuestion() throws Exception {
@@ -22,7 +22,7 @@ public class SendRequestTest {
         if (file.exists()) {
             assertTrue(file.delete());
         }
-        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
+        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
         assertNotNull(store);
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
@@ -41,8 +41,8 @@ public class SendRequestTest {
 
         var resp = requestSender.sendRecording(new File(DUMMY_FILE));
       
-        assertEquals("Hello world.", resp.getSecond().getQuestion().getQuestionText());
-        assertEquals("Hello there.", resp.getSecond().getAnswer().getAnswerText());
+        assertEquals("Hello world.", resp.getSecond().getInput().getInputText());
+        assertEquals("Hello there.", resp.getSecond().getOutput().getOutputText());
         assertEquals(0, resp.getFirst());
 
         server.stop();
@@ -55,7 +55,7 @@ public class SendRequestTest {
         if (file.exists()) {
             assertTrue(file.delete());
         }
-        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
+        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
         assertNotNull(store);
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
@@ -89,7 +89,7 @@ public class SendRequestTest {
 
     @Test
     public void testClearAll() throws Exception {
-        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
+        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
         assertNotNull(store);
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
@@ -121,7 +121,7 @@ public class SendRequestTest {
 
     @Test
     public void testDelete() throws Exception {
-        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore("testDelete.tsv");
+        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testDelete.tsv");
         assertNotNull(store);
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)

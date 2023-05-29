@@ -4,7 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
+import sayit.server.db.common.IPromptHelper;
 import sayit.server.storage.IStore;
 
 import java.io.IOException;
@@ -15,15 +16,15 @@ import java.nio.charset.StandardCharsets;
  * The endpoint will be <c>/history</c>.
  */
 public class HistoryHandler implements HttpHandler {
-    private final IStore<QuestionAnswerEntry> data;
+    private final IPromptHelper pHelper;
 
     /**
      * Creates a new instance of the <c>HistoryHandler</c> class.
      *
-     * @param data The store to use.
+     * @param helper The Prompt Helper to use.
      */
-    public HistoryHandler(IStore<QuestionAnswerEntry> data) {
-        this.data = data;
+    public HistoryHandler(IPromptHelper helper) {
+        this.pHelper = helper;
     }
 
     /**
@@ -46,8 +47,8 @@ public class HistoryHandler implements HttpHandler {
         JSONArray history = new JSONArray();
         for (var item : data.getEntries().entrySet()) {
             JSONObject entry = new JSONObject();
-            entry.put("question", item.getValue().getQuestion().getQuestionText());
-            entry.put("answer", item.getValue().getAnswer().getAnswerText());
+            entry.put("question", item.getValue().getInput().getInputText());
+            entry.put("answer", item.getValue().getOutput().getOutputText());
             entry.put("id", item.getKey());
             history.put(entry);
         }

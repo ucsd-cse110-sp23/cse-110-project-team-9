@@ -1,6 +1,6 @@
 package sayit.common.qa;
 
-public class IdQaEntry extends QuestionAnswerEntry {
+public class IdQaEntry extends InputOutputEntry {
     private final int _id;
 
     /**
@@ -9,7 +9,7 @@ public class IdQaEntry extends QuestionAnswerEntry {
      * @param q The question.
      * @param a The answer.
      */
-    public IdQaEntry(Question q, Answer a) {
+    public IdQaEntry(UserInput q, ProgramOutput a) {
         super(q, a);
         this._id = -1;
     }
@@ -21,7 +21,7 @@ public class IdQaEntry extends QuestionAnswerEntry {
      * @param q  The question.
      * @param a  The answer.
      */
-    public IdQaEntry(int id, Question q, Answer a) {
+    public IdQaEntry(int id, UserInput q, ProgramOutput a) {
         super(q, a);
         this._id = id;
     }

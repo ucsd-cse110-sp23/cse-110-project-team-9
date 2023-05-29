@@ -1,9 +1,9 @@
 package sayit.openai;
 
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.Answer;
-import sayit.common.qa.Question;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.ProgramOutput;
+import sayit.common.qa.UserInput;
+import sayit.common.qa.InputOutputEntry;
 import sayit.server.openai.WhisperCheck;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,9 +38,9 @@ public class QATest {
         assertEquals("42", response);
 
         // Step 4: Let's create the Entry object.
-        QuestionAnswerEntry entry = new QuestionAnswerEntry(new Question(question), new Answer(response));
-        assertEquals("What is the meaning of life?", entry.getQuestion().getQuestionText());
-        assertEquals("42", entry.getAnswer().getAnswerText());
+        InputOutputEntry entry = new InputOutputEntry(new UserInput(question), new ProgramOutput(response));
+        assertEquals("What is the meaning of life?", entry.getInput().getInputText());
+        assertEquals("42", entry.getOutput().getOutputText());
     }
 
     @Test

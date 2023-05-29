@@ -1,9 +1,9 @@
 package sayit.server.storage;
 
-import sayit.common.qa.Answer;
+import sayit.common.qa.UserInput;
+import sayit.common.qa.ProgramOutput;
 import sayit.common.qa.IdQaEntry;
-import sayit.common.qa.Question;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
 import sayit.server.db.store.ITsvStrategy;
 import sayit.server.db.store.TsvWriter;
 
@@ -31,7 +31,7 @@ import java.util.Map;
  * </p>
  */
 @Deprecated
-public class TsvStore implements IStore<QuestionAnswerEntry> {
+public class TsvStore implements IStore<InputOutputEntry> {
     /**
      * The id of the next entry to be added to the TSV file.
      */
@@ -52,16 +52,16 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
             public IdQaEntry parse(String[] columns) {
                 return new IdQaEntry(
                         Integer.parseInt(columns[0]),
-                        new Question(columns[1]),
-                        new Answer(columns[2]));
+                        new UserInput(columns[1]),
+                        new ProgramOutput(columns[2]));
             }
 
             @Override
             public String[] write(IdQaEntry obj) {
                 return new String[]{
                         Integer.toString(obj.getId()),
-                        obj.getQuestion().getQuestionText(),
-                        obj.getAnswer().getAnswerText()
+                        obj.getInput().getInputText(),
+                        obj.getOutput().getOutputText()
                 };
             }
         });
@@ -97,9 +97,9 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @param entry The entry to insert. The ID does not need to be set.
      * @return The id of the inserted entry.
      */
-    public int insert(QuestionAnswerEntry entry) {
+    public int insert(InputOutputEntry entry) {
         int thisId = this._nextId;
-        this._writer.addEntry(new IdQaEntry(thisId, entry.getQuestion(), entry.getAnswer()));
+        this._writer.addEntry(new IdQaEntry(thisId, entry.getInput(), entry.getOutput()));
         this._nextId++;
         return thisId;
     }
@@ -110,7 +110,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      * @param id The id of the entry to get.
      * @return The <c>QuestionAnswerEntry</c> with the specified id, or <c>null</c> if it doesn't exist.
      */
-    public QuestionAnswerEntry get(int id) {
+    public InputOutputEntry get(int id) {
         for (IdQaEntry entry : this._writer.getEntries()) {
             if (entry.getId() == id) {
                 return entry;
@@ -154,7 +154,7 @@ public class TsvStore implements IStore<QuestionAnswerEntry> {
      *
      * @return An immutable map of all entries in the store.
      */
-    public Map<Integer, QuestionAnswerEntry> getEntries() {
+    public Map<Integer, InputOutputEntry> getEntries() {
         HashMap<Integer, IdQaEntry> entries = new HashMap<>();
         for (IdQaEntry entry : this._writer.getEntries()) {
             entries.put(entry.getId(), entry);
