@@ -66,7 +66,7 @@ public class LoginHandler implements HttpHandler {
         
         if(!acc.getPassword().equals(password)){
             System.out.println("\tincorrect password");
-            exchange.sendResponseHeaders(410, 0);
+            exchange.sendResponseHeaders(409, 0);
             exchange.close();
             return;
         }
