@@ -34,13 +34,13 @@ public class LoginHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         
-        if (!exchange.getRequestMethod().equals("GET")) {
+        if (!exchange.getRequestMethod().equals("POST")) {
             exchange.sendResponseHeaders(405, 0);
             exchange.close();
             return;
         }
         
-        System.out.println("Received GET request for /login");
+        System.out.println("Received POST request for /login");
 
         JSONObject json = new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
@@ -63,7 +63,8 @@ public class LoginHandler implements HttpHandler {
             exchange.close();
             return;
         }
-        if(acc.getPassword() != password){
+        System.out.println(password.compareTo(acc.getPassword()));
+        if(!acc.getPassword().equals(password)){
             System.out.println("\tincorrect password");
             exchange.sendResponseHeaders(409, 0);
             exchange.close();

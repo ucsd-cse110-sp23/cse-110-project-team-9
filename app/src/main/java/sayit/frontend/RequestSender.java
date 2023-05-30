@@ -111,7 +111,7 @@ public final class RequestSender {
     }
 
     /**
-     * Sends a GET request to log into an account.
+     * Sends a POST request to log into an account.
      *
      * @param username The username to use.
      * @param password The password to use.
@@ -125,8 +125,8 @@ public final class RequestSender {
         parameters.put("username", username);
         parameters.put("password", password);
         
-        HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.GET, parameters);
-       
+        HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters);
+
         System.out.println(username + " " + password + " " + response);
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
