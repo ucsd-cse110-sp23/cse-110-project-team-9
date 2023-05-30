@@ -117,6 +117,22 @@ public final class EventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
+            String username = LoginUserInterface.getInstance().getEmail();
+            String password = LoginUserInterface.getInstance().getPassword();
+
+            try{
+                Boolean loggedIn = RequestSender.getInstance().login(username, password);
+                if (!loggedIn) {
+                    JOptionPane.showMessageDialog(null, UNKNOWN_ERROR_PROMPT);
+                    
+                    return;
+                }
+            }catch(Exception ex){
+                JOptionPane.showMessageDialog(null,
+                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
+                return;
+            }
+
             instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
         };
