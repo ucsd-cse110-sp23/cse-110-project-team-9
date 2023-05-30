@@ -57,7 +57,7 @@ public final class EventHandlers {
                 return;
             }
 
-            String username = LoginUserInterface.getInstance().getEmail();
+            String username = instance.getEmail();
             // Check if the account has been created
             try {
                 if (RequestSender.getInstance().doesAccountExist(username)) {
@@ -118,13 +118,14 @@ public final class EventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
-            String username = LoginUserInterface.getInstance().getEmail();
-            String password = LoginUserInterface.getInstance().getPassword();
+            String username = instance.getEmail();
+            String password = instance.getPassword();
             boolean verify = true; //verify email and password combination
             try{
                 verify = RequestSender.getInstance().login(username, password);
                 if (!verify) {
                     JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
+                    instance.clearText();
                     
                     return;
                 }
