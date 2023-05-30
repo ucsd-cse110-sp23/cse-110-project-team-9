@@ -3,11 +3,9 @@ package sayit.storage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.UserInput;
-import sayit.common.qa.ProgramOutput;
-import sayit.common.qa.InputOutputEntry;
-import sayit.server.storage.IStore;
-import sayit.server.storage.TsvStore;
+import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.doctypes.SayItPrompt;
+import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
 
@@ -15,54 +13,101 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TsvStoreTest {
     private static final String TEST_FILE = "test.tsv";
-    private IStore<InputOutputEntry> _store;
+    private static final String DUMMY_USERNAME1 = "dummy";
+    private static final String DUMMY_USERNAME2 = "Bob";
+    private static final String USER_NOT_USED = "Todd";
+    private static final String QUESTION = "QUESTION";
+    private IPromptHelper helper = new TsvPromptHelper(TEST_FILE);
+    private static final SayItPrompt PROMPT_1 = new SayItPrompt
+            (DUMMY_USERNAME1, 1, QUESTION, "What is 1 + 1?", "2");
+    private static final SayItPrompt PROMPT_2 = new SayItPrompt
+            (DUMMY_USERNAME1, 2, QUESTION, "What is 2 + 2?", "4");
+    private static final SayItPrompt PROMPT_3 = new SayItPrompt
+            (DUMMY_USERNAME2, 3, QUESTION, "What is life?", "ME");
 
     @BeforeEach
     public void setUp() {
-        _store = TsvStore.createOrOpenStore(TEST_FILE);
+        var file = new File(TEST_FILE);
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+        helper = new TsvPromptHelper(TEST_FILE);
     }
 
     @Test
     public void testAddGetDelete() {
-        _store.insert(new InputOutputEntry(new UserInput("What is 1 + 1?"), new ProgramOutput("2")));
-        _store.insert(new InputOutputEntry(new UserInput("What is 2 + 2?"), new ProgramOutput("4")));
-        _store.insert(new InputOutputEntry(new UserInput("What is 3 + 3?"), new ProgramOutput("6")));
+        assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
+        helper.createPrompt(PROMPT_1);
+        helper.save();
+        helper.createPrompt(PROMPT_2);
+        helper.save();
+        helper.createPrompt(PROMPT_3);
+        helper.save();
+        assertEquals(2, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(1, helper.getAllPromptsBy(DUMMY_USERNAME2).size());
+        assertEquals(0, helper.getAllPromptsBy(USER_NOT_USED).size());
 
-        assertEquals(3, _store.size());
+        assertEquals(PROMPT_1, helper.getAllPromptsBy(DUMMY_USERNAME1).get(0));
+        assertEquals(PROMPT_2, helper.getAllPromptsBy(DUMMY_USERNAME1).get(1));
+        assertEquals(PROMPT_3, helper.getAllPromptsBy(DUMMY_USERNAME2).get(0));
 
-        assertEquals(new InputOutputEntry(new UserInput("What is 1 + 1?"), new ProgramOutput("2")), _store.get(0));
-        assertEquals(new InputOutputEntry(new UserInput("What is 2 + 2?"), new ProgramOutput("4")), _store.get(1));
-        assertEquals(new InputOutputEntry(new UserInput("What is 3 + 3?"), new ProgramOutput("6")), _store.get(2));
+        assertEquals(false, helper.deletePrompt(DUMMY_USERNAME1, 10));
+        assertEquals(false, helper.deletePrompt(USER_NOT_USED, 10));
 
-        assertTrue(_store.delete(0));
-        assertEquals(2, _store.size());
-        assertNull(_store.get(0));
-        assertEquals(new InputOutputEntry(new UserInput("What is 2 + 2?"), new ProgramOutput("4")), _store.get(1));
-        assertEquals(new InputOutputEntry(new UserInput("What is 3 + 3?"), new ProgramOutput("6")), _store.get(2));
+        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME1, 1));
+        helper.save();
+        assertEquals(1, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
+
+        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME1, 2));
+        helper.save();
+        assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
+
+        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME2, 3));
+        helper.save();
+        assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME2).size());
+
+
+        helper.createPrompt(PROMPT_1);
+        helper.save();
+        helper.createPrompt(PROMPT_2);
+        helper.save();
+        helper.createPrompt(PROMPT_3);
+        helper.save();
+
+        assertEquals(2, helper.clearAllPrompts(DUMMY_USERNAME1));
+        helper.save();
+        assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
+
+        assertEquals(1, helper.clearAllPrompts(DUMMY_USERNAME2));
+        helper.save();
+        assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME2).size());
     }
+
 
     @Test
     public void testLoadData() {
-        _store.insert(new InputOutputEntry(new UserInput("Greg"), new ProgramOutput("Miranda")));
-        _store.insert(new InputOutputEntry(new UserInput("Joe"), new ProgramOutput("Politz")));
-        _store.insert(new InputOutputEntry(new UserInput("Paul"), new ProgramOutput("Cao")));
-        _store.insert(new InputOutputEntry(new UserInput("Niema"), new ProgramOutput("Moshiri")));
-        _store.insert(new InputOutputEntry(new UserInput("Daniel"), new ProgramOutput("Kane")));
-        _store.insert(new InputOutputEntry(new UserInput("Miles"), new ProgramOutput("Jones")));
 
-        assertTrue(_store.save());
+        helper.createPrompt(PROMPT_1);
+        helper.save();
+        helper.createPrompt(PROMPT_2);
+        helper.save();
+        helper.createPrompt(PROMPT_3);
+        helper.save();
 
-        IStore<InputOutputEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store2);
-        assertEquals(6, store2.size());
-        assertEquals(new InputOutputEntry(new UserInput("Greg"), new ProgramOutput("Miranda")), store2.get(0));
-        assertEquals(new InputOutputEntry(new UserInput("Joe"), new ProgramOutput("Politz")), store2.get(1));
-        assertEquals(new InputOutputEntry(new UserInput("Paul"), new ProgramOutput("Cao")), store2.get(2));
-        assertEquals(new InputOutputEntry(new UserInput("Niema"), new ProgramOutput("Moshiri")), store2.get(3));
-        assertEquals(new InputOutputEntry(new UserInput("Daniel"), new ProgramOutput("Kane")), store2.get(4));
-        assertEquals(new InputOutputEntry(new UserInput("Miles"), new ProgramOutput("Jones")), store2.get(5));
+        IPromptHelper helper2 = new TsvPromptHelper(TEST_FILE);
+        assertNotNull(helper2);
+        assertEquals(2, helper2.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(1, helper2.getAllPromptsBy(DUMMY_USERNAME2).size());
+        assertEquals(0, helper2.getAllPromptsBy(USER_NOT_USED).size());
+
+        assertEquals(PROMPT_1, helper2.getAllPromptsBy(DUMMY_USERNAME1).get(0));
+        assertEquals(PROMPT_2, helper2.getAllPromptsBy(DUMMY_USERNAME1).get(1));
+        assertEquals(PROMPT_3, helper2.getAllPromptsBy(DUMMY_USERNAME2).get(0));
+
     }
 
+
+    /**
     @Test
     public void testLoadDataEdit() {
         _store.insert(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")));
@@ -181,10 +226,13 @@ public class TsvStoreTest {
         assertEquals(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")), map.get(0));
         assertEquals(new InputOutputEntry(new UserInput("ECE"), new ProgramOutput("Electrical & Computer Engineering")), map.get(1));
     }
+     **/
+
 
     @AfterEach
     public void tearDown() {
-        _store.clearAll();
+        assertTrue(new File(TEST_FILE).delete());
         assertFalse(new File(TEST_FILE).exists());
     }
+
 }
