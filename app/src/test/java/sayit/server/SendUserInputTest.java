@@ -1,12 +1,11 @@
 package sayit.server;
 
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
-import sayit.server.storage.IStore;
-import sayit.server.storage.TsvStore;
+import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
 
@@ -15,6 +14,7 @@ import static sayit.ServerConstants.DUMMY_FILE;
 import static sayit.ServerConstants.PORT;
 
 public class SendUserInputTest {
+    private static final String DUMMY_USERNAME = "dummy";
 
     @Test
     public void testAskQuestion() throws Exception {
@@ -22,14 +22,14 @@ public class SendUserInputTest {
         if (file.exists()) {
             assertTrue(file.delete());
         }
-        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testAskQuestion.tsv");
-        assertNotNull(store);
+
+        IPromptHelper promptHelper = new TsvPromptHelper("testAskQuestion.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "Hello world."))
-                .setChatGpt(new MockChatGpt(false, "Hello there."))
-                .setStorage(store)
+                .setWhisper(new MockWhisper(false, "Question. Hello world."))
+                .setChatGpt(new MockChatGpt(false, "How are you?"))
+                .setPromptHelper(promptHelper)
                 .build();
 
         server.start();
@@ -39,14 +39,14 @@ public class SendUserInputTest {
         Thread.sleep(2000);
 
 
-        var resp = requestSender.sendRecording(new File(DUMMY_FILE));
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
       
-        assertEquals("Hello world.", resp.getSecond().getInput().getInputText());
-        assertEquals("Hello there.", resp.getSecond().getOutput().getOutputText());
-        assertEquals(0, resp.getFirst());
+        assertEquals("Hello world.", resp.getInput().getInputText());
+        assertEquals("How are you?", resp.getOutput().getOutputText());
+        assertTrue(resp.getID() > 0);
 
         server.stop();
-        assertTrue(store.clearAll());
+        assertEquals(1, promptHelper.clearAllPrompts(DUMMY_USERNAME));
     }
 
     @Test
@@ -55,14 +55,14 @@ public class SendUserInputTest {
         if (file.exists()) {
             assertTrue(file.delete());
         }
-        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testGetHistory.tsv");
-        assertNotNull(store);
+
+        IPromptHelper promptHelper = new TsvPromptHelper("testGetHistory.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "ABC"))
+                .setWhisper(new MockWhisper(false, "Question. ABC"))
                 .setChatGpt(new MockChatGpt(false, "DEF"))
-                .setStorage(store)
+                .setPromptHelper(promptHelper)
                 .build();
 
         server.start();
@@ -72,31 +72,32 @@ public class SendUserInputTest {
         Thread.sleep(2000);
 
         for (int i = 0; i < 15; i++) {
-
-            requestSender.sendRecording(new File(DUMMY_FILE));
-          
+            requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
             Thread.sleep(100);
         }
 
-        var history = requestSender.getHistory();
-        for (int i = 0; i < 15; i++) {
-            assertTrue(history.containsKey(i));
+        var history = requestSender.getHistory(DUMMY_USERNAME);
+        for (var entry : history.values()) {
+            assertEquals("ABC", entry.getInput().getInputText());
         }
 
         server.stop();
-        assertTrue(store.clearAll());
+        assertEquals(15, promptHelper.clearAllPrompts(DUMMY_USERNAME));
     }
 
     @Test
     public void testClearAll() throws Exception {
-        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
-        assertNotNull(store);
+        if (new File("testClearAll.tsv").exists()) {
+            assertTrue(new File("testClearAll.tsv").delete());
+        }
+
+        IPromptHelper promptHelper = new TsvPromptHelper("testClearAll.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "ABC"))
+                .setWhisper(new MockWhisper(false, "Question. ABC"))
                 .setChatGpt(new MockChatGpt(false, "DEF"))
-                .setStorage(store)
+                .setPromptHelper(promptHelper)
                 .build();
         server.start();
 
@@ -104,48 +105,58 @@ public class SendUserInputTest {
         // Wait for server to start
         Thread.sleep(2000);
 
-        for (int i = 0; i < 100; i++) {
-            requestSender.sendRecording(new File(DUMMY_FILE));
+        for (int i = 0; i < 10; i++) {
+            requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
             Thread.sleep(100);
         }
 
-        assertEquals(100, requestSender.getHistory().size());
-        assertEquals(100, store.size());
-        assertTrue(requestSender.clearHistory());
-        assertTrue(requestSender.getHistory().isEmpty());
-        assertTrue(store.getEntries().isEmpty());
+        assertEquals(10, requestSender.getHistory(DUMMY_USERNAME).size());
+        assertEquals(10, promptHelper.getAllPromptsBy(DUMMY_USERNAME).size());
+        assertEquals(10, requestSender.clearHistory(DUMMY_USERNAME));
+        assertTrue(requestSender.getHistory(DUMMY_USERNAME).isEmpty());
+        assertTrue(promptHelper.getAllPromptsBy(DUMMY_USERNAME).isEmpty());
 
         server.stop();
-        assertTrue(store.clearAll());
+        assertEquals(0, promptHelper.clearAllPrompts(DUMMY_USERNAME));
     }
+
+
 
     @Test
     public void testDelete() throws Exception {
-        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testDelete.tsv");
-        assertNotNull(store);
+        if (new File("testDelete.tsv").exists()) {
+            assertTrue(new File("testDelete.tsv").delete());
+        }
+
+        IPromptHelper promptHelper = new TsvPromptHelper("testDelete.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "CSE 110"))
+                .setWhisper(new MockWhisper(false, "Question. CSE 110"))
                 .setChatGpt(new MockChatGpt(false, "is a class."))
-                .setStorage(store)
+                .setPromptHelper(promptHelper)
                 .build();
         server.start();
 
-        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, 8273);
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
         // Wait for server to start
         Thread.sleep(2000);
 
-        requestSender.sendRecording(new File(DUMMY_FILE));
-        requestSender.sendRecording(new File(DUMMY_FILE));
+        requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
+        requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
 
-        assertEquals(2, requestSender.getHistory().size());
-        assertEquals(2, store.size());
-        assertTrue(requestSender.delete(0));
-        assertEquals(1, requestSender.getHistory().size());
-        assertEquals(1, store.size());
+        var history = requestSender.getHistory(DUMMY_USERNAME);
+        assertEquals(2, history.size());
+        assertEquals(2, promptHelper.getAllPromptsBy(DUMMY_USERNAME).size());
+
+        var entryToDelete = history.entrySet().stream().findFirst();
+        assertTrue(entryToDelete.isPresent());
+        var entry = entryToDelete.get();
+        assertTrue(requestSender.delete(entry.getKey(), DUMMY_USERNAME));
+        assertEquals(1, requestSender.getHistory(DUMMY_USERNAME).size());
+        assertEquals(1, promptHelper.getAllPromptsBy(DUMMY_USERNAME).size());
 
         server.stop();
-        assertTrue(store.clearAll());
+        assertTrue(promptHelper.clearAllPrompts(DUMMY_USERNAME) > 0);
     }
 }

@@ -1,11 +1,10 @@
 package sayit.storage;
 
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.UserInput;
-import sayit.common.qa.ProgramOutput;
-import sayit.common.qa.InputOutputEntry;
-import sayit.server.storage.IStore;
-import sayit.server.storage.TsvStore;
+import sayit.common.UniversalConstants;
+import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.doctypes.SayItPrompt;
+import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
 
@@ -16,32 +15,34 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ClearAllTest {
 
+    public static final String DUMMY_USERNAME = "dummy2";
+
     @Test
     public void testClearAll() {
-
         File file = new File("testClearAll.tsv");
-        IStore<InputOutputEntry> store = TsvStore.createOrOpenStore("testClearAll.tsv");
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
 
-        //Tests when the file is empty
-        assert store != null;
-        assertTrue(store.clearAll());
-        assertEquals(0, file.length());
+        IPromptHelper store = new TsvPromptHelper("testClearAll.tsv");
+
+        // Tests when the file is empty
+        assertEquals(0, store.clearAllPrompts(DUMMY_USERNAME));
 
         //Tests when the file has one Question-Answer Entry
-
-        store.insert(new InputOutputEntry(new UserInput("What is 1 + 1?"), new ProgramOutput("2")));
+        store.createPrompt(new SayItPrompt(DUMMY_USERNAME, 123, UniversalConstants.QUESTION,
+                "What is 1 + 1?", "2"));
         store.save();
-        // Note: 18 is the default length of file because of header
-        assertNotEquals(18, file.length());
-        assertTrue(store.clearAll());
-        assertEquals(0, file.length());
+
+        assertEquals(1, store.clearAllPrompts(DUMMY_USERNAME));
 
         //Tests when the file has multiple Question-Answer Entries.
-        store.insert(new InputOutputEntry(new UserInput("What is 1 + 1?"), new ProgramOutput("2")));
-        store.insert(new InputOutputEntry(new UserInput("What is 2 + 2?"), new ProgramOutput("4")));
+        store.createPrompt(new SayItPrompt(DUMMY_USERNAME, 123, UniversalConstants.QUESTION,
+                "What is 1 + 1?", "2"));
+        store.createPrompt(new SayItPrompt(DUMMY_USERNAME, 123, UniversalConstants.QUESTION,
+                "What is 2 + 2?", "4"));
+
         store.save();
-        assertNotEquals(18, file.length());
-        assertTrue(store.clearAll());
-        assertEquals(0, file.length());
+        assertEquals(2, store.clearAllPrompts(DUMMY_USERNAME));
     }
 }

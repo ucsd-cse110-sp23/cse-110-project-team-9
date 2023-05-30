@@ -271,19 +271,19 @@ public final class RequestSender {
      * It is assumed that the server is up.
      * </p>
      *
-     * @return True if the history was cleared, false otherwise.
+     * @return The number of entries deleted.
      * @throws IOException          If an error occurs while sending the request.
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
+    public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI( clearHistoryUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
 
-        return response.body().equals("true");
+        return Long.parseLong(response.body());
     }
 
     enum RequestType {
