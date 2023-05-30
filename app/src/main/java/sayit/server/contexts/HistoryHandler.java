@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
-
 /**
  * Handles a GET request for getting the history of questions and answers.
  * The endpoint will be <c>/history</c>.
@@ -61,23 +59,14 @@ public class HistoryHandler implements HttpHandler {
         for (var item : promptList) {
             JSONObject entry = new JSONObject();
             String type = item.getType();
-            if (type.equals(UniversalConstants.QUESTION)) {
-                entry.put(SayItPrompt.INPUT_FIELD, item.getInput());
-                entry.put(SayItPrompt.OUTPUT_FIELD, item.getOutput());
-                entry.put(UniversalConstants.ID, item.getTimestamp());
-                entry.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
+            if (!type.equals(UniversalConstants.QUESTION)) {
+                continue;
             }
-            else if (type.equals(UniversalConstants.DELETE_PROMPT)) {
-                entry.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
-            }
-            else if (type.equals(UniversalConstants.CLEAR_ALL)) {
-                entry.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
-            }
-            else {
-                entry.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
-                entry.put(SayItPrompt.INPUT_FIELD, item.getInput());
-                entry.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
-            }
+
+            entry.put(SayItPrompt.INPUT_FIELD, item.getInput());
+            entry.put(SayItPrompt.OUTPUT_FIELD, item.getOutput());
+            entry.put(UniversalConstants.ID, item.getTimestamp());
+            entry.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
             history.put(entry);
         }
 

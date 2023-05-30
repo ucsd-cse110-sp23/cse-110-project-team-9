@@ -41,17 +41,17 @@ public class DeleteHandler implements HttpHandler {
         System.out.println("Received DELETE request for /delete-question");
 
         String query = exchange.getRequestURI().getQuery();
-        String idString = Helper.getQueryParameter(query, "id");
         String username = Helper.getQueryParameter(query, "username");
-
-        if (idString == null) {
-            System.out.println("\tInvalid query string: " + query);
+        if (username == null) {
+            System.out.println("\tbut is invalid because no username specified.");
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
         }
-        if (username == null) {
-            System.out.println("\tbut is invalid because no username specified.");
+
+        String idString = Helper.getQueryParameter(query, "id");
+        if (idString == null) {
+            System.out.println("\tbut is invalid because no ID specified.");
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
@@ -68,15 +68,8 @@ public class DeleteHandler implements HttpHandler {
         }
 
         System.out.println("\twith ID: " + id);
-        Boolean deleteSuccess = pHelper.deletePrompt(username, id);
-        if (!deleteSuccess) {
-            exchange.sendResponseHeaders(404, 0);
-            exchange.close();
-            return;
-        }
+        boolean deleteSuccess = pHelper.deletePrompt(username, id);
         pHelper.save();
-
-        //TODO: Look at below, not sure if result is what it should be
 
         String result = String.valueOf(deleteSuccess);
         exchange.sendResponseHeaders(200, result.length());

@@ -33,13 +33,13 @@ public class MainUserInterface {
     private AudioRecorder recorder;
 
     private MainUserInterface() {
+        this.currentUsername = "gmiranda";
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addComponentsToPane(this.frame.getContentPane());
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
-        this.currentUsername = "dummyUsername";
 
         // Add behavior for closing app, update db.
         // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
@@ -113,9 +113,9 @@ public class MainUserInterface {
             return;
         }
 
-        Map<Integer, InputOutputEntry> entries;
+        Map<Long, InputOutputEntry> inputHistory;
         try {
-            entries = RequestSender.getInstance().getHistory(currentUsername);
+            inputHistory = RequestSender.getInstance().getHistory(this.currentUsername);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this.frame, e.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             return;
@@ -154,7 +154,7 @@ public class MainUserInterface {
 
         // load entries onto scrollBar
 
-        for (Map.Entry<Integer, InputOutputEntry> entry : entries.entrySet()) {
+        for (Map.Entry<Long, InputOutputEntry> entry : inputHistory.entrySet()) {
             String question = entry.getValue().getInput().getInputText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
             button.setPreferredSize(new Dimension(180, 100));
@@ -268,7 +268,7 @@ public class MainUserInterface {
  * Button class for questions on sidebar
  */
 class QuestionButton extends JButton {
-    private final int id;
+    private final long id;
 
     /**
      * Creates a <c>QuestionButton</c> object with the displayName.
@@ -277,7 +277,7 @@ class QuestionButton extends JButton {
      * @param id          The ID of the corresponding QuestionAnswerEntry in the
      *                    database
      */
-    public QuestionButton(String displayName, int id) {
+    public QuestionButton(String displayName, long id) {
         super(displayName);
         this.setPreferredSize(new Dimension(180, 100));
         this.id = id;
@@ -288,7 +288,7 @@ class QuestionButton extends JButton {
      *
      * @return The ID.
      */
-    public int getId() {
+    public long getId() {
         return this.id;
     }
 }

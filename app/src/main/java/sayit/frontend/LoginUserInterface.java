@@ -88,7 +88,6 @@ public class LoginUserInterface {
      * @param contentPane The pane to add the components to.
      */
     private void addComponentsToPane(Container contentPane) {
-
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         JPanel topPanel = new JPanel();
         topPanel.add(new JLabel(EMAIL_HEADER));

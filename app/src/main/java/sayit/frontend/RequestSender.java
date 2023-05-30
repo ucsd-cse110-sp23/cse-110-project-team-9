@@ -195,7 +195,8 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public Map<Integer, InputOutputEntry> getHistory(String username) throws IOException, URISyntaxException, InterruptedException {
+    public Map<Long, InputOutputEntry> getHistory(String username)
+            throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI( historyUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -203,14 +204,14 @@ public final class RequestSender {
         }
 
         JSONArray json = new JSONArray(response.body());
-        HashMap<Integer, InputOutputEntry> entries = new HashMap<>();
+        HashMap<Long, InputOutputEntry> entries = new HashMap<>();
         for (int i = 0; i < json.length(); i++) {
             JSONObject entry = json.getJSONObject(i);
             InputOutputEntry inputOutputEntry = new InputOutputEntry(
-                    new UserInput(entry.getString("question")),
-                    new ProgramOutput(entry.getString("answer"))
+                    new UserInput(entry.getString("input")),
+                    new ProgramOutput(entry.getString("output"))
             );
-            int id = entry.getInt("id");
+            long id = entry.getLong("id");
             entries.put(id, inputOutputEntry);
         }
 
@@ -231,7 +232,7 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean delete(int id, String username) throws IOException, URISyntaxException, InterruptedException {
+    public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(deleteEntryUrl + "?username=" + username + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
@@ -252,7 +253,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(checkAccountUrl + "?username=" + username);
+        URI uri = new URI(checkAccountUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {

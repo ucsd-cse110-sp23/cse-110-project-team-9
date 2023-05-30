@@ -1,12 +1,16 @@
 package sayit.frontend;
 
+import sayit.common.UniversalConstants;
 import sayit.common.qa.InputOutputEntry;
-import sayit.frontend.helpers.Pair;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+
+import static sayit.frontend.FrontEndConstants.ANSWER_HEADER_TEXT;
+import static sayit.frontend.FrontEndConstants.QUESTION_HEADER_TEXT;
 
 /**
  * A class that contains static methods to handle events in the UI.
@@ -125,7 +129,7 @@ public final class EventHandlers {
      * Handles the event when the user presses the Start button from the sidebar (the
      * question/answer history button).
      *
-     * @param ui     The <c>MainUserInterface</c> object.
+     * @param ui The <c>MainUserInterface</c> object.
      * @return An <c>ActionListener</c> object.
      */
     public static ActionListener onStartButtonPress(MainUserInterface ui) {
@@ -158,37 +162,105 @@ public final class EventHandlers {
                     }
 
                     File recordingFile = ui.getRecorder().getRecordingFile();
-                    InputOutputEntry serverResponse; //server should respond with JSON because this will eventually be all request
+                    //server should respond with JSON because this will eventually be all request
+                    InputOutputEntry serverResponse;
                     try {
-                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUsername()); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUsername());
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
-                        ui.setRecorder(null);
-                        ui.getStartButton().setEnabled(true);
-                        ui.getStartButton().setText("START");
+                        resetRecordButton(ui, recordingFile);
                         return;
                     }
 
+                    switch (serverResponse.getType()) {
+                        case UniversalConstants.QUESTION -> {
+                            ui.displayEntry(serverResponse);
 
-                    //TODO: TESTING REMOVE LATER
-                    //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
-                    ui.displayEntry(serverResponse);
+                            // add data to scrollBar
+                            QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
+                                    serverResponse.getID());
+                            button.setPreferredSize(new Dimension(180, 100));
+                            button.addActionListener(onQaButtonPress(ui, serverResponse, button));
+                            ui.getScrollBar().add(button);
 
-                    /*
-                     * We need some way to handle the server response JSON here
-                     * Maybe another file of helper methods that we can just pass it too
-                     */
+                            // update scrollBar
+                            ui.getScrollBar().revalidate();
+                            ui.getScrollBar().repaint();
+                            ui.setSelectedButton(button);
+                        }
+                        case UniversalConstants.DELETE_PROMPT -> {
+                            if (ui.getSelectedButton() == null) {
+                                if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)
+                                        && ui.getAnswerTextArea().getText().equals(ANSWER_HEADER_TEXT)) {
+                                    JOptionPane.showMessageDialog(ui.getFrame(), "No question selected.",
+                                            FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                                }
 
-                    ui.setRecorder(null);
-                    ui.getStartButton().setEnabled(true);
-                    ui.getStartButton().setText("START");
-                    if (!recordingFile.delete()) {
-                        System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
+                                ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
+                                ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
+                                resetRecordButton(ui, recordingFile);
+                                return;
+                            }
+
+                            try {
+                                RequestSender.getInstance().delete(ui.getSelectedButton().getId(),
+                                        ui.getUsername());
+                            } catch (Exception ex) {
+                                resetRecordButton(ui, recordingFile);
+                                JOptionPane.showMessageDialog(ui.getFrame(), ex.getMessage(),
+                                        FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                            }
+
+                            ui.getScrollBar().remove(ui.getSelectedButton());
+
+                            // reset question and answer text
+                            ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
+                            ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
+                            // update scrollBar
+                            ui.getScrollBar().revalidate();
+                            ui.getScrollBar().repaint();
+                            ui.setSelectedButton(null);
+                        }
+                        case UniversalConstants.CLEAR_ALL -> {
+                            try {
+                                RequestSender.getInstance().clearHistory(ui.getUsername());
+                            } catch (Exception ex) {
+                                resetRecordButton(ui, recordingFile);
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+                            ui.getScrollBar().removeAll();
+                            ui.getScrollBar().revalidate();
+                            ui.getScrollBar().repaint();
+                            ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
+                            ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
+                            ui.setSelectedButton(null);
+                        }
+                        default -> {
+                            // Assume error
+                            ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT
+                                    + serverResponse.getInput().getInputText().trim());
+                            ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT
+                                    + serverResponse.getOutput().getOutputText().trim());
+                            ui.setSelectedButton(null);
+                        }
                     }
+
+                    resetRecordButton(ui, recordingFile);
                 });
 
                 t.start();
             }
         };
+    }
+
+    private static void resetRecordButton(MainUserInterface ui, File recordingFile) {
+        ui.setRecorder(null);
+        ui.getStartButton().setEnabled(true);
+        ui.getStartButton().setText("START");
+        if (recordingFile != null && !recordingFile.delete()) {
+            System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
+        }
     }
 }

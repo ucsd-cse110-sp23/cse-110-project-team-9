@@ -136,10 +136,10 @@ public class InputHandler implements HttpHandler {
                     UniversalConstants.QUESTION, input, answer);
             this.pHelper.createPrompt(prompt);
             this.pHelper.save();
-        } else if (input.startsWith("delete prompt")) {
+        } else if (input.toLowerCase().startsWith("delete prompt")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
             response = obj.toString();
-        } else if (input.startsWith("clear all")) {
+        } else if (input.toLowerCase().startsWith("clear all")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
             response = obj.toString();
         } else {

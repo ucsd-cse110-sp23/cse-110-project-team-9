@@ -49,8 +49,7 @@ public class ClearAllHandler implements HttpHandler {
         long numDeleted = pHelper.clearAllPrompts(username);
         pHelper.save();
 
-        //TODO: What should result be
-        String result = ""; //?????
+        String result = String.valueOf(numDeleted);
         httpExchange.sendResponseHeaders(200, result.length());
         httpExchange.getResponseBody().write(result.getBytes());
         httpExchange.close();

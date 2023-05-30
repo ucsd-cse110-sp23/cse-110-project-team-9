@@ -39,34 +39,18 @@ public final class Helper {
         }
 
         query = URLDecoder.decode(query, StandardCharsets.UTF_8);
-        if (!query.contains("&")) { //only one "="
-            String[] querySplit = query.split("=");
-            if (querySplit.length == 2 && querySplit[0].equals(parameterName)) {
-                return querySplit[1];
-            } else {
-                return null;
+        String[] allQueries = query.split("&");
+        for (String q : allQueries) {
+            if (!q.contains("=")) {
+                continue;
             }
-        } else { //two "="
-            String[] querySplit = query.split("&");
-            if (querySplit[0].contains(parameterName)) {
-                String[] splitSplit = querySplit[0].split("=");
-                if (splitSplit[0].substring(1).equals(parameterName)) { // substring(1) used because of the "?"
-                    return splitSplit[1];
-                } else {
-                    return null;
-                }
-            } else if (querySplit[1].contains(parameterName)) {
-                String[] splitSplit = querySplit[1].split("=");
-                if (splitSplit[0].equals(parameterName)) {
-                    return splitSplit[1];
-                } else {
-                    return null;
-                }
-            }
-            else {
-                return null; // parameterName not found
+
+            String[] split = q.split("=");
+            if (split[0].equals(parameterName)) {
+                return split[1];
             }
         }
 
+        return null;
     }
 }
