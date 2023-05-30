@@ -252,9 +252,22 @@ public class MainUserInterface {
     public AudioRecorder getRecorder() {
         return recorder;
     }
-    
+
+    /**
+     * Sets the user field.
+     * 
+     * @param user The username that's currently logged in.
+     */
     public void setUser(String user){
         this.user = user;
+    }
+    /**
+     * Gets the user field.
+     * 
+     * @param user The username that's currently logged in.
+     */
+    public String getUser(){
+        return this.user;
     }
 }
 

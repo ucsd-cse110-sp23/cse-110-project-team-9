@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sayit.ServerConstants.PORT;
 
-public class loginTest {
+public class LoginTest {
     @Test
     public void testLoginAccountExist() throws Exception {
         var file = new File("login.tsv");
