@@ -35,6 +35,9 @@ public class TsvStoreTest {
     }
 
     @Test
+    /**
+     * Tests the createPrompt(), getAllPromptsBy(), deletePrompt(), clearAllPrompts() methods.
+     */
     public void testAddGetDelete() {
         assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
         helper.createPrompt(PROMPT_1);
@@ -85,6 +88,9 @@ public class TsvStoreTest {
 
 
     @Test
+    /**
+     * Tests loading a file into a new TsvPromptHelper when the initial file has been edited.
+     */
     public void testLoadData() {
 
         helper.createPrompt(PROMPT_1);
@@ -106,133 +112,80 @@ public class TsvStoreTest {
 
     }
 
-
+    @Test
     /**
-    @Test
+     * Tests multiple times for loading an edited file into a new TsvPromptHelper.
+     * Also tests for when the store is empty.
+     */
     public void testLoadDataEdit() {
-        _store.insert(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("ECE"), new ProgramOutput("Electrical & Computer Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("MAE"), new ProgramOutput("Mechanical & Aerospace Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("BENG"), new ProgramOutput("Bioengineering")));
-        _store.insert(new InputOutputEntry(new UserInput("NANO"), new ProgramOutput("Nanoengineering")));
-        _store.insert(new InputOutputEntry(new UserInput("CENG"), new ProgramOutput("Chemical Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("SE"), new ProgramOutput("Structural Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("MATH"), new ProgramOutput("Mathematics")));
-        _store.insert(new InputOutputEntry(new UserInput("COGS"), new ProgramOutput("Cognitive Science")));
-        _store.insert(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("hello")));
 
-        assertTrue(_store.save());
+        helper.createPrompt(PROMPT_1);
+        helper.save();
+        helper.createPrompt(PROMPT_2);
+        helper.save();
+        helper.createPrompt(PROMPT_3);
+        helper.save();
 
-        IStore<InputOutputEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store2);
-        assertEquals(10, store2.size());
-        assertEquals(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")), store2.get(0));
-        assertEquals(new InputOutputEntry(new UserInput("ECE"), new ProgramOutput("Electrical & Computer Engineering")), store2.get(1));
-        assertEquals(new InputOutputEntry(new UserInput("MAE"), new ProgramOutput("Mechanical & Aerospace Engineering")), store2.get(2));
-        assertEquals(new InputOutputEntry(new UserInput("BENG"), new ProgramOutput("Bioengineering")), store2.get(3));
-        assertEquals(new InputOutputEntry(new UserInput("NANO"), new ProgramOutput("Nanoengineering")), store2.get(4));
-        assertEquals(new InputOutputEntry(new UserInput("CENG"), new ProgramOutput("Chemical Engineering")), store2.get(5));
-        assertEquals(new InputOutputEntry(new UserInput("SE"), new ProgramOutput("Structural Engineering")), store2.get(6));
-        assertEquals(new InputOutputEntry(new UserInput("MATH"), new ProgramOutput("Mathematics")), store2.get(7));
-        assertEquals(new InputOutputEntry(new UserInput("COGS"), new ProgramOutput("Cognitive Science")), store2.get(8));
-        assertEquals(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("hello")), store2.get(9));
+        IPromptHelper helper2 = new TsvPromptHelper(TEST_FILE);
+        assertNotNull(helper2);
+        assertEquals(2, helper2.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(1, helper2.getAllPromptsBy(DUMMY_USERNAME2).size());
+        assertEquals(0, helper2.getAllPromptsBy(USER_NOT_USED).size());
 
-        assertTrue(store2.delete(0));
-        assertTrue(store2.delete(1));
-        assertTrue(store2.delete(2));
-        assertTrue(store2.save());
+        assertEquals(PROMPT_1, helper2.getAllPromptsBy(DUMMY_USERNAME1).get(0));
+        assertEquals(PROMPT_2, helper2.getAllPromptsBy(DUMMY_USERNAME1).get(1));
+        assertEquals(PROMPT_3, helper2.getAllPromptsBy(DUMMY_USERNAME2).get(0));
 
-        IStore<InputOutputEntry> store3 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store3);
-        assertEquals(7, store3.size());
-        assertNull(store2.get(0));
-        assertNull(store2.get(1));
-        assertNull(store2.get(2));
-        assertEquals(new InputOutputEntry(new UserInput("BENG"), new ProgramOutput("Bioengineering")), store3.get(3));
-        assertEquals(new InputOutputEntry(new UserInput("NANO"), new ProgramOutput("Nanoengineering")), store3.get(4));
-        assertEquals(new InputOutputEntry(new UserInput("CENG"), new ProgramOutput("Chemical Engineering")), store3.get(5));
-        assertEquals(new InputOutputEntry(new UserInput("SE"), new ProgramOutput("Structural Engineering")), store3.get(6));
-        assertEquals(new InputOutputEntry(new UserInput("MATH"), new ProgramOutput("Mathematics")), store3.get(7));
-        assertEquals(new InputOutputEntry(new UserInput("COGS"), new ProgramOutput("Cognitive Science")), store3.get(8));
-        assertEquals(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("hello")), store3.get(9));
+        helper2.deletePrompt(DUMMY_USERNAME1, 1);
+        helper2.save();
+        helper2.deletePrompt(DUMMY_USERNAME1, 2);
+        helper2.save();
+        assertEquals(0, helper2.getAllPromptsBy(DUMMY_USERNAME1).size());
 
-        assertFalse(store3.delete(0));
-        assertFalse(store3.delete(1111));
+        IPromptHelper helper3 = new TsvPromptHelper(TEST_FILE);
+        assertNotNull(helper3);
+        assertEquals(0, helper3.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(1, helper3.getAllPromptsBy(DUMMY_USERNAME2).size());
+        assertEquals(1, helper3.clearAllPrompts(DUMMY_USERNAME2));
+        helper3.save();
+        assertEquals(0, helper3.getAllPromptsBy(DUMMY_USERNAME2).size());
 
-        assertTrue(store3.save());
+        IPromptHelper helper4 = new TsvPromptHelper(TEST_FILE);
+        assertNotNull(helper4);
+        assertEquals(0, helper4.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(0, helper4.getAllPromptsBy(DUMMY_USERNAME2).size());
+        helper4.createPrompt(PROMPT_1);
+        helper4.save();
+        assertEquals(1, helper4.getAllPromptsBy(DUMMY_USERNAME1).size());
 
-        IStore<InputOutputEntry> store4 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store4);
-        assertEquals(7, store4.size());
-        assertNull(store4.get(0));
-        assertNull(store4.get(1));
-        assertNull(store4.get(2));
-        assertEquals(new InputOutputEntry(new UserInput("BENG"), new ProgramOutput("Bioengineering")), store4.get(3));
-        assertEquals(new InputOutputEntry(new UserInput("NANO"), new ProgramOutput("Nanoengineering")), store4.get(4));
-        assertEquals(new InputOutputEntry(new UserInput("CENG"), new ProgramOutput("Chemical Engineering")), store4.get(5));
-        assertEquals(new InputOutputEntry(new UserInput("SE"), new ProgramOutput("Structural Engineering")), store4.get(6));
-        assertEquals(new InputOutputEntry(new UserInput("MATH"), new ProgramOutput("Mathematics")), store4.get(7));
-        assertEquals(new InputOutputEntry(new UserInput("COGS"), new ProgramOutput("Cognitive Science")), store4.get(8));
-        assertEquals(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("hello")), store4.get(9));
-
-        assertTrue(store4.delete(9));
-        assertEquals(10, store4.insert(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("Political Science"))));
-        assertTrue(store4.delete(4));
-
-        assertTrue(store4.save());
-
-        IStore<InputOutputEntry> store5 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store5);
-        assertEquals(6, store5.size());
-        assertNull(store5.get(0));
-        assertNull(store5.get(1));
-        assertNull(store5.get(2));
-        assertEquals(new InputOutputEntry(new UserInput("BENG"), new ProgramOutput("Bioengineering")), store5.get(3));
-        assertNull(store5.get(4));
-        assertEquals(new InputOutputEntry(new UserInput("CENG"), new ProgramOutput("Chemical Engineering")), store5.get(5));
-        assertEquals(new InputOutputEntry(new UserInput("SE"), new ProgramOutput("Structural Engineering")), store5.get(6));
-        assertEquals(new InputOutputEntry(new UserInput("MATH"), new ProgramOutput("Mathematics")), store5.get(7));
-        assertEquals(new InputOutputEntry(new UserInput("COGS"), new ProgramOutput("Cognitive Science")), store5.get(8));
-        assertNull(store5.get(9));
-        assertEquals(new InputOutputEntry(new UserInput("POLI"), new ProgramOutput("Political Science")), store5.get(10));
+        IPromptHelper helper5 = new TsvPromptHelper(TEST_FILE);
+        assertNotNull(helper5);
+        assertEquals(1, helper5.getAllPromptsBy(DUMMY_USERNAME1).size());
+        assertEquals(0, helper5.getAllPromptsBy(DUMMY_USERNAME2).size());
+        helper5.deletePrompt(DUMMY_USERNAME1, 1);
+        helper5.save();
+        assertEquals(0, helper5.getAllPromptsBy(DUMMY_USERNAME1).size());
     }
 
     @Test
-    public void testEmptyStore() {
-        assertEquals(0, _store.size());
-        assertNull(_store.get(0));
-        assertNull(_store.get(1));
-
-        assertFalse(_store.delete(0));
-        assertFalse(_store.delete(1));
-
-        assertTrue(_store.save());
-
-        IStore<InputOutputEntry> store2 = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store2);
-        assertEquals(0, store2.size());
-
-        assertNull(store2.get(0));
-        assertNull(store2.get(1));
+    /**
+     * Tests getting prompts from a list of prompts. Test not really very significant.
+     */
+    public void testGetAllList() {
+        helper.createPrompt(PROMPT_1);
+        helper.save();
+        helper.createPrompt(PROMPT_2);
+        helper.save();
+        helper.createPrompt(PROMPT_3);
+        helper.save();
+        assertEquals(helper.getAllPromptsBy(DUMMY_USERNAME1).get(0), PROMPT_1);
+        assertEquals(helper.getAllPromptsBy(DUMMY_USERNAME1).get(1), PROMPT_2);
+        assertEquals(helper.getAllPromptsBy(DUMMY_USERNAME2).get(0), PROMPT_3);
     }
-
-    @Test
-    public void testGetAllMap() {
-        _store.insert(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")));
-        _store.insert(new InputOutputEntry(new UserInput("ECE"), new ProgramOutput("Electrical & Computer Engineering")));
-
-        var map = _store.getEntries();
-        assertEquals(2, map.size());
-        assertEquals(new InputOutputEntry(new UserInput("CSE"), new ProgramOutput("Computer Science & Engineering")), map.get(0));
-        assertEquals(new InputOutputEntry(new UserInput("ECE"), new ProgramOutput("Electrical & Computer Engineering")), map.get(1));
-    }
-     **/
-
 
     @AfterEach
     public void tearDown() {
         assertTrue(new File(TEST_FILE).delete());
-        assertFalse(new File(TEST_FILE).exists());
     }
 
 }

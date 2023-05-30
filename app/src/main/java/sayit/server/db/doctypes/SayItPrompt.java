@@ -165,4 +165,14 @@ public class SayItPrompt {
                 + ", output='" + output + '\''
                 + '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SayItPrompt prompt) {
+            return (this.username.equals(prompt.getUsername()) && this.timestamp == prompt.getTimestamp()
+                    && this.type.equals(prompt.getType()) && this.input.equals(prompt.getInput())
+                    && this.output.equals(prompt.getOutput()));
+        }
+        return false;
+    }
 }
