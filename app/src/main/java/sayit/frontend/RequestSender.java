@@ -123,7 +123,7 @@ public final class RequestSender {
      * @throws IOException        If an error occurs while sending the request.
      */
     public InputOutputEntry sendRecording(File audioFile, String username) throws IOException {
-        URL url = new URL(deleteEntryUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        URL url = new URL( inputUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
@@ -195,8 +195,9 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public Map<Integer, InputOutputEntry> getHistory() throws IOException, URISyntaxException, InterruptedException {
-        HttpResponse<String> response = sendRequest(historyUrl.toURI(), RequestType.GET, null);
+    public Map<Integer, InputOutputEntry> getHistory(String username) throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI( historyUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
@@ -230,8 +231,8 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean delete(int id) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(deleteEntryUrl + "?id=" + id);
+    public boolean delete(int id, String username) throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI(deleteEntryUrl + "?username=" + username + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -274,8 +275,9 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean clearHistory() throws IOException, URISyntaxException, InterruptedException {
-        HttpResponse<String> response = sendRequest(clearHistoryUrl.toURI(), RequestType.DELETE, null);
+    public boolean clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI( clearHistoryUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }

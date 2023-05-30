@@ -115,7 +115,7 @@ public class MainUserInterface {
 
         Map<Integer, InputOutputEntry> entries;
         try {
-            entries = RequestSender.getInstance().getHistory();
+            entries = RequestSender.getInstance().getHistory(currentUsername);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this.frame, e.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             return;

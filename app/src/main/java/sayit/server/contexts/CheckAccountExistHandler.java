@@ -40,7 +40,7 @@ public class CheckAccountExistHandler  implements HttpHandler {
 
         System.out.println("Received POST request for /check-account");
         String query = exchange.getRequestURI().getQuery();
-        String username = Helper.getSingleQueryParameter(query, "username");
+        String username = Helper.getQueryParameter(query, "username");
         if (username == null) {
             System.out.println("\twith invalid query: " + query);
             exchange.sendResponseHeaders(400, 0);

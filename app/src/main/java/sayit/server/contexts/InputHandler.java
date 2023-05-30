@@ -52,6 +52,9 @@ public class InputHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         // Make sure we have a POST request here
+
+        //TODO: I'm not sure if the if check below will cause problems now
+
         if (!httpExchange.getRequestMethod().equals("POST")) {
             httpExchange.sendResponseHeaders(405, 0);
             httpExchange.close();
@@ -61,7 +64,7 @@ public class InputHandler implements HttpHandler {
         System.out.println("Received POST request for /ask");
 
         // Get the username
-        String username = Helper.getSingleQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
+        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(400, 0);

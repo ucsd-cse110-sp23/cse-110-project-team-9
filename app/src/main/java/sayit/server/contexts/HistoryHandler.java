@@ -5,11 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
-import sayit.common.qa.InputOutputEntry;
 import sayit.server.Helper;
 import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.doctypes.SayItPrompt;
-import sayit.server.storage.IStore;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +48,7 @@ public class HistoryHandler implements HttpHandler {
 
         System.out.println("Received GET request for /history");
 
-        String username = Helper.getSingleQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
+        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(400, 0);

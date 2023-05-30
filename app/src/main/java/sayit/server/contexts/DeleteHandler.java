@@ -41,8 +41,8 @@ public class DeleteHandler implements HttpHandler {
         System.out.println("Received DELETE request for /delete-question");
 
         String query = exchange.getRequestURI().getQuery();
-        String idString = Helper.getSingleQueryParameter(query, "id");
-        String username = Helper.getSingleQueryParameter(exchange.getRequestURI().getQuery(), "username");
+        String idString = Helper.getQueryParameter(query, "id");
+        String username = Helper.getQueryParameter(query, "username");
 
         if (idString == null) {
             System.out.println("\tInvalid query string: " + query);
@@ -76,7 +76,7 @@ public class DeleteHandler implements HttpHandler {
         }
         pHelper.save();
 
-        //TODO: Look at below
+        //TODO: Look at below, not sure if result is what it should be
 
         String result = String.valueOf(deleteSuccess);
         exchange.sendResponseHeaders(200, result.length());

@@ -26,21 +26,47 @@ public final class Helper {
     }
 
     /**
-     * Gets a single query parameter from a query string.
+     * Gets a  query parameter from a query string. This method assumes there are at most two "="
+     * in the query.
+     *
      * @param query The query string (possibly null).
      * @param parameterName The name of the parameter to get.
      * @return The value of the parameter.
      */
-    public static String getSingleQueryParameter(String query, String parameterName) {
+    public static String getQueryParameter(String query, String parameterName) {
         if (query == null) {
             return null;
         }
 
         query = URLDecoder.decode(query, StandardCharsets.UTF_8);
-        String[] querySplit = query.split("=");
-        if (querySplit.length != 2 || !querySplit[0].equals(parameterName)) {
-            return null;
+        if (!query.contains("&")) { //only one "="
+            String[] querySplit = query.split("=");
+            if (querySplit.length == 2 && querySplit[0].equals(parameterName)) {
+                return querySplit[1];
+            } else {
+                return null;
+            }
+        } else { //two "="
+            String[] querySplit = query.split("&");
+            if (querySplit[0].contains(parameterName)) {
+                String[] splitSplit = querySplit[0].split("=");
+                if (splitSplit[0].substring(1).equals(parameterName)) { // substring(1) used because of the "?"
+                    return splitSplit[1];
+                } else {
+                    return null;
+                }
+            } else if (querySplit[1].contains(parameterName)) {
+                String[] splitSplit = querySplit[1].split("=");
+                if (splitSplit[0].equals(parameterName)) {
+                    return splitSplit[1];
+                } else {
+                    return null;
+                }
+            }
+            else {
+                return null; // parameterName not found
+            }
         }
-        return querySplit[1];
+
     }
 }

@@ -157,12 +157,6 @@ public final class EventHandlers {
                         // ...
                     }
 
-                    /*
-                     * TODO: Jimmy
-                     * you are going to need to figure out how excatly the server is going to handle things
-                     * start button just sends file for now
-                     */
-
                     File recordingFile = ui.getRecorder().getRecordingFile();
                     InputOutputEntry serverResponse; //server should respond with JSON because this will eventually be all request
                     try {
