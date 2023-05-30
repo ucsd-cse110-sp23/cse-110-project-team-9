@@ -175,8 +175,6 @@ public final class EventHandlers {
                         return;
                     }
 
-                    //TODO
-
 
                     //TODO: TESTING REMOVE LATER
                     //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1

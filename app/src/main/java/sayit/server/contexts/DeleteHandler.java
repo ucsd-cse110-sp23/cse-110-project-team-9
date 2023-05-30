@@ -42,16 +42,24 @@ public class DeleteHandler implements HttpHandler {
 
         String query = exchange.getRequestURI().getQuery();
         String idString = Helper.getSingleQueryParameter(query, "id");
+        String username = Helper.getSingleQueryParameter(exchange.getRequestURI().getQuery(), "username");
+
         if (idString == null) {
             System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
         }
+        if (username == null) {
+            System.out.println("\tbut is invalid because no username specified.");
+            exchange.sendResponseHeaders(400, 0);
+            exchange.close();
+            return;
+        }
 
-        int id;
+        long id;
         try {
-            id = Integer.parseInt(idString);
+            id = Long.parseLong(idString);
         } catch (NumberFormatException e) {
             System.out.println("\tInvalid query string: " + query);
             exchange.sendResponseHeaders(400, 0);
@@ -60,14 +68,17 @@ public class DeleteHandler implements HttpHandler {
         }
 
         System.out.println("\twith ID: " + id);
-        if (!data.getEntries().containsKey(id)) {
+        Boolean deleteSuccess = pHelper.deletePrompt(username, id);
+        if (!deleteSuccess) {
             exchange.sendResponseHeaders(404, 0);
             exchange.close();
             return;
         }
+        pHelper.save();
 
-        String result = String.valueOf(data.delete(id));
-        data.save();
+        //TODO: Look at below
+
+        String result = String.valueOf(deleteSuccess);
         exchange.sendResponseHeaders(200, result.length());
         exchange.getResponseBody().write(result.getBytes());
         exchange.close();
