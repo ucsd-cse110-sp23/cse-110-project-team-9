@@ -127,7 +127,6 @@ public final class RequestSender {
         
         HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters);
 
-        System.out.println(username + " " + password + " " + response);
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
 

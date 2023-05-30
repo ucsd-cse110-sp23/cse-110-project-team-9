@@ -136,6 +136,7 @@ public final class EventHandlers {
 
             instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
+            MainUserInterface.getInstance().setUser(username);
         };
     }
 

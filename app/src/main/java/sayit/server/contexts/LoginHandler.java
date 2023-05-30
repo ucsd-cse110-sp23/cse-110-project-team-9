@@ -9,7 +9,7 @@ import sayit.server.db.doctypes.SayItAccount;
 import java.io.IOException;
 
 /**
- * Handles a POST request for creating an account.
+ * Handles a POST request for logging into an account.
  * The endpoint will be <c>/login</c>.
  */
 public class LoginHandler implements HttpHandler {
@@ -63,7 +63,7 @@ public class LoginHandler implements HttpHandler {
             exchange.close();
             return;
         }
-        System.out.println(password.compareTo(acc.getPassword()));
+        
         if(!acc.getPassword().equals(password)){
             System.out.println("\tincorrect password");
             exchange.sendResponseHeaders(409, 0);
