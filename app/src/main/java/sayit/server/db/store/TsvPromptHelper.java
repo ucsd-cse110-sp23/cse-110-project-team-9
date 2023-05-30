@@ -19,7 +19,7 @@ public class TsvPromptHelper implements IPromptHelper {
     public TsvPromptHelper(String fileName) {
         this._writer = TsvWriter.createWriter(
                 List.of(SayItPrompt.USERNAME_FIELD, SayItPrompt.TIMESTAMP_FIELD,
-                        SayItPrompt.TYPE_FIELD, SayItPrompt.TITLE_FIELD, SayItPrompt.RESULT_FIELD),
+                        SayItPrompt.TYPE_FIELD, SayItPrompt.INPUT_FIELD, SayItPrompt.OUTPUT_FIELD),
                 fileName,
                 new ITsvStrategy<>() {
                     @Override
@@ -30,7 +30,7 @@ public class TsvPromptHelper implements IPromptHelper {
                     @Override
                     public String[] write(SayItPrompt obj) {
                         return new String[]{obj.getUsername(), Long.toString(obj.getTimestamp()),
-                                obj.getType(), obj.getTitle(), obj.getResult()};
+                                obj.getType(), obj.getInput(), obj.getOutput()};
                     }
                 });
     }
@@ -61,25 +61,24 @@ public class TsvPromptHelper implements IPromptHelper {
     /**
      * Deletes the <c>SayItPrompt</c> from the database.
      *
-     * @param username The username of the prompt
-     * @param timestamp The timestamp of the prompt
-     * @param type The type of prompt
-     * @param title The title of the prompt
-     * @param result The result of the prompt
+     * @param username  The username of the prompt.
+     * @param timestamp The timestamp of the prompt.
+     * @return True if the prompt was deleted, false otherwise.
      */
     @Override
-    public void deletePrompt(String username, long timestamp, String type, String title, String result) {
-
+    public boolean deletePrompt(String username, long timestamp) {
+        return this._writer.removeEntriesBy(p -> p.getUsername().equals(username) && p.getTimestamp() == timestamp) > 0;
     }
 
     /**
      * Clears all <c>SayItPrompt</c> under the specific username.
      *
      * @param username The username
+     * @return The number of prompts deleted.
      */
     @Override
-    public void clearAllPrompts(String username) {
-
+    public long clearAllPrompts(String username) {
+        return this._writer.removeEntriesBy(p -> p.getUsername().equals(username));
     }
 
     /**

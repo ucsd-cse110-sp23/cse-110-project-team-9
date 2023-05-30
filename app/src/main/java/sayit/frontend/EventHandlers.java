@@ -164,9 +164,9 @@ public final class EventHandlers {
                      */
 
                     File recordingFile = ui.getRecorder().getRecordingFile();
-                    Pair<Integer, InputOutputEntry> serverResponse;//server should respond with JSON because this will eventually be all request
+                    InputOutputEntry serverResponse; //server should respond with JSON because this will eventually be all request
                     try {
-                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile); //NEED TO CHANGE PLACEHOLDER FOR NOW
+                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUsername()); //NEED TO CHANGE PLACEHOLDER FOR NOW
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         ui.setRecorder(null);
@@ -180,8 +180,7 @@ public final class EventHandlers {
 
                     //TODO: TESTING REMOVE LATER
                     //right now its behaving as if question is asked, whole prompt will be displayed as if it were a question from MS1
-                    InputOutputEntry qaEntry = serverResponse.getSecond();
-                    ui.displayEntry(qaEntry);
+                    ui.displayEntry(serverResponse);
 
                     /*
                      * We need some way to handle the server response JSON here

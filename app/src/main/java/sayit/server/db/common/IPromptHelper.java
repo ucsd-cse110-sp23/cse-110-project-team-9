@@ -26,18 +26,16 @@ public interface IPromptHelper extends ISaveable {
     /**
      * Deletes a specific prompt.
      *
-     * @param username The username of the prompt
-     * @param timestamp The timestamp of the prompt
-     * @param type The type of prompt
-     * @param title The title of the prompt
-     * @param result The result of the prompt
+     * @param username  The username of the prompt.
+     * @param timestamp The timestamp of the prompt.
      */
-    void deletePrompt(String username, long timestamp, String type, String title, String result);
+    boolean deletePrompt(String username, long timestamp);
 
     /**
      * Deletes all prompts for a specific user.
      *
-     * @param username The username
+     * @param username The username.
+     * @return The number of prompts deleted.
      */
-    void clearAllPrompts(String username);
+    long clearAllPrompts(String username);
 }

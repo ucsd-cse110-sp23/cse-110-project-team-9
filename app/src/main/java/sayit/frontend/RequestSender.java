@@ -2,10 +2,10 @@ package sayit.frontend;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import sayit.common.UniversalConstants;
+import sayit.common.qa.InputOutputEntry;
 import sayit.common.qa.ProgramOutput;
 import sayit.common.qa.UserInput;
-import sayit.common.qa.InputOutputEntry;
-import sayit.frontend.helpers.Pair;
 import sayit.server.ServerConstants;
 
 import java.io.*;
@@ -13,6 +13,7 @@ import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public final class RequestSender {
 
-    private final URL askQuestionUrl;
+    private final URL inputUrl;
     private final URL historyUrl;
     private final URL clearHistoryUrl;
     private final URL deleteEntryUrl;
@@ -35,7 +36,7 @@ public final class RequestSender {
 
     private RequestSender(String host, int port) {
         try {
-            this.askQuestionUrl = new URL("http://" + host + ":" + port + "/ask");
+            this.inputUrl = new URL("http://" + host + ":" + port + "/input");
             this.historyUrl = new URL("http://" + host + ":" + port + "/history");
             this.clearHistoryUrl = new URL("http://" + host + ":" + port + "/clear-all");
             this.deleteEntryUrl = new URL("http://" + host + ":" + port + "/delete-question");
@@ -117,11 +118,14 @@ public final class RequestSender {
      * </p>
      *
      * @param audioFile The audio file to send.
-     * @return A pair with the first item being the ID and the second item being the question and the answer.
-     * @throws IOException If an error occurs while sending the request.
+     * @param username  The username to use.
+     * @return The result of the request.
+     * @throws IOException        If an error occurs while sending the request.
      */
-    public Pair<Integer, InputOutputEntry> sendRecording(File audioFile) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) askQuestionUrl.openConnection();
+    public InputOutputEntry sendRecording(File audioFile, String username) throws IOException {
+        URL url = new URL(deleteEntryUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/octet-stream");
@@ -146,16 +150,33 @@ public final class RequestSender {
             }
 
             JSONObject json = new JSONObject(response);
-
-            //TODO: change how response is handled because it may not be an entry
-            //this will need to be changed from pair to a more general parsing of the returned server JSON
-            return new Pair<>(
-                    json.getInt("id"),
-                    new InputOutputEntry(
-                            new UserInput(json.getString("question")),
-                            new ProgramOutput(json.getString("answer"))
-                    )
-            );
+            String type = json.getString(UniversalConstants.TYPE);
+            return switch (type) {
+                case UniversalConstants.QUESTION -> new InputOutputEntry(
+                        json.getLong(UniversalConstants.ID),
+                        UniversalConstants.QUESTION,
+                        new UserInput(json.getString("input")),
+                        new ProgramOutput(json.getString("output"))
+                );
+                case UniversalConstants.DELETE_PROMPT -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.DELETE_PROMPT,
+                        null,
+                        null
+                );
+                case UniversalConstants.CLEAR_ALL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.CLEAR_ALL,
+                        null,
+                        null
+                );
+                default -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.ERROR,
+                        new UserInput(json.getString("input")),
+                        new ProgramOutput(json.getString("output"))
+                );
+            };
         } finally {
             connection.disconnect();
         }

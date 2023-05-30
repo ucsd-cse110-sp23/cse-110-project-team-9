@@ -1,13 +1,11 @@
 package sayit.server;
 
 import com.sun.net.httpserver.HttpServer;
-import sayit.common.qa.InputOutputEntry;
 import sayit.server.contexts.*;
 import sayit.server.db.common.IAccountHelper;
 import sayit.server.db.common.IPromptHelper;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
-import sayit.server.storage.IStore;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -50,7 +48,7 @@ public class Server {
                 Executors.newFixedThreadPool(10);
 
         if (pHelper != null) {
-            this._server.createContext("/ask", new AskQuestionHandler(pHelper, whisper, chatgpt));
+            this._server.createContext("/input", new InputHandler(pHelper, whisper, chatgpt));
             this._server.createContext("/history", new HistoryHandler(pHelper));
             this._server.createContext("/delete-question", new DeleteHandler(pHelper));
             this._server.createContext("/clear-all", new ClearAllHandler(pHelper));

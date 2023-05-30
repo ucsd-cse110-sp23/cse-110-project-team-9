@@ -7,6 +7,7 @@ import sayit.server.db.doctypes.SayItPrompt;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
 /**
@@ -63,16 +64,17 @@ public class MongoPromptHelper implements IPromptHelper {
     /**
      * Deletes the <c>SayItPrompt</c> from the database.
      *
-     * @param username The username of the prompt
-     * @param timestamp The timestamp of the prompt
-     * @param type The type of prompt
-     * @param title The title of the prompt
-     * @param result The result of the prompt
+     * @param username  The username of the prompt.
+     * @param timestamp The timestamp of the prompt.
      */
     @Override
-    public void deletePrompt(String username, long timestamp, String type, String title, String result) {
-        //TODO
-
+    public boolean deletePrompt(String username, long timestamp) {
+        return this._sayItPrompts.deleteOne(
+                and(
+                        eq(SayItPrompt.USERNAME_FIELD, username),
+                        eq(SayItPrompt.TIMESTAMP_FIELD, timestamp)
+                )
+        ).getDeletedCount() > 0;
     }
 
     /**
@@ -81,15 +83,12 @@ public class MongoPromptHelper implements IPromptHelper {
      * @param username The username
      */
     @Override
-    public void clearAllPrompts(String username) {
-        //TODO
-
+    public long clearAllPrompts(String username) {
+        return this._sayItPrompts.deleteMany(eq(SayItPrompt.USERNAME_FIELD, username)).getDeletedCount();
     }
 
     @Override
     public void save() {
         // Do nothing, since Mongo automatically handles saving.
     }
-
-
 }

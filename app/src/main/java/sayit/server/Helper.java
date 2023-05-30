@@ -3,6 +3,8 @@ package sayit.server;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A helper class for the server.
@@ -34,6 +36,7 @@ public final class Helper {
             return null;
         }
 
+        query = URLDecoder.decode(query, StandardCharsets.UTF_8);
         String[] querySplit = query.split("=");
         if (querySplit.length != 2 || !querySplit[0].equals(parameterName)) {
             return null;

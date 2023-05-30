@@ -15,6 +15,8 @@ import static sayit.frontend.FrontEndConstants.*;
  * The main user interface for the application.
  */
 public class MainUserInterface {
+    private String currentUsername;
+
     private JButton startButton;
 
     private JPanel scrollBar;
@@ -37,6 +39,7 @@ public class MainUserInterface {
         this.frame.pack();
         this.frame.setVisible(true);
         this.recorder = null;
+        this.currentUsername = "dummyUsername";
 
         // Add behavior for closing app, update db.
         // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
@@ -199,7 +202,7 @@ public class MainUserInterface {
      * displayed.
      *
      * @return The button associated with the question that is currently being
-     *         displayed.
+     * displayed.
      */
     public QuestionButton getSelectedButton() {
         return selectedButton;
@@ -207,9 +210,10 @@ public class MainUserInterface {
 
     /**
      * Gets the Start button
+     *
      * @return The Start button
      */
-    public JButton getStartButton(){
+    public JButton getStartButton() {
         return startButton;
     }
 
@@ -248,6 +252,15 @@ public class MainUserInterface {
      */
     public AudioRecorder getRecorder() {
         return recorder;
+    }
+
+    /**
+     * Gets the currently logged-in username.
+     *
+     * @return The username.
+     */
+    public String getUsername() {
+        return this.currentUsername;
     }
 }
 

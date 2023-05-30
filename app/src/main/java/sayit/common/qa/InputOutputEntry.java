@@ -4,7 +4,7 @@ package sayit.common.qa;
  * Represents a input, output.
  */
 public class InputOutputEntry {
-    private final int id;
+    private final long id;
     private final String type;
     private final UserInput userInput;
     private final ProgramOutput programOutput;
@@ -30,7 +30,7 @@ public class InputOutputEntry {
      * @param i The user input.
      * @param o The program output.
      */
-    public InputOutputEntry(int id, String type, UserInput i, ProgramOutput o) {
+    public InputOutputEntry(long id, String type, UserInput i, ProgramOutput o) {
         this.id = id;
         this.type = type;
         this.userInput = i;
@@ -60,7 +60,7 @@ public class InputOutputEntry {
      *
      * @return The ID.
      */
-    public int getID() {
+    public long getID() {
         return this.id;
     }
 

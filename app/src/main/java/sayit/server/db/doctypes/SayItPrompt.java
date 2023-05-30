@@ -13,8 +13,8 @@ public class SayItPrompt {
     public static final String USERNAME_FIELD = "username";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String TYPE_FIELD = "type";
-    public static final String TITLE_FIELD = "title";
-    public static final String RESULT_FIELD = "result";
+    public static final String INPUT_FIELD = "input";
+    public static final String OUTPUT_FIELD = "output";
 
     // Types
     public static final String EMAIL_DRAFT = "EMAIL_DRAFT";
@@ -30,11 +30,11 @@ public class SayItPrompt {
     @BsonProperty(TYPE_FIELD)
     private String type;
 
-    @BsonProperty(TITLE_FIELD)
-    private String title;
+    @BsonProperty(INPUT_FIELD)
+    private String input;
 
-    @BsonProperty(RESULT_FIELD)
-    private String result;
+    @BsonProperty(OUTPUT_FIELD)
+    private String output;
 
     /**
      * Create a new <c>SayItPrompt</c> with no properties set. Required for
@@ -49,15 +49,15 @@ public class SayItPrompt {
      * @param username  The username.
      * @param timestamp The timestamp.
      * @param type      The type.
-     * @param title     The title.
-     * @param result    The result.
+     * @param input     The input.
+     * @param output    The output.
      */
-    public SayItPrompt(String username, long timestamp, String type, String title, String result) {
+    public SayItPrompt(String username, long timestamp, String type, String input, String output) {
         this.username = username;
         this.timestamp = timestamp;
         this.type = type;
-        this.title = title;
-        this.result = result;
+        this.input = input;
+        this.output = output;
     }
 
     /**
@@ -88,21 +88,21 @@ public class SayItPrompt {
     }
 
     /**
-     * Gets the title associated with this prompt.
+     * Gets the input associated with this prompt.
      *
-     * @return The title.
+     * @return The input.
      */
-    public String getTitle() {
-        return this.title;
+    public String getInput() {
+        return this.input;
     }
 
     /**
-     * Gets the result associated with this prompt.
+     * Gets the output associated with this prompt.
      *
-     * @return The result.
+     * @return The output.
      */
-    public String getResult() {
-        return this.result;
+    public String getOutput() {
+        return this.output;
     }
 
     /**
@@ -133,21 +133,21 @@ public class SayItPrompt {
     }
 
     /**
-     * Sets the title associated with this prompt.
+     * Sets the input associated with this prompt.
      *
-     * @param title The title.
+     * @param input The input.
      */
-    public void setTitle(String title) {
-        this.title = title;
+    public void setInput(String input) {
+        this.input = input;
     }
 
     /**
-     * Sets the result associated with this prompt.
+     * Sets the output associated with this prompt.
      *
-     * @param result The result.
+     * @param output The output.
      */
-    public void setResult(String result) {
-        this.result = result;
+    public void setOutput(String output) {
+        this.output = output;
     }
 
     /**
@@ -161,8 +161,8 @@ public class SayItPrompt {
                 + "username='" + username + '\''
                 + ", timestamp='" + timestamp + '\''
                 + ", type='" + type + '\''
-                + ", title='" + title + '\''
-                + ", result='" + result + '\''
+                + ", input='" + input + '\''
+                + ", output='" + output + '\''
                 + '}';
     }
 }
