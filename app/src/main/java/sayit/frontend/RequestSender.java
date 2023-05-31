@@ -229,11 +229,13 @@ public final class RequestSender {
         HashMap<Long, InputOutputEntry> entries = new HashMap<>();
         for (int i = 0; i < json.length(); i++) {
             JSONObject entry = json.getJSONObject(i);
+            long id = entry.getLong("id");
             InputOutputEntry inputOutputEntry = new InputOutputEntry(
+                    id,
+                    UniversalConstants.QUESTION,
                     new UserInput(entry.getString("input")),
                     new ProgramOutput(entry.getString("output"))
             );
-            long id = entry.getLong("id");
             entries.put(id, inputOutputEntry);
         }
 
