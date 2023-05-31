@@ -10,8 +10,8 @@ import sayit.server.db.store.TsvPromptHelper;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static sayit.ServerConstants.DUMMY_FILE;
-import static sayit.ServerConstants.PORT;
+import static sayit.TestConstants.DUMMY_FILE;
+import static sayit.TestConstants.PORT;
 
 public class SendUserInputTest {
     private static final String DUMMY_USERNAME = "dummy";

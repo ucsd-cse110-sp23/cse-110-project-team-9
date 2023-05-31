@@ -12,7 +12,7 @@ import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static sayit.ServerConstants.PORT;
+import static sayit.TestConstants.PORT;
 
 public class CreateAccountTest {
     @Test

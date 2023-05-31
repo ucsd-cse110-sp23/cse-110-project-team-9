@@ -11,7 +11,7 @@ import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TsvStoreTest {
+public class PromptDbTest {
     private static final String TEST_FILE = "test.tsv";
     private static final String DUMMY_USERNAME1 = "dummy";
     private static final String DUMMY_USERNAME2 = "Bob";
@@ -35,9 +35,6 @@ public class TsvStoreTest {
     }
 
     @Test
-    /**
-     * Tests the createPrompt(), getAllPromptsBy(), deletePrompt(), clearAllPrompts() methods.
-     */
     public void testAddGetDelete() {
         assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
         helper.createPrompt(PROMPT_1);
@@ -54,18 +51,18 @@ public class TsvStoreTest {
         assertEquals(PROMPT_2, helper.getAllPromptsBy(DUMMY_USERNAME1).get(1));
         assertEquals(PROMPT_3, helper.getAllPromptsBy(DUMMY_USERNAME2).get(0));
 
-        assertEquals(false, helper.deletePrompt(DUMMY_USERNAME1, 10));
-        assertEquals(false, helper.deletePrompt(USER_NOT_USED, 10));
+        assertFalse(helper.deletePrompt(DUMMY_USERNAME1, 10));
+        assertFalse(helper.deletePrompt(USER_NOT_USED, 10));
 
-        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME1, 1));
+        assertTrue(helper.deletePrompt(DUMMY_USERNAME1, 1));
         helper.save();
         assertEquals(1, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
 
-        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME1, 2));
+        assertTrue(helper.deletePrompt(DUMMY_USERNAME1, 2));
         helper.save();
         assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME1).size());
 
-        assertEquals(true, helper.deletePrompt(DUMMY_USERNAME2, 3));
+        assertTrue(helper.deletePrompt(DUMMY_USERNAME2, 3));
         helper.save();
         assertEquals(0, helper.getAllPromptsBy(DUMMY_USERNAME2).size());
 
@@ -88,9 +85,6 @@ public class TsvStoreTest {
 
 
     @Test
-    /**
-     * Tests loading a file into a new TsvPromptHelper when the initial file has been edited.
-     */
     public void testLoadData() {
 
         helper.createPrompt(PROMPT_1);
@@ -113,10 +107,6 @@ public class TsvStoreTest {
     }
 
     @Test
-    /**
-     * Tests multiple times for loading an edited file into a new TsvPromptHelper.
-     * Also tests for when the store is empty.
-     */
     public void testLoadDataEdit() {
 
         helper.createPrompt(PROMPT_1);
@@ -168,9 +158,6 @@ public class TsvStoreTest {
     }
 
     @Test
-    /**
-     * Tests getting prompts from a list of prompts. Test not really very significant.
-     */
     public void testGetAllList() {
         helper.createPrompt(PROMPT_1);
         helper.save();
