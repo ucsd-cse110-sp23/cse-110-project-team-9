@@ -178,7 +178,7 @@ public class MainUserInterface {
         for (Map.Entry<Long, InputOutputEntry> entry : inputHistory.entrySet()) {
             String question = entry.getValue().getInput().getInputText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
-            button.setPreferredSize(new Dimension(180, 100));
+            button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
             button.addActionListener(EventHandlers.onQaButtonPress(this, entry.getValue(), button));
             scrollBar.add(button);
         }
@@ -309,7 +309,7 @@ class QuestionButton extends JButton {
      */
     public QuestionButton(String displayName, long id) {
         super(displayName);
-        this.setPreferredSize(new Dimension(180, 100));
+        this.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
         this.id = id;
     }
 

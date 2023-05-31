@@ -1,5 +1,7 @@
 package sayit.frontend;
 
+import java.awt.*;
+
 /**
  * Various constants specifically for the frontend code.
  */
@@ -34,4 +36,7 @@ public final class FrontEndConstants {
             + "Please try again later.";
     public static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
     public static final String LOGIN_FAILED_PROMPT = "Login credentials invalid";
+
+    // Misc. constants
+    public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
 }

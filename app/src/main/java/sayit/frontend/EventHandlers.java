@@ -4,7 +4,6 @@ import sayit.common.UniversalConstants;
 import sayit.common.qa.InputOutputEntry;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
@@ -184,7 +183,7 @@ public final class EventHandlers {
                             // add data to scrollBar
                             QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
                                     serverResponse.getID());
-                            button.setPreferredSize(new Dimension(180, 100));
+                            button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
                             button.addActionListener(onQaButtonPress(ui, serverResponse, button));
                             ui.getScrollBar().add(button);
 
