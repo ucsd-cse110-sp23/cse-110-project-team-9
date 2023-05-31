@@ -23,6 +23,7 @@ public final class EventHandlers {
     private static final String UNKNOWN_ERROR_PROMPT = "An unknown error occurred when creating your account. "
             + "Please try again later.";
     private static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
+    private static final String LOGIN_FAILED_PROMPT = "Login credentials invalid";
 
     /**
      * Handles the event when the user presses the button from the sidebar (the
@@ -56,7 +57,7 @@ public final class EventHandlers {
                 return;
             }
 
-            String username = LoginUserInterface.getInstance().getEmail();
+            String username = instance.getEmail();
             // Check if the account has been created
             try {
                 if (RequestSender.getInstance().doesAccountExist(username)) {
@@ -117,8 +118,26 @@ public final class EventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
+            String username = instance.getEmail();
+            String password = instance.getPassword();
+            boolean verify = true; //verify email and password combination
+            try{
+                verify = RequestSender.getInstance().login(username, password);
+                if (!verify) {
+                    JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
+                    instance.clearText();
+                    
+                    return;
+                }
+            }catch(Exception ex){
+                JOptionPane.showMessageDialog(null,
+                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
+                return;
+            }
+
             instance.close(); // close the login UI
             MainUserInterface.getInstance(); // start the main UI
+            MainUserInterface.getInstance().setUser(username);
         };
     }
 

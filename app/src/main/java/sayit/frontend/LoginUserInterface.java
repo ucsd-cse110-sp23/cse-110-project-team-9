@@ -32,6 +32,7 @@ public class LoginUserInterface {
     private static final String LOGIN_PROMPT = "Login";
     private static final String EMAIL_HEADER = "Email: ";
     private static final String PASSWORD_HEADER = "Password: ";
+    private static final String EMPTY_TEXT = "";
 
     private LoginUserInterface() {
         frame = new JFrame(APP_NAME);
@@ -139,5 +140,13 @@ public class LoginUserInterface {
      */
     public String getPassword() {
         return passwordField.getText();
+    }
+
+    /**
+     * Clears the text in the email and password field
+     */
+    public void clearText(){
+        emailField.setText(EMPTY_TEXT);
+        passwordField.setText(EMPTY_TEXT);
     }
 }
