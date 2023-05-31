@@ -1,5 +1,8 @@
 package sayit.server;
 
+import org.json.JSONObject;
+import sayit.frontend.helpers.Pair;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,7 +32,7 @@ public final class Helper {
      * Gets a  query parameter from a query string. This method assumes there are at most two "="
      * in the query.
      *
-     * @param query The query string (possibly null).
+     * @param query         The query string (possibly null).
      * @param parameterName The name of the parameter to get.
      * @return The value of the parameter.
      */
@@ -52,5 +55,24 @@ public final class Helper {
         }
 
         return null;
+    }
+
+    /**
+     * Extracts the username and password from a JSON object.
+     *
+     * @param json The JSON object to extract from.
+     * @return A pair of the username and password, or null if the JSON object is invalid.
+     */
+    public static Pair<String, String> extractUsernamdPassword(JSONObject json) {
+        String username;
+        String password;
+        try {
+            username = json.getString("username");
+            password = json.getString("password");
+        } catch (Exception e) {
+            return null;
+        }
+
+        return new Pair<>(username, password);
     }
 }

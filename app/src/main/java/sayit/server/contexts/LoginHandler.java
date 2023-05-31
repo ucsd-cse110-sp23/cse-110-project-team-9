@@ -3,6 +3,8 @@ package sayit.server.contexts;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
+import sayit.frontend.helpers.Pair;
+import sayit.server.Helper;
 import sayit.server.db.common.IAccountHelper;
 import sayit.server.db.doctypes.SayItAccount;
 
@@ -41,20 +43,17 @@ public class LoginHandler implements HttpHandler {
         }
         
         System.out.println("Received POST request for /login");
-
         JSONObject json = new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
-        String username;
-        String password;
-        try {
-            username = json.getString("username");
-            password = json.getString("password");
-        } catch (Exception e) {
+        Pair<String, String> credentials = Helper.extractUsernamdPassword(json);
+        if (credentials == null) {
             System.out.println("\tbut is invalid.");
             exchange.sendResponseHeaders(400, 0);
             exchange.close();
             return;
         }
+        String username = credentials.getFirst();
+        String password = credentials.getSecond();
 
         SayItAccount acc = this._accountHelper.getAccount(username);
         if (acc == null) {
