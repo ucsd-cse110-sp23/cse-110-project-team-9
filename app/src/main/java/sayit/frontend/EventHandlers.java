@@ -148,14 +148,14 @@ public final class EventHandlers {
             if (ui.getRecorder() == null) {
                 ui.setRecorder(new AudioRecorder());
                 ui.getRecorder().startRecording();
-                ui.getStartButton().setText("RECORDING");
+                ui.getStartButton().setText(RECORD_ONGOING_TEXT);
             } else {
                 // Start a new thread to transcribe the recording, since we don't want
                 // to block the UI thread.
                 Thread t = new Thread(() -> {
                     ui.getRecorder().stopRecording();
                     ui.getStartButton().setEnabled(false);
-                    ui.getStartButton().setText("PROCESSING");
+                    ui.getStartButton().setText(RECORD_PROCESSING_TEXT);
 
 
                     // Just so the file can be saved to the disk
@@ -263,7 +263,7 @@ public final class EventHandlers {
     private static void resetRecordButton(MainUserInterface ui, File recordingFile) {
         ui.setRecorder(null);
         ui.getStartButton().setEnabled(true);
-        ui.getStartButton().setText("START");
+        ui.getStartButton().setText(RECORD_START_TEXT);
         if (recordingFile != null && !recordingFile.delete()) {
             System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
         }
