@@ -8,7 +8,6 @@ import sayit.server.db.mongo.MongoPromptHelper;
 import sayit.server.db.mongo.MongoWrapper;
 import sayit.server.openai.ChatGpt;
 import sayit.server.openai.Whisper;
-import sayit.server.storage.TsvStore;
 
 public class App {
     public static void main(String[] args) {
