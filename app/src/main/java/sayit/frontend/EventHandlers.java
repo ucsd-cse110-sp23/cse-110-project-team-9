@@ -172,7 +172,7 @@ public final class EventHandlers {
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(),
                                 FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
-                        resetRecordButton(ui, recordingFile);
+                        resetStartButton(ui, recordingFile);
                         return;
                     }
 
@@ -202,7 +202,7 @@ public final class EventHandlers {
 
                                 ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
                                 ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
-                                resetRecordButton(ui, recordingFile);
+                                resetStartButton(ui, recordingFile);
                                 return;
                             }
 
@@ -210,7 +210,7 @@ public final class EventHandlers {
                                 RequestSender.getInstance().delete(ui.getSelectedButton().getId(),
                                         ui.getUser());
                             } catch (Exception ex) {
-                                resetRecordButton(ui, recordingFile);
+                                resetStartButton(ui, recordingFile);
                                 JOptionPane.showMessageDialog(ui.getFrame(), ex.getMessage(),
                                         FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                             }
@@ -229,7 +229,7 @@ public final class EventHandlers {
                             try {
                                 RequestSender.getInstance().clearHistory(ui.getUser());
                             } catch (Exception ex) {
-                                resetRecordButton(ui, recordingFile);
+                                resetStartButton(ui, recordingFile);
                                 ex.printStackTrace();
                                 JOptionPane.showMessageDialog(null, ex.getMessage());
                                 return;
@@ -251,7 +251,7 @@ public final class EventHandlers {
                         }
                     }
 
-                    resetRecordButton(ui, recordingFile);
+                    resetStartButton(ui, recordingFile);
                 });
 
                 t.start();
@@ -259,7 +259,13 @@ public final class EventHandlers {
         };
     }
 
-    private static void resetRecordButton(MainUserInterface ui, File recordingFile) {
+    /**
+     * Resets the start button to the initial button state.
+     *
+     * @param ui            The main user interface.
+     * @param recordingFile The recording file, if any, or <c>null</c> otherwise.
+     */
+    private static void resetStartButton(MainUserInterface ui, File recordingFile) {
         ui.setRecorder(null);
         ui.getStartButton().setEnabled(true);
         ui.getStartButton().setText(RECORD_START_TEXT);
