@@ -52,9 +52,6 @@ public class InputHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         // Make sure we have a POST request here
-
-        //TODO: I'm not sure if the if check below will cause problems now
-
         if (!httpExchange.getRequestMethod().equals("POST")) {
             httpExchange.sendResponseHeaders(405, 0);
             httpExchange.close();
@@ -110,6 +107,8 @@ public class InputHandler implements HttpHandler {
             } else {
                 input = input.substring(9);
             }
+
+            input = input.trim();
 
             //if audio is transcribed, pass to Chat GPT
             String answer;
