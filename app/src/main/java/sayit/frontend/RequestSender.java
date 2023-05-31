@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static sayit.frontend.FrontEndConstants.USERNAME_QUERY_PARAM;
+
 /**
  * A class that contains static methods to make requests to our HTTP server to
  * access the business logic of our project.
@@ -105,8 +107,8 @@ public final class RequestSender {
     public boolean createAccount(String username, String password)
             throws IOException, URISyntaxException, InterruptedException {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("username", username);
-        parameters.put("password", password);
+        parameters.put(UniversalConstants.USERNAME, username);
+        parameters.put(UniversalConstants.PASSWORD, password);
         HttpResponse<String> response = sendRequest(this.createAccountUrl.toURI(), RequestType.POST, parameters);
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
@@ -123,9 +125,9 @@ public final class RequestSender {
     public boolean login(String username, String password)
             throws IOException, URISyntaxException, InterruptedException {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("username", username);
-        parameters.put("password", password);
-        
+        parameters.put(UniversalConstants.USERNAME, username);
+        parameters.put(UniversalConstants.PASSWORD, password);
+
         HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters);
 
         return response.statusCode() == HttpURLConnection.HTTP_OK;
@@ -142,10 +144,11 @@ public final class RequestSender {
      * @param audioFile The audio file to send.
      * @param username  The username to use.
      * @return The result of the request.
-     * @throws IOException        If an error occurs while sending the request.
+     * @throws IOException If an error occurs while sending the request.
      */
     public InputOutputEntry sendRecording(File audioFile, String username) throws IOException {
-        URL url = new URL( inputUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        URL url = new URL(inputUrl + "?" +
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
@@ -177,8 +180,8 @@ public final class RequestSender {
                 case UniversalConstants.QUESTION -> new InputOutputEntry(
                         json.getLong(UniversalConstants.ID),
                         UniversalConstants.QUESTION,
-                        new UserInput(json.getString("input")),
-                        new ProgramOutput(json.getString("output"))
+                        new UserInput(json.getString(UniversalConstants.INPUT)),
+                        new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
                 );
                 case UniversalConstants.DELETE_PROMPT -> new InputOutputEntry(
                         Integer.MIN_VALUE,
@@ -195,8 +198,8 @@ public final class RequestSender {
                 default -> new InputOutputEntry(
                         Integer.MIN_VALUE,
                         UniversalConstants.ERROR,
-                        new UserInput(json.getString("input")),
-                        new ProgramOutput(json.getString("output"))
+                        new UserInput(json.getString(UniversalConstants.INPUT)),
+                        new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
                 );
             };
         } finally {
@@ -219,8 +222,13 @@ public final class RequestSender {
      */
     public Map<Long, InputOutputEntry> getHistory(String username)
             throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI( historyUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
-        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+        HttpResponse<String> response = sendRequest(
+                new URI(historyUrl + "?" +
+                        USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8)),
+                RequestType.GET,
+                null
+        );
+
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
@@ -229,12 +237,12 @@ public final class RequestSender {
         HashMap<Long, InputOutputEntry> entries = new HashMap<>();
         for (int i = 0; i < json.length(); i++) {
             JSONObject entry = json.getJSONObject(i);
-            long id = entry.getLong("id");
+            long id = entry.getLong(UniversalConstants.ID);
             InputOutputEntry inputOutputEntry = new InputOutputEntry(
                     id,
                     UniversalConstants.QUESTION,
-                    new UserInput(entry.getString("input")),
-                    new ProgramOutput(entry.getString("output"))
+                    new UserInput(entry.getString(UniversalConstants.INPUT)),
+                    new ProgramOutput(entry.getString(UniversalConstants.OUTPUT))
             );
             entries.put(id, inputOutputEntry);
         }
@@ -257,7 +265,8 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(deleteEntryUrl + "?username=" + username + "&id=" + id);
+        URI uri = new URI(deleteEntryUrl + "?" + 
+                USERNAME_QUERY_PARAM + username + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -277,7 +286,8 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(checkAccountUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        URI uri = new URI(checkAccountUrl + "?" + 
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -301,7 +311,8 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI( clearHistoryUrl + "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        URI uri = new URI(clearHistoryUrl + "?" 
+                + USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());

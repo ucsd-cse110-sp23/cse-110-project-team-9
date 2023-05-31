@@ -2,6 +2,7 @@ package sayit.server.db.doctypes;
 
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+import sayit.common.UniversalConstants;
 
 /**
  * A class representing a prompt in the <c>sayit</c> database. Each user can
@@ -10,16 +11,11 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
  */
 public class SayItPrompt {
     // Document Fields.
-    public static final String USERNAME_FIELD = "username";
+    public static final String USERNAME_FIELD = UniversalConstants.USERNAME;
     public static final String TIMESTAMP_FIELD = "timestamp";
-    public static final String TYPE_FIELD = "type";
-    public static final String INPUT_FIELD = "input";
-    public static final String OUTPUT_FIELD = "output";
-
-    // Types
-    public static final String EMAIL_DRAFT = "EMAIL_DRAFT";
-    public static final String QUESTION = "QUESTION";
-    public static final String EMAIL_SENT = "EMAIL_SENT";
+    public static final String TYPE_FIELD = UniversalConstants.TYPE;
+    public static final String INPUT_FIELD = UniversalConstants.INPUT;
+    public static final String OUTPUT_FIELD = UniversalConstants.OUTPUT;
 
     @BsonProperty(USERNAME_FIELD)
     private String username;

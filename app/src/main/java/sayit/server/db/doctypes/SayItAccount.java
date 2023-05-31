@@ -2,6 +2,7 @@ package sayit.server.db.doctypes;
 
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+import sayit.common.UniversalConstants;
 
 /**
  * Every user using the SayIt application must have an account. We'll store their account
@@ -16,8 +17,8 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
  * </ul>
  */
 public class SayItAccount {
-    public static final String USERNAME_FIELD = "username";
-    public static final String PASSWORD_FIELD = "password";
+    public static final String USERNAME_FIELD = UniversalConstants.USERNAME;
+    public static final String PASSWORD_FIELD = UniversalConstants.PASSWORD;
 
     @BsonProperty(USERNAME_FIELD)
     private String username;
