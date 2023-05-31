@@ -114,13 +114,13 @@ public class WalkthroughTest {
         assertNull(secondQ2);
 
         // Greg Miranda now wants to ask another question
-        whisper.setValues(false, "Question. How do I make students suffer more?");
-        chatGpt.setValues(false, "Make them take CSE 110.");
+        whisper.setValues(false, "Question. How do I pre-record a CSE 110 lecture?");
+        chatGpt.setValues(false, "Welcome to CSE 110 pre-recorded lecture.");
         var resp5 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
         assertEquals(UniversalConstants.QUESTION, resp5.getType());
-        assertEquals("How do I make students suffer more?", resp5.getInput().getInputText());
+        assertEquals("How do I pre-record a CSE 110 lecture?", resp5.getInput().getInputText());
         // Make sure the answer is correct.
-        assertEquals("Make them take CSE 110.", resp5.getOutput().getOutputText());
+        assertEquals("Welcome to CSE 110 pre-recorded lecture.", resp5.getOutput().getOutputText());
 
         // Ensure that the question is added to the history.
         var history3 = requestSender.getHistory("gmiranda");
