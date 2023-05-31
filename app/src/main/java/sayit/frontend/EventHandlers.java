@@ -111,14 +111,13 @@ public final class EventHandlers {
         return e -> {
             String username = instance.getEmail();
             String password = instance.getPassword();
-            try{
+            try {
                 if (!RequestSender.getInstance().login(username, password)) {
                     JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
                     instance.clearText();
-                    
                     return;
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null,
                         FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
                 return;
@@ -172,7 +171,8 @@ public final class EventHandlers {
                     try {
                         serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUser());
                     } catch (IOException e1) {
-                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(),
+                                FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         resetRecordButton(ui, recordingFile);
                         return;
                     }

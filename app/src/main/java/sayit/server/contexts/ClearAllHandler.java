@@ -19,7 +19,9 @@ public class ClearAllHandler implements HttpHandler {
      *
      * @param helper The Prompt Helper to use.
      */
-    public ClearAllHandler(IPromptHelper helper) { this.pHelper = helper; }
+    public ClearAllHandler(IPromptHelper helper) {
+        this.pHelper = helper;
+    }
 
     /**
      * Handles the request.
