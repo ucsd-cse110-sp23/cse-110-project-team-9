@@ -32,8 +32,11 @@ public class MainUserInterface {
 
     private AudioRecorder recorder;
 
-    private MainUserInterface() {
-        this.currentUsername = "gmiranda";
+    private MainUserInterface(String username) {
+        if (username != null) {
+            this.currentUsername = username;
+        }
+
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addComponentsToPane(this.frame.getContentPane());
@@ -85,7 +88,22 @@ public class MainUserInterface {
      */
     public static MainUserInterface getInstance() {
         if (userInterface == null) {
-            userInterface = new MainUserInterface();
+            userInterface = new MainUserInterface(null);
+        }
+
+        return userInterface;
+    }
+
+    /**
+     * Gets or creates a new instance of the <c>MainUserInterface</c> class. Note that
+     * you should use this method if you want to specify a username.
+     *
+     * @param username The username to use.
+     * @return The instance of the <c>MainUserInterface</c> class.
+     */
+    public static MainUserInterface createInstance(String username) {
+        if (userInterface == null) {
+            userInterface = new MainUserInterface(username);
         }
 
         return userInterface;
@@ -255,11 +273,20 @@ public class MainUserInterface {
     }
 
     /**
-     * Gets the currently logged-in username.
+     * Sets the user field.
      *
-     * @return The username.
+     * @param user The username that's currently logged in.
      */
-    public String getUsername() {
+    public void setUser(String user) {
+        this.currentUsername = user;
+    }
+
+    /**
+     * Gets the user field.
+     *
+     * @return The username that's currently logged in.
+     */
+    public String getUser() {
         return this.currentUsername;
     }
 }

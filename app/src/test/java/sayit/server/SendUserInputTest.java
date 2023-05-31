@@ -38,7 +38,6 @@ public class SendUserInputTest {
         // Wait for server to start
         Thread.sleep(2000);
 
-
         var resp = requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
       
         assertEquals("Hello world.", resp.getInput().getInputText());

@@ -51,7 +51,6 @@ public class WalkthroughTest {
                 .build();
 
         server.start();
-
         var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
         // Wait for server to start
         Thread.sleep(2000);
@@ -72,5 +71,6 @@ public class WalkthroughTest {
         // Make sure the answer is correct.
         assertEquals("The answer is 2.", resp1.getOutput().getOutputText());
 
+        server.stop();
     }
 }

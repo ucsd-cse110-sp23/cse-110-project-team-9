@@ -26,4 +26,16 @@ public final class FrontEndConstants {
     public static final String APP_CANNOT_RUN_TEXT = "The server is currently offline and cannot handle"
             + " any requests, and will terminate.";
     public static final String ERROR_TEXT = "Error";
+
+
+    // Constants for events
+    public static final String PASSWORD_HEADER = "Password: ";
+    public static final String VERIFY_PASSWORD_HEADER = "Verify Password";
+    public static final String INVALID_INPUT_PROMPT = "Invalid email/password";
+    public static final String USERNAME_IN_USE_PROMPT = "The provided username is already in use. "
+            + "Try a different username.";
+    public static final String UNKNOWN_ERROR_PROMPT = "An unknown error occurred when creating your account. "
+            + "Please try again later.";
+    public static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
+    public static final String LOGIN_FAILED_PROMPT = "Login credentials invalid";
 }

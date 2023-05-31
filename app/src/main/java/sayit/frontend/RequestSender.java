@@ -30,6 +30,7 @@ public final class RequestSender {
     private final URL pingUrl;
     private final URL createAccountUrl;
     private final URL checkAccountUrl;
+    private final URL loginUrl;
 
     private static RequestSender requestSender;
 
@@ -43,6 +44,7 @@ public final class RequestSender {
             this.pingUrl = new URL("http://" + host + ":" + port + "/ping");
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
             this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
+            this.loginUrl = new URL("http://" + host + ":" + port + "/login");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -106,6 +108,26 @@ public final class RequestSender {
         parameters.put("username", username);
         parameters.put("password", password);
         HttpResponse<String> response = sendRequest(this.createAccountUrl.toURI(), RequestType.POST, parameters);
+        return response.statusCode() == HttpURLConnection.HTTP_OK;
+    }
+
+    /**
+     * Sends a POST request to log into an account.
+     *
+     * @param username The username to use.
+     * @param password The password to use.
+     * @return <c>true</c> if the account and password is correct, <c>false</c> otherwise.
+     * @throws IOException        If an error occurs while sending the request.
+     * @throws URISyntaxException If an error occurs while sending the request.
+     */
+    public boolean login(String username, String password)
+            throws IOException, URISyntaxException, InterruptedException {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("username", username);
+        parameters.put("password", password);
+        
+        HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters);
+
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
 

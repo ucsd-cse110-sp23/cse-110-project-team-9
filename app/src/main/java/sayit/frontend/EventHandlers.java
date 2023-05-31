@@ -9,23 +9,12 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-import static sayit.frontend.FrontEndConstants.ANSWER_HEADER_TEXT;
-import static sayit.frontend.FrontEndConstants.QUESTION_HEADER_TEXT;
+import static sayit.frontend.FrontEndConstants.*;
 
 /**
  * A class that contains static methods to handle events in the UI.
  */
 public final class EventHandlers {
-
-    // constants
-    private static final String PASSWORD_HEADER = "Password: ";
-    private static final String VERIFY_PASSWORD_HEADER = "Verify Password";
-    private static final String INVALID_INPUT_PROMPT = "Invalid email/password";
-    private static final String USERNAME_IN_USE_PROMPT = "The provided username is already in use. "
-            + "Try a different username.";
-    private static final String UNKNOWN_ERROR_PROMPT = "An unknown error occurred when creating your account. "
-            + "Please try again later.";
-    private static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
 
     /**
      * Handles the event when the user presses the button from the sidebar (the
@@ -59,7 +48,7 @@ public final class EventHandlers {
                 return;
             }
 
-            String username = LoginUserInterface.getInstance().getEmail();
+            String username = instance.getEmail();
             // Check if the account has been created
             try {
                 if (RequestSender.getInstance().doesAccountExist(username)) {
@@ -108,7 +97,7 @@ public final class EventHandlers {
             }
 
             instance.close(); // close the login UI
-            MainUserInterface.getInstance(); // start the main UI
+            MainUserInterface.createInstance(username); // start the main UI
         };
     }
 
@@ -120,8 +109,23 @@ public final class EventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
+            String username = instance.getEmail();
+            String password = instance.getPassword();
+            try{
+                if (!RequestSender.getInstance().login(username, password)) {
+                    JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
+                    instance.clearText();
+                    
+                    return;
+                }
+            }catch(Exception ex){
+                JOptionPane.showMessageDialog(null,
+                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
+                return;
+            }
+
             instance.close(); // close the login UI
-            MainUserInterface.getInstance(); // start the main UI
+            MainUserInterface.createInstance(username); // start the main UI
         };
     }
 
@@ -136,7 +140,8 @@ public final class EventHandlers {
         return e -> {
             //check everything is good
             if (!RequestSender.getInstance().isAlive()) {
-                JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT, FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
+                        FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -165,7 +170,7 @@ public final class EventHandlers {
                     //server should respond with JSON because this will eventually be all request
                     InputOutputEntry serverResponse;
                     try {
-                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUsername());
+                        serverResponse = RequestSender.getInstance().sendRecording(recordingFile, ui.getUser());
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(ui.getFrame(), e1.getMessage(), FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                         resetRecordButton(ui, recordingFile);
@@ -204,7 +209,7 @@ public final class EventHandlers {
 
                             try {
                                 RequestSender.getInstance().delete(ui.getSelectedButton().getId(),
-                                        ui.getUsername());
+                                        ui.getUser());
                             } catch (Exception ex) {
                                 resetRecordButton(ui, recordingFile);
                                 JOptionPane.showMessageDialog(ui.getFrame(), ex.getMessage(),
@@ -223,7 +228,7 @@ public final class EventHandlers {
                         }
                         case UniversalConstants.CLEAR_ALL -> {
                             try {
-                                RequestSender.getInstance().clearHistory(ui.getUsername());
+                                RequestSender.getInstance().clearHistory(ui.getUser());
                             } catch (Exception ex) {
                                 resetRecordButton(ui, recordingFile);
                                 ex.printStackTrace();
