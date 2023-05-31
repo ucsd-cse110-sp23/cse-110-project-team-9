@@ -2,6 +2,7 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import sayit.common.UniversalConstants;
 import sayit.server.Helper;
 import sayit.server.db.common.IAccountHelper;
 
@@ -40,7 +41,7 @@ public class CheckAccountExistHandler  implements HttpHandler {
 
         System.out.println("Received POST request for /check-account");
         String query = exchange.getRequestURI().getQuery();
-        String username = Helper.getQueryParameter(query, "username");
+        String username = Helper.getQueryParameter(query, UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\twith invalid query: " + query);
             exchange.sendResponseHeaders(400, 0);

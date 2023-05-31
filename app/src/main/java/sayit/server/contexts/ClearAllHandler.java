@@ -2,6 +2,7 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import sayit.common.UniversalConstants;
 import sayit.server.Helper;
 import sayit.server.db.common.IPromptHelper;
 
@@ -40,7 +41,7 @@ public class ClearAllHandler implements HttpHandler {
 
         System.out.println("Received DELETE request for /clear-all");
 
-        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
+        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(400, 0);

@@ -1,6 +1,7 @@
 package sayit.server;
 
 import org.json.JSONObject;
+import sayit.common.UniversalConstants;
 import sayit.frontend.helpers.Pair;
 
 import java.io.FileOutputStream;
@@ -63,12 +64,12 @@ public final class Helper {
      * @param json The JSON object to extract from.
      * @return A pair of the username and password, or null if the JSON object is invalid.
      */
-    public static Pair<String, String> extractUsernamdPassword(JSONObject json) {
+    public static Pair<String, String> extractUsernamePassword(JSONObject json) {
         String username;
         String password;
         try {
-            username = json.getString("username");
-            password = json.getString("password");
+            username = json.getString(UniversalConstants.USERNAME);
+            password = json.getString(UniversalConstants.PASSWORD);
         } catch (Exception e) {
             return null;
         }

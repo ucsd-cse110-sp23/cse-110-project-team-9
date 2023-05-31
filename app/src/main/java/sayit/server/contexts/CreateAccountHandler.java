@@ -45,7 +45,7 @@ public class CreateAccountHandler implements HttpHandler {
 
         JSONObject json = new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
-        Pair<String, String> credentials = Helper.extractUsernamdPassword(json);
+        Pair<String, String> credentials = Helper.extractUsernamePassword(json);
         if (credentials == null) {
             System.out.println("\tbut is invalid.");
             exchange.sendResponseHeaders(400, 0);

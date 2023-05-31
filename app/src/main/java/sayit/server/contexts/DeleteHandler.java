@@ -2,6 +2,7 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import sayit.common.UniversalConstants;
 import sayit.server.Helper;
 import sayit.server.db.common.IPromptHelper;
 
@@ -41,7 +42,7 @@ public class DeleteHandler implements HttpHandler {
         System.out.println("Received DELETE request for /delete-question");
 
         String query = exchange.getRequestURI().getQuery();
-        String username = Helper.getQueryParameter(query, "username");
+        String username = Helper.getQueryParameter(query, UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             exchange.sendResponseHeaders(400, 0);
@@ -49,7 +50,7 @@ public class DeleteHandler implements HttpHandler {
             return;
         }
 
-        String idString = Helper.getQueryParameter(query, "id");
+        String idString = Helper.getQueryParameter(query, UniversalConstants.ID);
         if (idString == null) {
             System.out.println("\tbut is invalid because no ID specified.");
             exchange.sendResponseHeaders(400, 0);
