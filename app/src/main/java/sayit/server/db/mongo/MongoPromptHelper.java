@@ -52,6 +52,22 @@ public class MongoPromptHelper implements IPromptHelper {
     }
 
     /**
+     * Gets a prompt by username and id.
+     * @param username The username of the prompt.
+     * @param id       The id of the prompt.
+     * @return The prompt, or null if none exists.
+     */
+    @Override
+    public SayItPrompt get(String username, long id) {
+        return this._sayItPrompts.find(
+                and(
+                        eq(SayItPrompt.USERNAME_FIELD, username),
+                        eq(SayItPrompt.TIMESTAMP_FIELD, id)
+                )
+        ).first();
+    }
+
+    /**
      * Inserts a new <c>SayItPrompt</c> into the database.
      *
      * @param prompt The prompt to create.

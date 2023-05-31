@@ -49,6 +49,21 @@ public class TsvPromptHelper implements IPromptHelper {
     }
 
     /**
+     * Gets a prompt by username and id.
+     *
+     * @param username The username of the prompt.
+     * @param id       The id of the prompt.
+     * @return The prompt, or null if none exists.
+     */
+    @Override
+    public SayItPrompt get(String username, long id) {
+        return this._writer.getEntries().stream()
+                .filter(prompt -> prompt.getUsername().equals(username) && prompt.getTimestamp() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Inserts a new <c>SayItPrompt</c> into the TSV file.
      *
      * @param prompt The prompt to create.

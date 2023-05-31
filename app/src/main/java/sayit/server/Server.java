@@ -17,7 +17,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class Server {
     private final HttpServer _server;
-
     private final int _port;
     private Thread _serverThread;
 
