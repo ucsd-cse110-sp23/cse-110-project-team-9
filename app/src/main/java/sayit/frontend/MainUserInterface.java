@@ -105,6 +105,9 @@ public class MainUserInterface {
         if (userInterface == null) {
             userInterface = new MainUserInterface(username);
         }
+        else {
+            userInterface.setUser(username);
+        }
 
         return userInterface;
     }

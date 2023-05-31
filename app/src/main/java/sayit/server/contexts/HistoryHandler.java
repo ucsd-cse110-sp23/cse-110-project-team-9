@@ -46,7 +46,8 @@ public class HistoryHandler implements HttpHandler {
 
         System.out.println("Received GET request for /history");
 
-        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), "username");
+        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
+                SayItPrompt.USERNAME_FIELD);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(400, 0);

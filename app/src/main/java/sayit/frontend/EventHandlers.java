@@ -197,7 +197,7 @@ public final class EventHandlers {
                             if (ui.getSelectedButton() == null) {
                                 if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)
                                         && ui.getAnswerTextArea().getText().equals(ANSWER_HEADER_TEXT)) {
-                                    JOptionPane.showMessageDialog(ui.getFrame(), "No question selected.",
+                                    JOptionPane.showMessageDialog(ui.getFrame(), DELETION_NONE_SELECTED_TEXT,
                                             FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                                 }
 
