@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
 import static sayit.server.Helper.saveAudioFile;
@@ -53,7 +54,7 @@ public class InputHandler implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         // Make sure we have a POST request here
         if (!httpExchange.getRequestMethod().equals("POST")) {
-            httpExchange.sendResponseHeaders(405, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             httpExchange.close();
             return;
         }
@@ -65,7 +66,7 @@ public class InputHandler implements HttpHandler {
                 UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
-            httpExchange.sendResponseHeaders(400, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             httpExchange.close();
             return;
         }
@@ -95,7 +96,7 @@ public class InputHandler implements HttpHandler {
         String response;
         if (whisperCheck.isExceptionThrown()) {
             response = input;
-            httpExchange.sendResponseHeaders(400, response.length());
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
             httpExchange.getResponseBody().write(response.getBytes());
             httpExchange.close();
             return;
@@ -118,7 +119,7 @@ public class InputHandler implements HttpHandler {
                 answer = this.chatGpt.askQuestion(input);
             } catch (Exception e) {
                 response = "ChatGPT Error: " + e.getMessage();
-                httpExchange.sendResponseHeaders(400, response.length());
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
                 httpExchange.getResponseBody().write(response.getBytes());
                 httpExchange.close();
                 return;
@@ -150,7 +151,7 @@ public class InputHandler implements HttpHandler {
         }
 
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-        httpExchange.sendResponseHeaders(200, bytes.length);
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);
         httpExchange.close();
     }

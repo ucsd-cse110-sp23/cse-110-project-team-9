@@ -7,6 +7,7 @@ import sayit.server.Helper;
 import sayit.server.db.common.IAccountHelper;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a GET request for checking if an account exists.
@@ -34,7 +35,7 @@ public class CheckAccountExistHandler  implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("GET")) {
-            exchange.sendResponseHeaders(405, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             exchange.close();
             return;
         }
@@ -44,15 +45,14 @@ public class CheckAccountExistHandler  implements HttpHandler {
         String username = Helper.getQueryParameter(query, UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\twith invalid query: " + query);
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
 
         System.out.println("\twith username: " + username);
-
         String response = String.valueOf(this._accountHelper.getAccount(username) != null);
-        exchange.sendResponseHeaders(200, response.length());
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
         exchange.getResponseBody().write(response.getBytes());
         exchange.close();
     }

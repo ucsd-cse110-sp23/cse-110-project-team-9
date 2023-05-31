@@ -10,6 +10,7 @@ import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.doctypes.SayItPrompt;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class HistoryHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         if (!httpExchange.getRequestMethod().equals("GET")) {
-            httpExchange.sendResponseHeaders(405, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             httpExchange.close();
             return;
         }
@@ -50,7 +51,7 @@ public class HistoryHandler implements HttpHandler {
                 UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
-            httpExchange.sendResponseHeaders(400, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             httpExchange.close();
             return;
         }
@@ -73,7 +74,7 @@ public class HistoryHandler implements HttpHandler {
 
         String response = history.toString();
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-        httpExchange.sendResponseHeaders(200, bytes.length);
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);
         httpExchange.close();
     }

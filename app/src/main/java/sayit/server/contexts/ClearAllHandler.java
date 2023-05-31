@@ -7,6 +7,7 @@ import sayit.server.Helper;
 import sayit.server.db.common.IPromptHelper;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a DELETE request for clearing all questions.
@@ -34,7 +35,7 @@ public class ClearAllHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         if (!httpExchange.getRequestMethod().equals("DELETE")) {
-            httpExchange.sendResponseHeaders(405, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             httpExchange.close();
             return;
         }
@@ -44,7 +45,7 @@ public class ClearAllHandler implements HttpHandler {
         String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
-            httpExchange.sendResponseHeaders(400, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             httpExchange.close();
             return;
         }
@@ -53,7 +54,7 @@ public class ClearAllHandler implements HttpHandler {
         pHelper.save();
 
         String result = String.valueOf(numDeleted);
-        httpExchange.sendResponseHeaders(200, result.length());
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length());
         httpExchange.getResponseBody().write(result.getBytes());
         httpExchange.close();
     }

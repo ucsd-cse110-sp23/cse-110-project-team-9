@@ -9,6 +9,7 @@ import sayit.server.db.common.IAccountHelper;
 import sayit.server.db.doctypes.SayItAccount;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a POST request for logging into an account.
@@ -36,7 +37,7 @@ public class LoginHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("POST")) {
-            exchange.sendResponseHeaders(405, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             exchange.close();
             return;
         }
@@ -47,7 +48,7 @@ public class LoginHandler implements HttpHandler {
         Pair<String, String> credentials = Helper.extractUsernamePassword(json);
         if (credentials == null) {
             System.out.println("\tbut is invalid.");
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
@@ -57,14 +58,14 @@ public class LoginHandler implements HttpHandler {
         SayItAccount acc = this._accountHelper.getAccount(username);
         if (acc == null) {
             System.out.println("\taccount does not exists.");
-            exchange.sendResponseHeaders(409, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
 
         if (!acc.getPassword().equals(password)) {
             System.out.println("\tincorrect password");
-            exchange.sendResponseHeaders(409, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, 0);
             exchange.close();
             return;
         }
@@ -72,7 +73,7 @@ public class LoginHandler implements HttpHandler {
         System.out.println("\tlogin successful");
         System.out.println("\t\twith username: " + username);
 
-        exchange.sendResponseHeaders(200, 0);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
         exchange.close();
     }
 }

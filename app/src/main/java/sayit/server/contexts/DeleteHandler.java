@@ -7,6 +7,7 @@ import sayit.server.Helper;
 import sayit.server.db.common.IPromptHelper;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a DELETE request for deleting a question.
@@ -34,7 +35,7 @@ public class DeleteHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("DELETE")) {
-            exchange.sendResponseHeaders(405, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             exchange.close();
             return;
         }
@@ -45,7 +46,7 @@ public class DeleteHandler implements HttpHandler {
         String username = Helper.getQueryParameter(query, UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
@@ -53,7 +54,7 @@ public class DeleteHandler implements HttpHandler {
         String idString = Helper.getQueryParameter(query, UniversalConstants.ID);
         if (idString == null) {
             System.out.println("\tbut is invalid because no ID specified.");
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
@@ -63,7 +64,7 @@ public class DeleteHandler implements HttpHandler {
             id = Long.parseLong(idString);
         } catch (NumberFormatException e) {
             System.out.println("\tInvalid query string: " + query);
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
@@ -73,7 +74,7 @@ public class DeleteHandler implements HttpHandler {
         pHelper.save();
 
         String result = String.valueOf(deleteSuccess);
-        exchange.sendResponseHeaders(200, result.length());
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length());
         exchange.getResponseBody().write(result.getBytes());
         exchange.close();
     }
