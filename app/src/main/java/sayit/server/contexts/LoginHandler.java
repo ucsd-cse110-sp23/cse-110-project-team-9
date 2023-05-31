@@ -35,13 +35,12 @@ public class LoginHandler implements HttpHandler {
      */
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        
         if (!exchange.getRequestMethod().equals("POST")) {
             exchange.sendResponseHeaders(405, 0);
             exchange.close();
             return;
         }
-        
+
         System.out.println("Received POST request for /login");
         JSONObject json = new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
@@ -62,8 +61,8 @@ public class LoginHandler implements HttpHandler {
             exchange.close();
             return;
         }
-        
-        if(!acc.getPassword().equals(password)){
+
+        if (!acc.getPassword().equals(password)) {
             System.out.println("\tincorrect password");
             exchange.sendResponseHeaders(409, 0);
             exchange.close();
@@ -72,7 +71,7 @@ public class LoginHandler implements HttpHandler {
 
         System.out.println("\tlogin successful");
         System.out.println("\t\twith username: " + username);
-        
+
         exchange.sendResponseHeaders(200, 0);
         exchange.close();
     }
