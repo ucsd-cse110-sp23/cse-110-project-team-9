@@ -1,18 +1,10 @@
 package sayit.frontend;
 
+import javax.swing.*;
+import java.awt.*;
+
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TEXT;
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TITLE;
-
-import java.awt.Container;
-import java.awt.Dimension;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /**
  * The login user interface for the application.
@@ -89,7 +81,6 @@ public class LoginUserInterface {
      * @param contentPane The pane to add the components to.
      */
     private void addComponentsToPane(Container contentPane) {
-
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         JPanel topPanel = new JPanel();
         topPanel.add(new JLabel(EMAIL_HEADER));
@@ -126,7 +117,7 @@ public class LoginUserInterface {
 
     /**
      * Returns the text in the email field
-     * 
+     *
      * @return the text in the email field
      */
     public String getEmail() {
@@ -135,7 +126,7 @@ public class LoginUserInterface {
 
     /**
      * Returns the text in the password field
-     * 
+     *
      * @return the text in the password field
      */
     public String getPassword() {
@@ -145,7 +136,7 @@ public class LoginUserInterface {
     /**
      * Clears the text in the email and password field
      */
-    public void clearText(){
+    public void clearText() {
         emailField.setText(EMPTY_TEXT);
         passwordField.setText(EMPTY_TEXT);
     }

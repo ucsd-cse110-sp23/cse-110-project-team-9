@@ -1,143 +1,191 @@
 package sayit;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sayit.common.qa.Answer;
-import sayit.common.qa.Question;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.UniversalConstants;
+import sayit.common.qa.InputOutputEntry;
+import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
-import sayit.server.openai.IChatGpt;
-import sayit.server.openai.OpenAiException;
-import sayit.server.openai.WhisperCheck;
-import sayit.server.storage.IStore;
-import sayit.server.storage.TsvStore;
+import sayit.server.Server;
+import sayit.server.ServerConstants;
+import sayit.server.db.store.TsvAccountHelper;
+import sayit.server.db.store.TsvPromptHelper;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static sayit.TestConstants.DUMMY_FILE;
+import static sayit.TestConstants.PORT;
 
 public class WalkthroughTest {
-    private static final String TEST_FILE = "test.tsv";
+    private static final String TEST_PROMPT_TSV = "test_prompt.tsv";
+    private static final String TEST_ACCOUNT_TSV = "test_account.tsv";
+
+    @BeforeEach
+    public void setUp() {
+        var file = new File(TEST_PROMPT_TSV);
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+        file = new File(TEST_ACCOUNT_TSV);
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+    }
 
     @Test
-    public void testWalkthrough() throws OpenAiException, IOException, InterruptedException {
-        String[][] sampleQuestionAnswers = new String[][]{
-                {"What is 1 + 1?", "2"},
-                {"What is 2 + 2?", "4"},
-                {"What is 3 + 3?", "6"},
-                {"What is 4 + 4?", "8"},
-                {"What is 5 + 5?", "10"},
-                {"What is 6 + 6?", "12"},
-                {"What is 7 + 7?", "14"},
-                {"What is 8 + 8?", "16"},
-                {"What is 9 + 9?", "18"},
-                {"What is 10 + 10?", "20"},
-        };
+    public void testAppIteration1WalkThrough() throws InterruptedException, IOException, URISyntaxException {
+        MockWhisper whisper = new MockWhisper(false, "Question. What is 1 + 1?");
+        MockChatGpt chatGpt = new MockChatGpt(false, "The answer is 2.");
 
-        // Let's create our store, which can be used to store any questions and answers
-        IStore<QuestionAnswerEntry> store = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(store);
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(whisper)
+                .setChatGpt(chatGpt)
+                .setPromptHelper(new TsvPromptHelper(TEST_PROMPT_TSV))
+                .setAccountHelper(new TsvAccountHelper(TEST_ACCOUNT_TSV))
+                .build();
 
-        // Iterate over each question and answer, and pretend that we're "asking" them.
-        int idx = 0;
-        for (String[] qa : sampleQuestionAnswers) {
-            MockWhisper whisper = new MockWhisper(false, qa[0]);
-            IChatGpt chatGpt = new MockChatGpt(false, qa[1]);
-            WhisperCheck check = new WhisperCheck(whisper, null);
+        server.start();
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
+        // Wait for server to start
+        Thread.sleep(2000);
 
-            // First, let's transcribe our message.
-            String transcription = check.output();
 
-            // Using the transcription, let's ask the question.
-            String response = chatGpt.askQuestion(transcription);
+        // Time to run through the application. Greg Miranda begins by creating a new account
+        // with username "gmiranda" and password "cse110isbad".
+        assertTrue(requestSender.createAccount("gmiranda", "cse110isbad"));
+        // Let's make sure the account exists.
+        assertTrue(requestSender.doesAccountExist("gmiranda"));
+        // And then let's try to log into the account.
+        assertTrue(requestSender.login("gmiranda", "cse110isbad"));
+        // Greg Miranda then asks a new question.
+        var resp1 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.QUESTION, resp1.getType());
+        assertEquals("What is 1 + 1?", resp1.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("The answer is 2.", resp1.getOutput().getOutputText());
 
-            // Okay, let's now save the question and answer to a class.
-            Question question = new Question(transcription);
-            Answer answer = new Answer(response);
-            QuestionAnswerEntry entry = new QuestionAnswerEntry(question, answer);
+        Thread.sleep(250);
+        // Greg Miranda then asks another question.
+        whisper.setValues(false, "Question. What is 2 + 2?");
+        chatGpt.setValues(false, "The answer is 4.");
+        var resp2 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.QUESTION, resp2.getType());
+        assertEquals("What is 2 + 2?", resp2.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("The answer is 4.", resp2.getOutput().getOutputText());
 
-            // And let's now save the question and answer to the store.
-            assertEquals(idx, store.insert(entry));
-            idx++;
-        }
+        Thread.sleep(250);
+        // Greg Miranda then asks another question.
+        whisper.setValues(false, "Question. Why is CSE 110 a bad class?");
+        chatGpt.setValues(false, "Because it is.");
+        var resp3 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.QUESTION, resp3.getType());
+        assertEquals("Why is CSE 110 a bad class?", resp3.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("Because it is.", resp3.getOutput().getOutputText());
 
-        // Make sure we have the right number of entries.
-        assertEquals(10, store.size());
+        // Greg Miranda now wants to select the second question (What is 2 + 2)
+        var history1 = requestSender.getHistory("gmiranda");
+        assertEquals(3, history1.size());
+        var secondQ = history1.values().stream()
+                .filter(x -> x.getInput().getInputText().equals("What is 2 + 2?"))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(secondQ);
 
-        // Okay, let's suppose the user wants to look at their response to "What is 3 + 3?"
-        // The user will press the "What is 3 + 3?" button, and we'll get the index of that button (2)
-        // and use that to get the question and answer.
-        assertEquals(new QuestionAnswerEntry(new Question("What is 3 + 3?"), new Answer("6")), store.get(2));
+        // Now Greg Miranda wants to delete the question.
+        whisper.setValues(false, "Delete prompt.");
+        var resp4 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.DELETE_PROMPT, resp4.getType());
+        assertTrue(requestSender.delete(secondQ.getID(), "gmiranda"));
+        // Make sure the question is deleted.
+        var history2 = requestSender.getHistory("gmiranda");
+        assertEquals(2, history2.size());
+        var secondQ2 = history2.values().stream()
+                .filter(x -> x.getInput().getInputText().equals("What is 2 + 2?"))
+                .findFirst()
+                .orElse(null);
+        assertNull(secondQ2);
 
-        // Now, let's suppose the user closes the application. Before the app closes, we should
-        // probably save the store to disk.
-        store.save();
+        // Greg Miranda now wants to ask another question
+        whisper.setValues(false, "Question. How do I pre-record a CSE 110 lecture?");
+        chatGpt.setValues(false, "Welcome to CSE 110 pre-recorded lecture.");
+        var resp5 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.QUESTION, resp5.getType());
+        assertEquals("How do I pre-record a CSE 110 lecture?", resp5.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("Welcome to CSE 110 pre-recorded lecture.", resp5.getOutput().getOutputText());
 
-        // Now, let's suppose the user opens the application again. We should load the store from disk.
-        IStore<QuestionAnswerEntry> loadedStore = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(loadedStore);
+        // Ensure that the question is added to the history.
+        var history3 = requestSender.getHistory("gmiranda");
+        assertEquals(3, history3.size());
 
-        // Let's make sure the loaded store has the same number of entries as the original store.
-        assertEquals(store.size(), loadedStore.size());
+        // Greg Miranda now wants to log out.
+        // Greg's friend, Billy, now wants to log in, but naturally forgot his password.
+        assertFalse(requestSender.login("billy", "cse110isgood"));
+        // So, Billy creates a new account
+        assertTrue(requestSender.createAccount("billy", "cse11isbad"));
+        // and then tries to log into it
+        assertTrue(requestSender.login("billy", "cse11isbad"));
+        // Billy then asks a question.
+        whisper.setValues(false, "Question. Am I a monkey?");
+        chatGpt.setValues(false, "Yes.");
+        var resp6 = requestSender.sendRecording(new File(DUMMY_FILE), "billy");
+        assertEquals(UniversalConstants.QUESTION, resp6.getType());
+        assertEquals("Am I a monkey?", resp6.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("Yes.", resp6.getOutput().getOutputText());
 
-        // The user now clicks on the "What is 5 + 5?" button. We'll get the index of that button (4)
-        // and use that to get the question and answer.
-        assertEquals(new QuestionAnswerEntry(new Question("What is 5 + 5?"), new Answer("10")), loadedStore.get(4));
+        // Billy asks another question.
+        whisper.setValues(false, "Question. Can you tell Greg to go away during lecture?");
+        chatGpt.setValues(false, "Yes.");
+        var resp7 = requestSender.sendRecording(new File(DUMMY_FILE), "billy");
+        assertEquals(UniversalConstants.QUESTION, resp7.getType());
+        assertEquals("Can you tell Greg to go away during lecture?", resp7.getInput().getInputText());
+        // Make sure the answer is correct.
+        assertEquals("Yes.", resp7.getOutput().getOutputText());
 
-        // Cool. Maybe the user isn't happy with the 5 + 5 answer. Let's delete it.
-        assertTrue(loadedStore.delete(4));
-        assertNull(loadedStore.get(4));
+        // Billy logs out and Greg now wants to log in.
+        // Naturally, Greg forgets his password
+        assertFalse(requestSender.login("gmiranda", "cse110isgood"));
+        // But, Greg remembers it!
+        assertTrue(requestSender.login("gmiranda", "cse110isbad"));
+        // Greg looks at the questions that he has asked.
+        var history4 = requestSender.getHistory("gmiranda");
+        assertEquals(3, history4.size());
+        var idGregAsked = history4.values().stream()
+                .map(InputOutputEntry::getID)
+                .toList();
+        var idGregAskedBefore = history3.values().stream()
+                .map(InputOutputEntry::getID)
+                .toList();
+        assertEquals(idGregAskedBefore, idGregAsked);
 
-        // The user now clicks on the "What is 10 + 10?" button. We'll get the index of that button (9).
-        // and use that to get the question and answer.
-        assertEquals(new QuestionAnswerEntry(new Question("What is 10 + 10?"), new Answer("20")), loadedStore.get(9));
+        // Greg now wants to clear all of his questions.
+        // But, of course, he forgets the command.
+        whisper.setValues(false, "Clear questions");
+        var resp8 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.ERROR, resp8.getType());
 
-        // The user now asks "What is 5 + 5?" again.
-        MockWhisper whisper = new MockWhisper(false, "What is 5 + 5?");
-        IChatGpt chatGpt = new MockChatGpt(false, "It's ten!");
-        WhisperCheck check = new WhisperCheck(whisper, null);
-        String transcription = check.output();
-        String response = chatGpt.askQuestion(transcription);
+        // Greg now remembers the command.
+        whisper.setValues(false, "Clear all");
+        var resp9 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.CLEAR_ALL, resp9.getType());
+        assertEquals(3, requestSender.clearHistory("gmiranda"));
+        // Make sure that all of Greg's questions are deleted.
+        var history5 = requestSender.getHistory("gmiranda");
+        assertEquals(0, history5.size());
 
-        // Let's save the new question and answer to the store.
-        Question question = new Question(transcription);
-        Answer answer = new Answer(response);
-        QuestionAnswerEntry entry = new QuestionAnswerEntry(question, answer);
-
-        // And let's now save the question and answer to the store.
-        loadedStore.insert(entry);
-
-        // Finally, let's check that the new question and answer was saved.
-        assertEquals(new QuestionAnswerEntry(new Question("What is 5 + 5?"), new Answer("It's ten!")), loadedStore.get(10));
-        assertNull(loadedStore.get(4));
-
-        // Okay, maybe the user wants to *clear all* of their questions and answers.
-        assertTrue(loadedStore.clearAll());
-
-        // And then suppose the user asks "What is the meaning of life?"
-        whisper = new MockWhisper(false, "What is the meaning of life?");
-        chatGpt = new MockChatGpt(false, "42");
-        check = new WhisperCheck(whisper, null);
-        transcription = check.output();
-        response = chatGpt.askQuestion(transcription);
-
-        // Let's save the new question and answer to the store.
-        loadedStore.insert(new QuestionAnswerEntry(new Question(transcription), new Answer(response)));
-        // And make sure it's actually there
-        assertEquals(new QuestionAnswerEntry(new Question("What is the meaning of life?"), new Answer("42")), loadedStore.get(0));
-
-        // Great. Let's save it once more.
-        loadedStore.save();
-
-        // And pretend the user closes the application and then opens it again.
-        IStore<QuestionAnswerEntry> reloadedStore = TsvStore.createOrOpenStore(TEST_FILE);
-        assertNotNull(reloadedStore);
-
-        // And the user clicks on the "What is the meaning of life?" button.
-        assertEquals(new QuestionAnswerEntry(new Question("What is the meaning of life?"), new Answer("42")), reloadedStore.get(0));
-
-        // And the user is happy. :)
+        // Billy never touches the app again.
+        // Greg has since retired from teaching.
         // The end.
-        assertTrue(reloadedStore.clearAll());
+
+        server.stop();
     }
 }

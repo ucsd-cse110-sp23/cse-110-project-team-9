@@ -2,6 +2,7 @@ package sayit.server.db.doctypes;
 
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+import sayit.common.UniversalConstants;
 
 /**
  * A class representing a prompt in the <c>sayit</c> database. Each user can
@@ -10,16 +11,11 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
  */
 public class SayItPrompt {
     // Document Fields.
-    public static final String USERNAME_FIELD = "username";
+    public static final String USERNAME_FIELD = UniversalConstants.USERNAME;
     public static final String TIMESTAMP_FIELD = "timestamp";
-    public static final String TYPE_FIELD = "type";
-    public static final String TITLE_FIELD = "title";
-    public static final String RESULT_FIELD = "result";
-
-    // Types
-    public static final String EMAIL_DRAFT = "EMAIL_DRAFT";
-    public static final String QUESTION = "QUESTION";
-    public static final String EMAIL_SENT = "EMAIL_SENT";
+    public static final String TYPE_FIELD = UniversalConstants.TYPE;
+    public static final String INPUT_FIELD = UniversalConstants.INPUT;
+    public static final String OUTPUT_FIELD = UniversalConstants.OUTPUT;
 
     @BsonProperty(USERNAME_FIELD)
     private String username;
@@ -30,11 +26,11 @@ public class SayItPrompt {
     @BsonProperty(TYPE_FIELD)
     private String type;
 
-    @BsonProperty(TITLE_FIELD)
-    private String title;
+    @BsonProperty(INPUT_FIELD)
+    private String input;
 
-    @BsonProperty(RESULT_FIELD)
-    private String result;
+    @BsonProperty(OUTPUT_FIELD)
+    private String output;
 
     /**
      * Create a new <c>SayItPrompt</c> with no properties set. Required for
@@ -49,15 +45,15 @@ public class SayItPrompt {
      * @param username  The username.
      * @param timestamp The timestamp.
      * @param type      The type.
-     * @param title     The title.
-     * @param result    The result.
+     * @param input     The input.
+     * @param output    The output.
      */
-    public SayItPrompt(String username, long timestamp, String type, String title, String result) {
+    public SayItPrompt(String username, long timestamp, String type, String input, String output) {
         this.username = username;
         this.timestamp = timestamp;
         this.type = type;
-        this.title = title;
-        this.result = result;
+        this.input = input;
+        this.output = output;
     }
 
     /**
@@ -88,21 +84,21 @@ public class SayItPrompt {
     }
 
     /**
-     * Gets the title associated with this prompt.
+     * Gets the input associated with this prompt.
      *
-     * @return The title.
+     * @return The input.
      */
-    public String getTitle() {
-        return this.title;
+    public String getInput() {
+        return this.input;
     }
 
     /**
-     * Gets the result associated with this prompt.
+     * Gets the output associated with this prompt.
      *
-     * @return The result.
+     * @return The output.
      */
-    public String getResult() {
-        return this.result;
+    public String getOutput() {
+        return this.output;
     }
 
     /**
@@ -133,21 +129,21 @@ public class SayItPrompt {
     }
 
     /**
-     * Sets the title associated with this prompt.
+     * Sets the input associated with this prompt.
      *
-     * @param title The title.
+     * @param input The input.
      */
-    public void setTitle(String title) {
-        this.title = title;
+    public void setInput(String input) {
+        this.input = input;
     }
 
     /**
-     * Sets the result associated with this prompt.
+     * Sets the output associated with this prompt.
      *
-     * @param result The result.
+     * @param output The output.
      */
-    public void setResult(String result) {
-        this.result = result;
+    public void setOutput(String output) {
+        this.output = output;
     }
 
     /**
@@ -161,8 +157,18 @@ public class SayItPrompt {
                 + "username='" + username + '\''
                 + ", timestamp='" + timestamp + '\''
                 + ", type='" + type + '\''
-                + ", title='" + title + '\''
-                + ", result='" + result + '\''
+                + ", input='" + input + '\''
+                + ", output='" + output + '\''
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SayItPrompt prompt) {
+            return (this.username.equals(prompt.getUsername()) && this.timestamp == prompt.getTimestamp()
+                    && this.type.equals(prompt.getType()) && this.input.equals(prompt.getInput())
+                    && this.output.equals(prompt.getOutput()));
+        }
+        return false;
     }
 }

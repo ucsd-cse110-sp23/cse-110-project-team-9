@@ -6,8 +6,8 @@ import sayit.server.openai.OpenAiException;
 import java.io.File;
 
 public class MockWhisper implements IWhisper {
-    private final boolean _shouldThrowError;
-    private final String _answerOrError;
+    private boolean _shouldThrowError;
+    private String _answerOrError;
 
     public MockWhisper(boolean shouldThrowError, String withMsg) {
         this._shouldThrowError = shouldThrowError;
@@ -21,5 +21,10 @@ public class MockWhisper implements IWhisper {
         }
 
         return this._answerOrError;
+    }
+
+    public void setValues(boolean shouldThrowError, String withMsg) {
+        this._shouldThrowError = shouldThrowError;
+        this._answerOrError = withMsg;
     }
 }

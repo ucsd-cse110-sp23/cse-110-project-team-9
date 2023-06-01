@@ -19,7 +19,7 @@ public class TsvPromptHelper implements IPromptHelper {
     public TsvPromptHelper(String fileName) {
         this._writer = TsvWriter.createWriter(
                 List.of(SayItPrompt.USERNAME_FIELD, SayItPrompt.TIMESTAMP_FIELD,
-                        SayItPrompt.TYPE_FIELD, SayItPrompt.TITLE_FIELD, SayItPrompt.RESULT_FIELD),
+                        SayItPrompt.TYPE_FIELD, SayItPrompt.INPUT_FIELD, SayItPrompt.OUTPUT_FIELD),
                 fileName,
                 new ITsvStrategy<>() {
                     @Override
@@ -30,7 +30,7 @@ public class TsvPromptHelper implements IPromptHelper {
                     @Override
                     public String[] write(SayItPrompt obj) {
                         return new String[]{obj.getUsername(), Long.toString(obj.getTimestamp()),
-                                obj.getType(), obj.getTitle(), obj.getResult()};
+                                obj.getType(), obj.getInput(), obj.getOutput()};
                     }
                 });
     }
@@ -49,6 +49,21 @@ public class TsvPromptHelper implements IPromptHelper {
     }
 
     /**
+     * Gets a prompt by username and id.
+     *
+     * @param username The username of the prompt.
+     * @param id       The id of the prompt.
+     * @return The prompt, or null if none exists.
+     */
+    @Override
+    public SayItPrompt get(String username, long id) {
+        return this._writer.getEntries().stream()
+                .filter(prompt -> prompt.getUsername().equals(username) && prompt.getTimestamp() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Inserts a new <c>SayItPrompt</c> into the TSV file.
      *
      * @param prompt The prompt to create.
@@ -56,6 +71,29 @@ public class TsvPromptHelper implements IPromptHelper {
     @Override
     public void createPrompt(SayItPrompt prompt) {
         this._writer.addEntry(prompt);
+    }
+
+    /**
+     * Deletes the <c>SayItPrompt</c> from the database.
+     *
+     * @param username  The username of the prompt.
+     * @param timestamp The timestamp of the prompt.
+     * @return True if the prompt was deleted, false otherwise.
+     */
+    @Override
+    public boolean deletePrompt(String username, long timestamp) {
+        return this._writer.removeEntriesBy(p -> p.getUsername().equals(username) && p.getTimestamp() == timestamp) > 0;
+    }
+
+    /**
+     * Clears all <c>SayItPrompt</c> under the specific username.
+     *
+     * @param username The username
+     * @return The number of prompts deleted.
+     */
+    @Override
+    public long clearAllPrompts(String username) {
+        return this._writer.removeEntriesBy(p -> p.getUsername().equals(username));
     }
 
     /**

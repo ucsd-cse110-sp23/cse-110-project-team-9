@@ -3,7 +3,7 @@ package sayit.common.qa;
 /**
  * Represents a question asked by a user.
  */
-public class Question {
+public class UserInput {
     private String text;
 
     /**
@@ -11,7 +11,7 @@ public class Question {
      *
      * @param s The question.
      */
-    public Question(String s) {
+    public UserInput(String s) {
         this.text = s;
 
     }
@@ -21,7 +21,7 @@ public class Question {
      *
      * @param s The question to set.
      */
-    public void setQuestion(String s) {
+    public void setInput(String s) {
         this.text = s;
     }
 
@@ -30,7 +30,7 @@ public class Question {
      *
      * @return The question.
      */
-    public String getQuestionText() {
+    public String getInputText() {
         return text;
     }
 
@@ -42,7 +42,7 @@ public class Question {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Question o) {
+        if (obj instanceof UserInput o) {
             return this.text.equals(o.text);
         }
 

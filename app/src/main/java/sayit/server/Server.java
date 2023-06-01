@@ -1,12 +1,11 @@
 package sayit.server;
 
 import com.sun.net.httpserver.HttpServer;
-import sayit.common.qa.QuestionAnswerEntry;
 import sayit.server.contexts.*;
 import sayit.server.db.common.IAccountHelper;
+import sayit.server.db.common.IPromptHelper;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
-import sayit.server.storage.IStore;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,21 +17,20 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class Server {
     private final HttpServer _server;
-
     private final int _port;
     private Thread _serverThread;
 
     /**
      * Creates a new server.
      *
-     * @param storage       The storage to use.
+     * @param pHelper       The prompt helper to use.
      * @param accountHelper The account helper to use.
      * @param host          The host to use.
      * @param port          The port to use.
      * @param whisper       The <c>whisper</c> instance to use.
      * @param chatgpt       The <c>ChatGPT</c> instance to use.
      */
-    private Server(IStore<QuestionAnswerEntry> storage, IAccountHelper accountHelper,
+    private Server(IPromptHelper pHelper, IAccountHelper accountHelper,
                    String host, int port, IWhisper whisper, IChatGpt chatgpt) {
         this._port = port;
 
@@ -48,11 +46,11 @@ public class Server {
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)
                 Executors.newFixedThreadPool(10);
 
-        if (storage != null) {
-            this._server.createContext("/ask", new AskQuestionHandler(storage, whisper, chatgpt));
-            this._server.createContext("/history", new HistoryHandler(storage));
-            this._server.createContext("/delete-question", new DeleteHandler(storage));
-            this._server.createContext("/clear-all", new ClearAllHandler(storage));
+        if (pHelper != null) {
+            this._server.createContext("/input", new InputHandler(pHelper, whisper, chatgpt));
+            this._server.createContext("/history", new HistoryHandler(pHelper));
+            this._server.createContext("/delete-question", new DeleteHandler(pHelper));
+            this._server.createContext("/clear-all", new ClearAllHandler(pHelper));
         }
 
         if (accountHelper != null) {
@@ -95,7 +93,7 @@ public class Server {
      * A builder for the <c>Server</c> class.
      */
     public static class ServerBuilder {
-        private IStore<QuestionAnswerEntry> _storage;
+        private IPromptHelper _pHelper;
         private IAccountHelper _accountHelper;
         private String _host;
         private int _port = -1;
@@ -105,11 +103,11 @@ public class Server {
         /**
          * Sets the storage to use.
          *
-         * @param storage The storage to use.
+         * @param pHelper The prompt helper to use.
          * @return The builder.
          */
-        public ServerBuilder setStorage(IStore<QuestionAnswerEntry> storage) {
-            this._storage = storage;
+        public ServerBuilder setPromptHelper(IPromptHelper pHelper) {
+            this._pHelper = pHelper;
             return this;
         }
 
@@ -183,7 +181,7 @@ public class Server {
             }
 
             return new Server(
-                    this._storage,
+                    this._pHelper,
                     this._accountHelper,
                     this._host,
                     this._port,

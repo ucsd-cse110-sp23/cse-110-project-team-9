@@ -4,8 +4,8 @@ import sayit.server.openai.IChatGpt;
 import sayit.server.openai.OpenAiException;
 
 public class MockChatGpt implements IChatGpt {
-    private final boolean _shouldThrowError;
-    private final String _answerOrError;
+    private boolean _shouldThrowError;
+    private String _answerOrError;
 
     public MockChatGpt(boolean shouldThrowError, String withMsg) {
         this._shouldThrowError = shouldThrowError;
@@ -19,5 +19,10 @@ public class MockChatGpt implements IChatGpt {
         }
 
         return this._answerOrError;
+    }
+
+    public void setValues(boolean shouldThrowError, String withMsg) {
+        this._shouldThrowError = shouldThrowError;
+        this._answerOrError = withMsg;
     }
 }

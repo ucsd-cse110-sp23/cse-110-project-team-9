@@ -2,26 +2,27 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.storage.IStore;
+import sayit.server.db.common.IPromptHelper;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a DELETE request for deleting a question.
  * The endpoint will be <c>/delete-question</c>.
  */
 public class DeleteHandler implements HttpHandler {
-    private final IStore<QuestionAnswerEntry> data;
+    private final IPromptHelper pHelper;
 
     /**
      * Creates a new instance of the <c>AskQuestionHandler</c> class.
      *
-     * @param data The store to use.
+     * @param helper The Prompt Helper to use.
      */
-    public DeleteHandler(IStore<QuestionAnswerEntry> data) {
-        this.data = data;
+    public DeleteHandler(IPromptHelper helper) {
+        this.pHelper = helper;
     }
 
     /**
@@ -34,7 +35,7 @@ public class DeleteHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("DELETE")) {
-            exchange.sendResponseHeaders(405, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             exchange.close();
             return;
         }
@@ -42,34 +43,38 @@ public class DeleteHandler implements HttpHandler {
         System.out.println("Received DELETE request for /delete-question");
 
         String query = exchange.getRequestURI().getQuery();
-        String idString = Helper.getSingleQueryParameter(query, "id");
-        if (idString == null) {
-            System.out.println("\tInvalid query string: " + query);
-            exchange.sendResponseHeaders(400, 0);
+        String username = Helper.getQueryParameter(query, UniversalConstants.USERNAME);
+        if (username == null) {
+            System.out.println("\tbut is invalid because no username specified.");
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
 
-        int id;
+        String idString = Helper.getQueryParameter(query, UniversalConstants.ID);
+        if (idString == null) {
+            System.out.println("\tbut is invalid because no ID specified.");
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            exchange.close();
+            return;
+        }
+
+        long id;
         try {
-            id = Integer.parseInt(idString);
+            id = Long.parseLong(idString);
         } catch (NumberFormatException e) {
             System.out.println("\tInvalid query string: " + query);
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
 
         System.out.println("\twith ID: " + id);
-        if (!data.getEntries().containsKey(id)) {
-            exchange.sendResponseHeaders(404, 0);
-            exchange.close();
-            return;
-        }
+        boolean deleteSuccess = pHelper.deletePrompt(username, id);
+        pHelper.save();
 
-        String result = String.valueOf(data.delete(id));
-        data.save();
-        exchange.sendResponseHeaders(200, result.length());
+        String result = String.valueOf(deleteSuccess);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length());
         exchange.getResponseBody().write(result.getBytes());
         exchange.close();
     }

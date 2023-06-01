@@ -2,25 +2,27 @@ package sayit.server.contexts;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import sayit.common.qa.QuestionAnswerEntry;
-import sayit.server.storage.IStore;
+import sayit.common.UniversalConstants;
+import sayit.server.Helper;
+import sayit.server.db.common.IPromptHelper;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a DELETE request for clearing all questions.
  * The endpoint will be <c>/delete-question</c>.
  */
 public class ClearAllHandler implements HttpHandler {
-    private final IStore<QuestionAnswerEntry> data;
+    private final IPromptHelper pHelper;
 
     /**
      * Creates a new instance of the <c>AskQuestionHandler</c> class.
      *
-     * @param data The store to use.
+     * @param helper The Prompt Helper to use.
      */
-    public ClearAllHandler(IStore<QuestionAnswerEntry> data) {
-        this.data = data;
+    public ClearAllHandler(IPromptHelper helper) {
+        this.pHelper = helper;
     }
 
     /**
@@ -33,16 +35,26 @@ public class ClearAllHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         if (!httpExchange.getRequestMethod().equals("DELETE")) {
-            httpExchange.sendResponseHeaders(405, 0);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             httpExchange.close();
             return;
         }
 
         System.out.println("Received DELETE request for /clear-all");
 
-        String result = String.valueOf(data.clearAll());
-        data.save();
-        httpExchange.sendResponseHeaders(200, result.length());
+        String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(), UniversalConstants.USERNAME);
+        if (username == null) {
+            System.out.println("\tbut is invalid because no username specified.");
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            httpExchange.close();
+            return;
+        }
+
+        long numDeleted = pHelper.clearAllPrompts(username);
+        pHelper.save();
+
+        String result = String.valueOf(numDeleted);
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length());
         httpExchange.getResponseBody().write(result.getBytes());
         httpExchange.close();
     }

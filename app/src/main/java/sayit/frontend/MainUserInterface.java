@@ -1,6 +1,6 @@
 package sayit.frontend;
 
-import sayit.common.qa.QuestionAnswerEntry;
+import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.helpers.ImageHelper;
 
 import javax.swing.*;
@@ -15,6 +15,8 @@ import static sayit.frontend.FrontEndConstants.*;
  * The main user interface for the application.
  */
 public class MainUserInterface {
+    private String currentUsername;
+
     private JButton startButton;
 
     private JPanel scrollBar;
@@ -29,11 +31,12 @@ public class MainUserInterface {
     private final JFrame frame;
 
     private AudioRecorder recorder;
-    
-    //stores the username of the current login
-    private String user;
 
-    private MainUserInterface() {
+    private MainUserInterface(String username) {
+        if (username != null) {
+            this.currentUsername = username;
+        }
+
         this.frame = new JFrame(APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addComponentsToPane(this.frame.getContentPane());
@@ -85,7 +88,25 @@ public class MainUserInterface {
      */
     public static MainUserInterface getInstance() {
         if (userInterface == null) {
-            userInterface = new MainUserInterface();
+            userInterface = new MainUserInterface(null);
+        }
+
+        return userInterface;
+    }
+
+    /**
+     * Gets or creates a new instance of the <c>MainUserInterface</c> class. Note that
+     * you should use this method if you want to specify a username.
+     *
+     * @param username The username to use.
+     * @return The instance of the <c>MainUserInterface</c> class.
+     */
+    public static MainUserInterface createInstance(String username) {
+        if (userInterface == null) {
+            userInterface = new MainUserInterface(username);
+        }
+        else {
+            userInterface.setUser(username);
         }
 
         return userInterface;
@@ -96,9 +117,9 @@ public class MainUserInterface {
      *
      * @param entry The entry to display.
      */
-    public void displayEntry(QuestionAnswerEntry entry) {
-        questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getQuestion().getQuestionText().trim());
-        answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getAnswer().getAnswerText().trim());
+    public void displayEntry(InputOutputEntry entry) {
+        questionTextArea.setText(QUESTION_HEADER_TEXT + entry.getInput().getInputText().trim());
+        answerTextArea.setText(ANSWER_HEADER_TEXT + entry.getOutput().getOutputText().trim());
     }
 
     /**
@@ -113,9 +134,9 @@ public class MainUserInterface {
             return;
         }
 
-        Map<Integer, QuestionAnswerEntry> entries;
+        Map<Long, InputOutputEntry> inputHistory;
         try {
-            entries = RequestSender.getInstance().getHistory();
+            inputHistory = RequestSender.getInstance().getHistory(this.currentUsername);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this.frame, e.getMessage(), ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
             return;
@@ -154,10 +175,10 @@ public class MainUserInterface {
 
         // load entries onto scrollBar
 
-        for (Map.Entry<Integer, QuestionAnswerEntry> entry : entries.entrySet()) {
-            String question = entry.getValue().getQuestion().getQuestionText();
+        for (Map.Entry<Long, InputOutputEntry> entry : inputHistory.entrySet()) {
+            String question = entry.getValue().getInput().getInputText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
-            button.setPreferredSize(new Dimension(180, 100));
+            button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
             button.addActionListener(EventHandlers.onQaButtonPress(this, entry.getValue(), button));
             scrollBar.add(button);
         }
@@ -202,7 +223,7 @@ public class MainUserInterface {
      * displayed.
      *
      * @return The button associated with the question that is currently being
-     *         displayed.
+     * displayed.
      */
     public QuestionButton getSelectedButton() {
         return selectedButton;
@@ -210,9 +231,10 @@ public class MainUserInterface {
 
     /**
      * Gets the Start button
+     *
      * @return The Start button
      */
-    public JButton getStartButton(){
+    public JButton getStartButton() {
         return startButton;
     }
 
@@ -255,19 +277,20 @@ public class MainUserInterface {
 
     /**
      * Sets the user field.
-     * 
+     *
      * @param user The username that's currently logged in.
      */
-    public void setUser(String user){
-        this.user = user;
+    public void setUser(String user) {
+        this.currentUsername = user;
     }
+
     /**
      * Gets the user field.
-     * 
-     * @param user The username that's currently logged in.
+     *
+     * @return The username that's currently logged in.
      */
-    public String getUser(){
-        return this.user;
+    public String getUser() {
+        return this.currentUsername;
     }
 }
 
@@ -275,7 +298,7 @@ public class MainUserInterface {
  * Button class for questions on sidebar
  */
 class QuestionButton extends JButton {
-    private final int id;
+    private final long id;
 
     /**
      * Creates a <c>QuestionButton</c> object with the displayName.
@@ -284,9 +307,9 @@ class QuestionButton extends JButton {
      * @param id          The ID of the corresponding QuestionAnswerEntry in the
      *                    database
      */
-    public QuestionButton(String displayName, int id) {
+    public QuestionButton(String displayName, long id) {
         super(displayName);
-        this.setPreferredSize(new Dimension(180, 100));
+        this.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
         this.id = id;
     }
 
@@ -295,7 +318,7 @@ class QuestionButton extends JButton {
      *
      * @return The ID.
      */
-    public int getId() {
+    public long getId() {
         return this.id;
     }
 }

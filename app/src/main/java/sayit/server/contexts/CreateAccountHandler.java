@@ -3,10 +3,13 @@ package sayit.server.contexts;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
+import sayit.frontend.helpers.Pair;
+import sayit.server.Helper;
 import sayit.server.db.common.IAccountHelper;
 import sayit.server.db.doctypes.SayItAccount;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 /**
  * Handles a POST request for creating an account.
@@ -34,7 +37,7 @@ public class CreateAccountHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("POST")) {
-            exchange.sendResponseHeaders(405, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             exchange.close();
             return;
         }
@@ -43,21 +46,19 @@ public class CreateAccountHandler implements HttpHandler {
 
         JSONObject json = new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
-        String username;
-        String password;
-        try {
-            username = json.getString("username");
-            password = json.getString("password");
-        } catch (Exception e) {
+        Pair<String, String> credentials = Helper.extractUsernamePassword(json);
+        if (credentials == null) {
             System.out.println("\tbut is invalid.");
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             exchange.close();
             return;
         }
+        String username = credentials.getFirst();
+        String password = credentials.getSecond();
 
         if (this._accountHelper.getAccount(username) != null) {
             System.out.println("\tbut account already exists.");
-            exchange.sendResponseHeaders(409, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_CONFLICT, 0);
             exchange.close();
             return;
         }
@@ -68,7 +69,7 @@ public class CreateAccountHandler implements HttpHandler {
 
         this._accountHelper.createAccount(new SayItAccount(username, password));
         this._accountHelper.save();
-        exchange.sendResponseHeaders(200, 0);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
         exchange.close();
     }
 }
