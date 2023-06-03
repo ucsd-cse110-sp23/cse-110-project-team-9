@@ -195,6 +195,12 @@ public final class RequestSender {
                         null,
                         null
                 );
+                case UniversalConstants.SETUP_EMAIL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.SETUP_EMAIL,
+                        null,
+                        null
+                );
                 default -> new InputOutputEntry(
                         Integer.MIN_VALUE,
                         UniversalConstants.ERROR,
@@ -265,7 +271,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(deleteEntryUrl + "?" + 
+        URI uri = new URI(deleteEntryUrl + "?" +
                 USERNAME_QUERY_PARAM + username + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
@@ -286,7 +292,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(checkAccountUrl + "?" + 
+        URI uri = new URI(checkAccountUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
@@ -311,7 +317,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(clearHistoryUrl + "?" 
+        URI uri = new URI(clearHistoryUrl + "?"
                 + USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {

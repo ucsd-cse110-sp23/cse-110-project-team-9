@@ -242,6 +242,10 @@ public final class EventHandlers {
                             ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
                             ui.setSelectedButton(null);
                         }
+                        case UniversalConstants.SETUP_EMAIL -> {
+                            var emailSetupUserInterface = EmailSetupUserInterface.getInstance();
+                            emailSetupUserInterface.open();
+                        }
                         default -> {
                             // Assume error
                             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT
