@@ -18,9 +18,8 @@ public class EmailSetupUserInterface {
     private final JTextField passwordField;
     private final JTextField smtpHostField;
     private final JTextField tlsPortField;
-    private final String[] storedInformation;
+    private String[] storedInformation;
 
-    //constructor for EmailSetupUserInterface
     private EmailSetupUserInterface() {
         firstNameField = new JTextField();
         lastNameField = new JTextField();
@@ -168,6 +167,17 @@ public class EmailSetupUserInterface {
      * [FirstName, LastName, DisplayName, Email, Password, SMTPHost, TLSPort]
      */
     public void save() {
+        if (firstNameField.getText().equals(EMPTY_STRING)
+                || lastNameField.getText().equals(EMPTY_STRING)
+                || displayNameField.getText().equals(EMPTY_STRING)
+                || emailField.getText().equals(EMPTY_STRING)
+                || passwordField.getText().equals(EMPTY_STRING)
+                || smtpHostField.getText().equals(EMPTY_STRING)
+                || tlsPortField.getText().equals(EMPTY_STRING)) {
+            JOptionPane.showMessageDialog(frame, EMAIL_MISSING_INFO, ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         storedInformation[0] = firstNameField.getText();
         storedInformation[1] = lastNameField.getText();
         storedInformation[2] = displayNameField.getText();
@@ -185,5 +195,22 @@ public class EmailSetupUserInterface {
      */
     public String[] getInfo() {
         return storedInformation;
+    }
+
+    /**
+     * Sets the stored information to the input array. The array must be of length
+     * 7. This should be called before calling open() to load the text fields with
+     * the stored information.
+     *
+     * @param info The array containing the information to be stored. This must be
+     *             of the form [FirstName, LastName, DisplayName, Email, Password,
+     *             SMTPHost, TLSPort].
+     */
+    public void setInfo(String[] info) {
+        if (info.length != NUM_EMAIL_FIELDS) {
+            return;
+        }
+
+        this.storedInformation = info;
     }
 }

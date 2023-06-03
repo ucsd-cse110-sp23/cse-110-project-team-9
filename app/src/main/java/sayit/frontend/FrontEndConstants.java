@@ -36,6 +36,9 @@ public final class FrontEndConstants {
             + "Please try again later.";
     public static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
     public static final String LOGIN_FAILED_PROMPT = "Login credentials invalid";
+    public static final String EMAIL_MISSING_INFO = "Please fill out all fields before continuing.";
+
+    public static final int NUM_EMAIL_FIELDS = 7;
 
     // Constants for requests
     public static final String USERNAME_QUERY_PARAM = "username=";
