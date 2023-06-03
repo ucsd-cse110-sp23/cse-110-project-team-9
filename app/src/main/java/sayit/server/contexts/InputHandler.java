@@ -143,6 +143,9 @@ public class InputHandler implements HttpHandler {
         } else if (input.toLowerCase().startsWith("clear all")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
             response = obj.toString();
+        } else if(input.toLowerCase().startsWith("send email")){
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
+            response = obj.toString();
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);

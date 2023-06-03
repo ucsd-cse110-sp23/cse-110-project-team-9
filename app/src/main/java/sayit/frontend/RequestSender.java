@@ -195,6 +195,12 @@ public final class RequestSender {
                         null,
                         null
                 );
+                case UniversalConstants.SEND_EMAIL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.SEND_EMAIL,
+                        new UserInput(json.getString(UniversalConstants.INPUT)),
+                        new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
+                );
                 default -> new InputOutputEntry(
                         Integer.MIN_VALUE,
                         UniversalConstants.ERROR,
@@ -325,6 +331,10 @@ public final class RequestSender {
         GET,
         DELETE,
         POST
+    }
+
+    public String sendEmail(String username){
+        return "";
     }
 
     /**
