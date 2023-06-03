@@ -321,6 +321,8 @@ public final class RequestSender {
         return Long.parseLong(response.body());
     }
 
+    //TODO: two request senders: one for saving email configurations and another for getting them
+
     enum RequestType {
         GET,
         DELETE,
