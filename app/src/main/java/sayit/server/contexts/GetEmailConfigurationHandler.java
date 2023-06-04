@@ -42,7 +42,7 @@ public class GetEmailConfigurationHandler implements HttpHandler {
 
         System.out.println("Received GET request for /get_email_config");
         String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
-                ServerConstants.ACC_USERNAME);
+                UniversalConstants.ACC_USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);

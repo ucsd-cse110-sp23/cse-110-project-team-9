@@ -61,14 +61,4 @@ public final class ServerConstants {
 
     public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized."
             + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt.\"";
-
-    //Following constants below are for EmailConfiguration stuff
-    public static final String ACC_USERNAME = "ACC_USERNAME";
-    public static final String FIRST_NAME = "FIRST_NAME";
-    public static final String LAST_NAME = "LAST_NAME";
-    public static final String DISPLAY_NAME = "DISPLAY_NAME";
-    public static final String EMAIL = "EMAIL";
-    public static final String EMAIL_PASSWORD = "EMAIL_PASSWORD";
-    public static final String SMTP = "SMTP";
-    public static final String TLS = "TLS";
 }

@@ -11,14 +11,14 @@ import sayit.common.UniversalConstants;
 public class SayItEmailConfiguration {
 
     //Document Fields
-    public static final String ACC_USERNAME_FIELD = UniversalConstants.USERNAME;
-    public static final String FIRST_NAME_FIELD = "first_name";
-    public static final String LAST_NAME_FIELD = "last_name";
-    public static final String DISPLAY_NAME_FIELD = "display_name";
-    public static final String EMAIL_FIELD = "email";
-    public static final String EMAIL_PASSWORD_FIELD = "email_password";
-    public static final String SMTP_FIELD = "smtp";
-    public static final String TLS_FIELD = "tls";
+    public static final String ACC_USERNAME_FIELD = UniversalConstants.USERNAME; // "username"
+    public static final String FIRST_NAME_FIELD = UniversalConstants.FIRST_NAME;
+    public static final String LAST_NAME_FIELD = UniversalConstants.LAST_NAME;
+    public static final String DISPLAY_NAME_FIELD = UniversalConstants.DISPLAY_NAME;
+    public static final String EMAIL_FIELD = UniversalConstants.EMAIL;
+    public static final String EMAIL_PASSWORD_FIELD = UniversalConstants.EMAIL_PASSWORD;
+    public static final String SMTP_FIELD = UniversalConstants.SMTP;
+    public static final String TLS_FIELD = UniversalConstants.TLS;
 
     @BsonProperty(ACC_USERNAME_FIELD)
     private String accUsername;

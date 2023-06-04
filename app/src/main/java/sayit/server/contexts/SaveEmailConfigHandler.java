@@ -53,14 +53,14 @@ public class SaveEmailConfigHandler implements HttpHandler {
 
         JSONObject json = new JSONObject(new String(httpExchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
-        String accUsername = json.getString(ServerConstants.ACC_USERNAME);
-        String firstName = json.getString(ServerConstants.FIRST_NAME);
-        String lastName = json.getString(ServerConstants.LAST_NAME);
-        String displayName = json.getString(ServerConstants.DISPLAY_NAME);
-        String email = json.getString(ServerConstants.EMAIL);
-        String emailPassword = json.getString(ServerConstants.EMAIL_PASSWORD);
-        String smtp = json.getString(ServerConstants.SMTP);
-        String tls = json.getString(ServerConstants.TLS);
+        String accUsername = json.getString(UniversalConstants.ACC_USERNAME);
+        String firstName = json.getString(UniversalConstants.FIRST_NAME);
+        String lastName = json.getString(UniversalConstants.LAST_NAME);
+        String displayName = json.getString(UniversalConstants.DISPLAY_NAME);
+        String email = json.getString(UniversalConstants.EMAIL);
+        String emailPassword = json.getString(UniversalConstants.EMAIL_PASSWORD);
+        String smtp = json.getString(UniversalConstants.SMTP);
+        String tls = json.getString(UniversalConstants.TLS);
 
         if (accUsername == null || firstName == null || lastName == null || displayName == null ||
             email == null || emailPassword == null || smtp == null || tls == null) {
