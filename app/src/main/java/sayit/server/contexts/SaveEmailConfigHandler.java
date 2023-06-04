@@ -4,14 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
-import sayit.frontend.helpers.Pair;
-import sayit.server.Helper;
-import sayit.server.ServerConstants;
 import sayit.server.db.common.IEmailConfigurationHelper;
-import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.doctypes.SayItEmailConfiguration;
-import sayit.server.openai.IChatGpt;
-import sayit.server.openai.IWhisper;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -53,7 +47,7 @@ public class SaveEmailConfigHandler implements HttpHandler {
 
         JSONObject json = new JSONObject(new String(httpExchange.getRequestBody().readAllBytes()));
         System.out.println("\twith JSON: " + json);
-        String accUsername = json.getString(UniversalConstants.ACC_USERNAME);
+        String accUsername = json.getString(UniversalConstants.USERNAME);
         String firstName = json.getString(UniversalConstants.FIRST_NAME);
         String lastName = json.getString(UniversalConstants.LAST_NAME);
         String displayName = json.getString(UniversalConstants.DISPLAY_NAME);

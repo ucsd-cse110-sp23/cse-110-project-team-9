@@ -1,5 +1,7 @@
 package sayit.frontend;
 
+import sayit.common.IAction;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -20,15 +22,22 @@ public class EmailSetupUserInterface {
     private final JTextField tlsPortField;
     private String[] storedInformation;
 
-    private EmailSetupUserInterface() {
-        firstNameField = new JTextField();
-        lastNameField = new JTextField();
-        displayNameField = new JTextField();
-        emailField = new JTextField();
-        passwordField = new JTextField();
-        smtpHostField = new JTextField();
-        tlsPortField = new JTextField();
-        storedInformation = new String[7];
+    private final IAction<String[]> saveAction;
+
+    public EmailSetupUserInterface(IAction<String[]> saveAction) {
+        this(saveAction, null);
+    }
+
+    public EmailSetupUserInterface(IAction<String[]> saveAction, String[] data) {
+        this.firstNameField = new JTextField();
+        this.lastNameField = new JTextField();
+        this.displayNameField = new JTextField();
+        this.emailField = new JTextField();
+        this.passwordField = new JTextField();
+        this.smtpHostField = new JTextField();
+        this.tlsPortField = new JTextField();
+        this.storedInformation = data == null ? new String[7] : data;
+        this.saveAction = saveAction;
 
         frame = new JFrame(FrontEndConstants.APP_TITLE);
         this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -37,30 +46,6 @@ public class EmailSetupUserInterface {
         this.frame.setVisible(true);
 
         frame.addWindowListener(EventHandlers.onClosePress(this));
-    }
-
-    private static EmailSetupUserInterface userInterface;
-
-    /**
-     * <p>
-     * Gets or creates a new instance of the <c>EmailSetupUserInterface</c> class. This
-     * method is designed so that there can be at most one instance of the
-     * <c>EmailSetupUserInterface</c> class at any point.
-     * </p>
-     *
-     * <p>
-     * This will also automatically make the user interface visible if it hasn't
-     * been initialized.
-     * </p>
-     *
-     * @return The instance of the <c>EmailSetupUserInterface</c> class.
-     */
-    public static EmailSetupUserInterface getInstance() {
-        if (userInterface == null) {
-            userInterface = new EmailSetupUserInterface();
-        }
-
-        return userInterface;
     }
 
     /**
@@ -185,6 +170,7 @@ public class EmailSetupUserInterface {
         storedInformation[4] = passwordField.getText();
         storedInformation[5] = smtpHostField.getText();
         storedInformation[6] = tlsPortField.getText();
+        this.saveAction.execute(storedInformation);
     }
 
     /**

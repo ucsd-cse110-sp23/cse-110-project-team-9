@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.ServerConstants;
 import sayit.server.db.common.IEmailConfigurationHelper;
 import sayit.server.db.doctypes.SayItEmailConfiguration;
 
@@ -42,7 +41,7 @@ public class GetEmailConfigurationHandler implements HttpHandler {
 
         System.out.println("Received GET request for /get_email_config");
         String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
-                UniversalConstants.ACC_USERNAME);
+                UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);

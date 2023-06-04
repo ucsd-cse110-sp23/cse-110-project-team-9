@@ -7,7 +7,6 @@ import sayit.common.qa.InputOutputEntry;
 import sayit.common.qa.ProgramOutput;
 import sayit.common.qa.UserInput;
 import sayit.server.ServerConstants;
-import sayit.server.db.doctypes.SayItEmailConfiguration;
 
 import java.io.*;
 import java.net.*;
@@ -18,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static sayit.frontend.FrontEndConstants.ACC_USERNAME_QUERY_PARAM;
 import static sayit.frontend.FrontEndConstants.USERNAME_QUERY_PARAM;
 
 /**
@@ -51,8 +49,8 @@ public final class RequestSender {
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
             this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
-            this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_config");
-            this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_config");
+            this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_configuration");
+            this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_configuration");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -345,9 +343,9 @@ public final class RequestSender {
      * @param smtp          The smtp port.
      * @param tls           The tls port.
      * @return <c>true</c> if the email configuration was created, <c>false</c> otherwise.
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws InterruptedException
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean saveEmailConfiguration(String username, String firstName, String lastName,
                                           String displayName, String email, String emailPassword,
@@ -355,7 +353,7 @@ public final class RequestSender {
             throws IOException, URISyntaxException, InterruptedException {
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(UniversalConstants.ACC_USERNAME, username);
+        parameters.put(UniversalConstants.USERNAME, username);
         parameters.put(UniversalConstants.FIRST_NAME, firstName);
         parameters.put(UniversalConstants.LAST_NAME, lastName);
         parameters.put(UniversalConstants.DISPLAY_NAME, displayName);
@@ -372,33 +370,36 @@ public final class RequestSender {
      * Sends a GET request to get an email configuration with the specified username.
      *
      * @param username The username
-     * @return an email configuration with the specified username (if found)
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws InterruptedException
+     * @return An email configuration with the specified username (if found)
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
      */
-    public SayItEmailConfiguration getEmailConfiguration(String username)
+    public Map<String, String> getEmailConfiguration(String username)
             throws IOException, URISyntaxException, InterruptedException {
-
         URI uri = new URI(getEmailConfigurationUrl + "?" +
-                ACC_USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return null;
+        }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
 
         JSONObject json = new JSONObject(response.body());
-        return new SayItEmailConfiguration(
-                json.getString(UniversalConstants.ACC_USERNAME),
-                json.getString(UniversalConstants.FIRST_NAME),
-                json.getString(UniversalConstants.LAST_NAME),
-                json.getString(UniversalConstants.DISPLAY_NAME),
-                json.getString(UniversalConstants.EMAIL),
-                json.getString(UniversalConstants.EMAIL_PASSWORD),
-                json.getString(UniversalConstants.SMTP),
-                json.getString(UniversalConstants.TLS)
-        );
+        Map<String, String> emailInfo = new HashMap<>();
+        emailInfo.put(UniversalConstants.USERNAME, json.getString(UniversalConstants.USERNAME));
+        emailInfo.put(UniversalConstants.FIRST_NAME, json.getString(UniversalConstants.FIRST_NAME));
+        emailInfo.put(UniversalConstants.LAST_NAME, json.getString(UniversalConstants.LAST_NAME));
+        emailInfo.put(UniversalConstants.DISPLAY_NAME, json.getString(UniversalConstants.DISPLAY_NAME));
+        emailInfo.put(UniversalConstants.EMAIL, json.getString(UniversalConstants.EMAIL));
+        emailInfo.put(UniversalConstants.EMAIL_PASSWORD, json.getString(UniversalConstants.EMAIL_PASSWORD));
+        emailInfo.put(UniversalConstants.SMTP, json.getString(UniversalConstants.SMTP));
+        emailInfo.put(UniversalConstants.TLS, json.getString(UniversalConstants.TLS));
+        return emailInfo;
     }
 
     enum RequestType {

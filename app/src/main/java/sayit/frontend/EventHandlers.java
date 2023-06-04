@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import static sayit.frontend.FrontEndConstants.*;
 
@@ -243,7 +244,63 @@ public final class EventHandlers {
                             ui.setSelectedButton(null);
                         }
                         case UniversalConstants.SETUP_EMAIL -> {
-                            var emailSetupUserInterface = EmailSetupUserInterface.getInstance();
+                            // See if the user has any email configuration set up
+
+                            Map<String, String> emailConfig;
+                            try {
+                                emailConfig = RequestSender.getInstance().getEmailConfiguration(ui.getUser());
+                            } catch (Exception ex) {
+                                resetStartButton(ui, recordingFile);
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+
+                            String[] emailInfo = null;
+                            if (emailConfig != null) {
+                                String firstName = emailConfig.get(UniversalConstants.FIRST_NAME);
+                                String lastName = emailConfig.get(UniversalConstants.LAST_NAME);
+                                String email = emailConfig.get(UniversalConstants.EMAIL);
+                                String password = emailConfig.get(UniversalConstants.EMAIL_PASSWORD);
+                                String smtp = emailConfig.get(UniversalConstants.SMTP);
+                                String tls = emailConfig.get(UniversalConstants.TLS);
+                                String displayName = emailConfig.get(UniversalConstants.DISPLAY_NAME);
+
+                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp, tls};
+                            }
+
+                            EmailSetupUserInterface emailSetupUserInterface = new EmailSetupUserInterface(data -> {
+                                String firstName = data[0];
+                                String lastName = data[1];
+                                String displayName = data[2];
+                                String email = data[3];
+                                String password = data[4];
+                                String smtp = data[5];
+                                String tls = data[6];
+
+                                boolean result;
+                                try {
+                                    result = RequestSender.getInstance().saveEmailConfiguration(ui.getUser(),
+                                            firstName, lastName, displayName, email, password, smtp, tls);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                    JOptionPane.showMessageDialog(null,
+                                            EMAIL_NOT_SAVED + " " + ex.getMessage(),
+                                            ERROR_TEXT,
+                                            JOptionPane.ERROR_MESSAGE
+                                    );
+                                    return;
+                                }
+
+                                if (result) {
+                                    JOptionPane.showMessageDialog(null, EMAIL_SAVED, SUCCESS_TEXT,
+                                            JOptionPane.INFORMATION_MESSAGE);
+                                } else {
+                                    JOptionPane.showMessageDialog(null, EMAIL_NOT_SAVED, ERROR_TEXT,
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            }, emailInfo);
+
                             emailSetupUserInterface.open();
                         }
                         default -> {
@@ -285,7 +342,7 @@ public final class EventHandlers {
      * @param ui The <c>EmailSetUpUserInterface</c> object
      * @return a An <c>WindowAdapter</c> object. object
      */
-    public static WindowAdapter onClosePress(EmailSetupUserInterface ui){
+    public static WindowAdapter onClosePress(EmailSetupUserInterface ui) {
         return new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
@@ -297,7 +354,7 @@ public final class EventHandlers {
     /**
      * Handles the event when the user presses the Save button on the bottom
      *
-     * @param ui     The <c>EmailSetUpUserInterface</c> object.
+     * @param ui The <c>EmailSetUpUserInterface</c> object.
      * @return An <c>ActionListener</c> object.
      */
     public static ActionListener onSavePress(EmailSetupUserInterface ui) {
@@ -307,7 +364,7 @@ public final class EventHandlers {
     /**
      * Handles the event when the user presses the Cancel button on the bottom
      *
-     * @param ui     The <c>EmailSetUpUserInterface</c> object.
+     * @param ui The <c>EmailSetUpUserInterface</c> object.
      * @return An <c>ActionListener</c> object.
      */
     public static ActionListener onCancelPress(EmailSetupUserInterface ui) {

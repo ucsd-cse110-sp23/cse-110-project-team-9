@@ -16,7 +16,6 @@ public final class UniversalConstants {
     public static final String OUTPUT = "output";
 
     //Following constants below are for EmailConfiguration stuff
-    public static final String ACC_USERNAME = "acc_username";
     public static final String FIRST_NAME = "first_name";
     public static final String LAST_NAME = "last_name";
     public static final String DISPLAY_NAME = "display_name";

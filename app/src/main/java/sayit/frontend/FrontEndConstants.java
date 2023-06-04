@@ -24,6 +24,9 @@ public final class FrontEndConstants {
     public static final String APP_CANNOT_RUN_TEXT = "The server is currently offline and cannot handle"
             + " any requests, and will terminate.";
     public static final String ERROR_TEXT = "Error";
+    public static final String SUCCESS_TEXT = "Success";
+    public static final String EMAIL_SAVED = "Your email configuration has been saved.";
+    public static final String EMAIL_NOT_SAVED = "Your email configuration could not be saved.";
 
 
     // Constants for events
@@ -42,9 +45,6 @@ public final class FrontEndConstants {
 
     // Constants for requests
     public static final String USERNAME_QUERY_PARAM = "username=";
-
-    // Misc. constants
-    public static final String ACC_USERNAME_QUERY_PARAM = "acc_username=";
 
     // Button Dimensions
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
