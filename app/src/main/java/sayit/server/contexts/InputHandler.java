@@ -144,6 +144,10 @@ public class InputHandler implements HttpHandler {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
             response = obj.toString();
         } else if(input.toLowerCase().startsWith("send email")){
+            /*
+             * TODO PARSE EMAIL ADDRESS
+             */
+            obj.put(response, obj);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
             response = obj.toString();
         } else {
