@@ -5,7 +5,6 @@ import sayit.common.qa.InputOutputEntry;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -13,9 +12,9 @@ import java.util.Map;
 import static sayit.frontend.FrontEndConstants.*;
 
 /**
- * A class that contains static methods to handle events in the UI.
+ * A class that contains static methods to handle events in the main UI.
  */
-public final class EventHandlers {
+public final class MainUiEventHandlers {
 
     /**
      * Handles the event when the user presses the button from the sidebar (the
@@ -31,101 +30,6 @@ public final class EventHandlers {
             ui.displayEntry(qa);
             // track which button was last selected for deletion
             ui.setSelectedButton(button);
-        };
-    }
-
-    /**
-     * Handles the event when the user presses the create button.
-     *
-     * @param instance The <c>LoginUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onCreateButtonPress(LoginUserInterface instance) {
-        return e -> {
-            // check valid input
-            if (instance.getEmail().length() == 0
-                    || instance.getPassword().length() == 0) {
-                JOptionPane.showMessageDialog(null, INVALID_INPUT_PROMPT);
-                return;
-            }
-
-            String username = instance.getEmail();
-            // Check if the account has been created
-            try {
-                if (RequestSender.getInstance().doesAccountExist(username)) {
-                    JOptionPane.showMessageDialog(null, USERNAME_IN_USE_PROMPT);
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            JPanel myPanel = new JPanel();
-            myPanel.add(new JLabel(PASSWORD_HEADER));
-            JTextField passwordField = new JTextField(10);
-            myPanel.add(passwordField);
-
-            int result = JOptionPane.showConfirmDialog(null, myPanel, VERIFY_PASSWORD_HEADER,
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-            if (result != JOptionPane.OK_OPTION) {
-                return;
-            }
-
-            if (!passwordField.getText().equals(instance.getPassword())) {
-                JOptionPane.showMessageDialog(null, VERIFICATION_FAILED_PROMPT);
-                return;
-            }
-
-            // successful login
-            // Create the account
-            try {
-                boolean created = RequestSender
-                        .getInstance()
-                        .createAccount(username,
-                                instance.getPassword());
-
-                if (!created) {
-                    JOptionPane.showMessageDialog(null, UNKNOWN_ERROR_PROMPT);
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            instance.close(); // close the login UI
-            MainUserInterface.createInstance(username); // start the main UI
-        };
-    }
-
-    /**
-     * Handles the event when the user presses the login button.
-     *
-     * @param instance The <c>LoginUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
-        return e -> {
-            String username = instance.getEmail();
-            String password = instance.getPassword();
-            try {
-                if (!RequestSender.getInstance().login(username, password)) {
-                    JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
-                    instance.clearText();
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            instance.close(); // close the login UI
-            MainUserInterface.createInstance(username); // start the main UI
         };
     }
 
@@ -334,40 +238,5 @@ public final class EventHandlers {
         if (recordingFile != null && !recordingFile.delete()) {
             System.err.println(FrontEndConstants.DELETION_ERROR_TEXT);
         }
-    }
-
-    /**
-     * Defines behavior when the close button is pressed.
-     *
-     * @param ui The <c>EmailSetUpUserInterface</c> object
-     * @return a An <c>WindowAdapter</c> object. object
-     */
-    public static WindowAdapter onClosePress(EmailSetupUserInterface ui) {
-        return new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                ui.close();
-            }
-        };
-    }
-
-    /**
-     * Handles the event when the user presses the Save button on the bottom
-     *
-     * @param ui The <c>EmailSetUpUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onSavePress(EmailSetupUserInterface ui) {
-        return e -> ui.save();
-    }
-
-    /**
-     * Handles the event when the user presses the Cancel button on the bottom
-     *
-     * @param ui The <c>EmailSetUpUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onCancelPress(EmailSetupUserInterface ui) {
-        return e -> ui.close();
     }
 }

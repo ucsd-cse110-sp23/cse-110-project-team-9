@@ -99,11 +99,11 @@ public class LoginUserInterface {
         JPanel bottomPanel = new JPanel();
         JButton createButton = new JButton(CREATE_ACCOUNT_PROMPT);
         createButton.setPreferredSize(BUTTON_DIMENSION);
-        createButton.addActionListener(EventHandlers.onCreateButtonPress(this));
+        createButton.addActionListener(LoginUiEventHandlers.onCreateButtonPress(this));
         bottomPanel.add(createButton);
         JButton loginButton = new JButton(LOGIN_PROMPT);
         loginButton.setPreferredSize(BUTTON_DIMENSION);
-        loginButton.addActionListener(EventHandlers.onLoginButtonPress(this));
+        loginButton.addActionListener(LoginUiEventHandlers.onLoginButtonPress(this));
         bottomPanel.add(loginButton);
         contentPane.add(bottomPanel);
     }

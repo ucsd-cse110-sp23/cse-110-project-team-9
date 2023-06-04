@@ -145,7 +145,7 @@ public class MainUserInterface {
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         startButton = new JButton("START");
         toolBar.add(startButton);
-        startButton.addActionListener(EventHandlers.onStartButtonPress(this));
+        startButton.addActionListener(MainUiEventHandlers.onStartButtonPress(this));
         pane.add(toolBar, BorderLayout.PAGE_START);
 
         scrollBar = new JPanel(new GridLayout(0, 1)); // USE THIS FOR APP
@@ -179,7 +179,7 @@ public class MainUserInterface {
             String question = entry.getValue().getInput().getInputText();
             QuestionButton button = new QuestionButton(question, entry.getKey());
             button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
-            button.addActionListener(EventHandlers.onQaButtonPress(this, entry.getValue(), button));
+            button.addActionListener(MainUiEventHandlers.onQaButtonPress(this, entry.getValue(), button));
             scrollBar.add(button);
         }
 

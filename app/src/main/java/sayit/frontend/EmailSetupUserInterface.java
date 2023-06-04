@@ -58,7 +58,7 @@ public class EmailSetupUserInterface {
         this.frame.pack();
         this.frame.setVisible(true);
 
-        frame.addWindowListener(EventHandlers.onClosePress(this));
+        frame.addWindowListener(EmailSetupUiEventHandlers.onClosePress(this));
     }
 
     /**
@@ -96,11 +96,11 @@ public class EmailSetupUserInterface {
         JPanel bottomPanel = new JPanel();
         JButton saveButton = new JButton(SAVE_PROMPT);
         saveButton.setPreferredSize(SHORT_BUTTON_DIMENSION);
-        saveButton.addActionListener(EventHandlers.onSavePress(this));
+        saveButton.addActionListener(EmailSetupUiEventHandlers.onSavePress(this));
         bottomPanel.add(saveButton);
         JButton cancelButton = new JButton(CANCEL_HEADER);
         cancelButton.setPreferredSize(SHORT_BUTTON_DIMENSION);
-        cancelButton.addActionListener(EventHandlers.onCancelPress(this));
+        cancelButton.addActionListener(EmailSetupUiEventHandlers.onCancelPress(this));
         bottomPanel.add(cancelButton);
         contentPane.add(bottomPanel);
     }
