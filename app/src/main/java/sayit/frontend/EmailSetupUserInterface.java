@@ -8,7 +8,7 @@ import java.awt.*;
 import static sayit.frontend.FrontEndConstants.*;
 
 /**
- * The login user interface for the application.
+ * The email setup user interface for the application.
  */
 public class EmailSetupUserInterface {
     // class variables
@@ -24,10 +24,23 @@ public class EmailSetupUserInterface {
 
     private final IAction<String[]> saveAction;
 
+    /**
+     * Creates a new email setup user interface with the specified action to perform after the save button
+     * is pressed.
+     *
+     * @param saveAction The action to perform after the save button is pressed.
+     */
     public EmailSetupUserInterface(IAction<String[]> saveAction) {
         this(saveAction, null);
     }
 
+    /**
+     * Creates a new email setup user interface with the specified action to perform after the save button
+     * is pressed and the specified data to initially populate the fields with.
+     *
+     * @param saveAction The action to perform after the save button is pressed.
+     * @param data       The data to populate the fields with.
+     */
     public EmailSetupUserInterface(IAction<String[]> saveAction, String[] data) {
         this.firstNameField = new JTextField();
         this.lastNameField = new JTextField();

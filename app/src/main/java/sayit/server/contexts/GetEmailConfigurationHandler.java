@@ -57,6 +57,8 @@ public class GetEmailConfigurationHandler implements HttpHandler {
             return;
         }
 
+        System.out.println("\tand found email configuration for " + username + ".");
+
         JSONObject emailConfig = new JSONObject();
         emailConfig.put(SayItEmailConfiguration.ACC_USERNAME_FIELD, config.getAccUsername());
         emailConfig.put(SayItEmailConfiguration.FIRST_NAME_FIELD, config.getFirstName());
