@@ -333,8 +333,21 @@ public final class RequestSender {
         POST
     }
 
-    public String sendEmail(String username){
-        return "";
+    /**
+     * <p>
+     * Sends a request to the server to send an email if one is created.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
+     *
+     * @return The number of entries deleted.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    public boolean sendEmail(String username, String toAddress){
+        return true;
     }
 
     /**

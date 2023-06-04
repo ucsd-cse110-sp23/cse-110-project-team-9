@@ -241,6 +241,16 @@ public final class EventHandlers {
                             ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
                             ui.setSelectedButton(null);
                         }
+                        case UniversalConstants.SEND_EMAIL ->{
+                            try{
+                                RequestSender.getInstance().sendEmail(null, null, null);
+                            } catch(Exception ex){
+                                resetStartButton(ui, recordingFile);
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+                        }
                         default -> {
                             // Assume error
                             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT
