@@ -1,4 +1,6 @@
-package sayit.frontend;
+package sayit.frontend.events;
+
+import sayit.frontend.EmailSetupUserInterface;
 
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;

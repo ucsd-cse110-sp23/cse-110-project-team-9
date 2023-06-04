@@ -1,5 +1,7 @@
 package sayit.frontend;
 
+import sayit.frontend.events.LoginUiEventHandlers;
+
 import javax.swing.*;
 import java.awt.*;
 

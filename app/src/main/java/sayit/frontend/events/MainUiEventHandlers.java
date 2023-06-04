@@ -1,7 +1,9 @@
-package sayit.frontend;
+package sayit.frontend.events;
 
 import sayit.common.UniversalConstants;
 import sayit.common.qa.InputOutputEntry;
+import sayit.frontend.*;
+import sayit.frontend.components.QuestionButton;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;

@@ -1,11 +1,11 @@
 package sayit.frontend;
 
 import sayit.common.qa.InputOutputEntry;
-import sayit.frontend.helpers.ImageHelper;
+import sayit.frontend.components.QuestionButton;
+import sayit.frontend.events.MainUiEventHandlers;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.Map;
 
@@ -104,8 +104,7 @@ public class MainUserInterface {
     public static MainUserInterface createInstance(String username) {
         if (userInterface == null) {
             userInterface = new MainUserInterface(username);
-        }
-        else {
+        } else {
             userInterface.setUser(username);
         }
 
@@ -294,81 +293,3 @@ public class MainUserInterface {
     }
 }
 
-/**
- * Button class for questions on sidebar
- */
-class QuestionButton extends JButton {
-    private final long id;
-
-    /**
-     * Creates a <c>QuestionButton</c> object with the displayName.
-     *
-     * @param displayName The text to be displayed on the button.
-     * @param id          The ID of the corresponding QuestionAnswerEntry in the
-     *                    database
-     */
-    public QuestionButton(String displayName, long id) {
-        super(displayName);
-        this.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
-        this.id = id;
-    }
-
-    /**
-     * Public getter method for the ID
-     *
-     * @return The ID.
-     */
-    public long getId() {
-        return this.id;
-    }
-}
-
-/**
- * Represents a round button.
- */
-class RoundButton extends JButton {
-    private Shape shape;
-
-    /**
-     * Creates a <c>RoundButton</c> object with the specified image and size.
-     *
-     * @param fileName The file containing the image.
-     * @param size     The size of the button.
-     */
-    public RoundButton(String fileName, int size) {
-        super.setIcon(ImageHelper.getImageIcon(fileName, size));
-
-        setBackground(Color.lightGray);
-        setFocusable(false);
-        Dimension size1 = getPreferredSize();
-        size1.width = size1.height = 50;
-        setPreferredSize(size1);
-        setContentAreaFilled(false);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        if (getModel().isArmed()) {
-            g.setColor(Color.gray);
-        } else {
-            g.setColor(getBackground());
-        }
-
-        g.fillOval(0, 0, getSize().width - 1, getSize().height - 1);
-        super.paintComponent(g);
-    }
-
-    @Override
-    protected void paintBorder(Graphics g) {
-        g.setColor(Color.darkGray);
-        g.drawOval(0, 0, getSize().width - 1, getSize().height - 1);
-    }
-
-    @Override
-    public boolean contains(int x, int y) {
-        if (shape == null || !shape.getBounds().equals(getBounds())) {
-            shape = new Ellipse2D.Float(0, 0, getWidth(), getHeight());
-        }
-        return shape.contains(x, y);
-    }
-}

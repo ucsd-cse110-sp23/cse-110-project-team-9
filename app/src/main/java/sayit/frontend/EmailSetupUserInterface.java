@@ -1,6 +1,7 @@
 package sayit.frontend;
 
 import sayit.common.IAction;
+import sayit.frontend.events.EmailSetupUiEventHandlers;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,9 @@
-package sayit.frontend;
+package sayit.frontend.events;
+
+import sayit.frontend.FrontEndConstants;
+import sayit.frontend.LoginUserInterface;
+import sayit.frontend.MainUserInterface;
+import sayit.frontend.RequestSender;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
