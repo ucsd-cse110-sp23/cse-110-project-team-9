@@ -4,6 +4,7 @@ import sayit.frontend.LoginUserInterface;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
 import sayit.server.db.mongo.MongoAccountHelper;
+import sayit.server.db.mongo.MongoEmailConfigurationHelper;
 import sayit.server.db.mongo.MongoPromptHelper;
 import sayit.server.db.mongo.MongoWrapper;
 import sayit.server.openai.ChatGpt;
@@ -18,6 +19,7 @@ public class App {
                 .setWhisper(new Whisper(ServerConstants.OPENAI_API_KEY))
                 .setChatGpt(new ChatGpt(ServerConstants.OPENAI_API_KEY))
                 .setPromptHelper(MongoPromptHelper.getOrCreateInstance(mongo))
+                .setEmailConfigurationHelper(MongoEmailConfigurationHelper.getOrCreateInstance(mongo))
                 .setAccountHelper(MongoAccountHelper.getOrCreateInstance(mongo))
                 .build();
 

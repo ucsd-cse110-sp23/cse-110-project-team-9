@@ -162,11 +162,20 @@ public class SayItPrompt {
                 + '}';
     }
 
+    /**
+     * Checks if the provided object (<c>SayItPrompt</c>) has the same fields
+     * as this <c>SayItPrompt</c>.
+     *
+     * @param obj the object being compared to
+     * @return true if the fields are equal.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SayItPrompt prompt) {
-            return (this.username.equals(prompt.getUsername()) && this.timestamp == prompt.getTimestamp()
-                    && this.type.equals(prompt.getType()) && this.input.equals(prompt.getInput())
+            return (this.username.equals(prompt.getUsername())
+                    && this.timestamp.equals(prompt.getTimestamp())
+                    && this.type.equals(prompt.getType())
+                    && this.input.equals(prompt.getInput())
                     && this.output.equals(prompt.getOutput()));
         }
         return false;

@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import sayit.server.contexts.*;
 import sayit.server.db.common.IAccountHelper;
 import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.common.IEmailConfigurationHelper;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
 
@@ -30,7 +31,7 @@ public class Server {
      * @param whisper       The <c>whisper</c> instance to use.
      * @param chatgpt       The <c>ChatGPT</c> instance to use.
      */
-    private Server(IPromptHelper pHelper, IAccountHelper accountHelper,
+    private Server(IEmailConfigurationHelper configHelper, IPromptHelper pHelper, IAccountHelper accountHelper,
                    String host, int port, IWhisper whisper, IChatGpt chatgpt) {
         this._port = port;
 
@@ -51,6 +52,10 @@ public class Server {
             this._server.createContext("/history", new HistoryHandler(pHelper));
             this._server.createContext("/delete-question", new DeleteHandler(pHelper));
             this._server.createContext("/clear-all", new ClearAllHandler(pHelper));
+        }
+
+        if (configHelper != null) {
+            this._server.createContext("/save_email_configuration", new SaveEmailConfigHandler(configHelper));
         }
 
         if (accountHelper != null) {
@@ -93,6 +98,7 @@ public class Server {
      * A builder for the <c>Server</c> class.
      */
     public static class ServerBuilder {
+        private IEmailConfigurationHelper _configHelper;
         private IPromptHelper _pHelper;
         private IAccountHelper _accountHelper;
         private String _host;
@@ -101,7 +107,18 @@ public class Server {
         private IChatGpt _chatgpt;
 
         /**
-         * Sets the storage to use.
+         * Sets the email configuration helper to use.
+         *
+         * @param configHelper The email configuration helper to use.
+         * @return The builder.
+         */
+        public ServerBuilder setEmailConfigurationHelper(IEmailConfigurationHelper configHelper) {
+            this._configHelper = configHelper;
+            return this;
+        }
+
+        /**
+         * Sets the prompt helper to use.
          *
          * @param pHelper The prompt helper to use.
          * @return The builder.
@@ -181,6 +198,7 @@ public class Server {
             }
 
             return new Server(
+                    this._configHelper,
                     this._pHelper,
                     this._accountHelper,
                     this._host,

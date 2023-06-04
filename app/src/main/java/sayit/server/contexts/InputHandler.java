@@ -31,9 +31,9 @@ public class InputHandler implements HttpHandler {
     private final IChatGpt chatGpt;
 
     /**
-     * Creates a new instance of the <c>AskQuestionHandler</c> class.
+     * Creates a new instance of the <c>InputHandler</c> class.
      *
-     * @param pHelper The helper to use.
+     * @param pHelper The prompt helper to use.
      * @param whisper The <c>Whisper</c> instance to use.
      * @param chatGpt The <c>ChatGPT</c> instance to use.
      */

@@ -43,6 +43,9 @@ public final class FrontEndConstants {
     // Constants for requests
     public static final String USERNAME_QUERY_PARAM = "username=";
 
+    // Misc. constants
+    public static final String ACC_USERNAME_QUERY_PARAM = "acc_username=";
+
     // Button Dimensions
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
     public static final Dimension SHORT_BUTTON_DIMENSION = new Dimension(150, 40);
