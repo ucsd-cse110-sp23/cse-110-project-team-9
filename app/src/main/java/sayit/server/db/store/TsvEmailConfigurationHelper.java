@@ -20,9 +20,9 @@ public class TsvEmailConfigurationHelper implements IEmailConfigurationHelper {
     public TsvEmailConfigurationHelper(String fileName) {
         this._writer = TsvWriter.createWriter(
                 List.of(SayItEmailConfiguration.ACC_USERNAME_FIELD, SayItEmailConfiguration.FIRST_NAME_FIELD,
-                SayItEmailConfiguration.LAST_NAME_FIELD, SayItEmailConfiguration.DISPLAY_NAME_FIELD,
-                SayItEmailConfiguration.EMAIL_FIELD, SayItEmailConfiguration.EMAIL_PASSWORD_FIELD,
-                SayItEmailConfiguration.SMTP_FIELD, SayItEmailConfiguration.TLS_FIELD),
+                        SayItEmailConfiguration.LAST_NAME_FIELD, SayItEmailConfiguration.DISPLAY_NAME_FIELD,
+                        SayItEmailConfiguration.EMAIL_FIELD, SayItEmailConfiguration.EMAIL_PASSWORD_FIELD,
+                        SayItEmailConfiguration.SMTP_FIELD, SayItEmailConfiguration.TLS_FIELD),
                 fileName,
                 new ITsvStrategy<>() {
                     @Override
@@ -34,8 +34,8 @@ public class TsvEmailConfigurationHelper implements IEmailConfigurationHelper {
                     @Override
                     public String[] write(SayItEmailConfiguration obj) {
                         return new String[]{obj.getAccUsername(), obj.getFirstName(),
-                        obj.getLastName(), obj.getDisplayName(), obj.getEmail(), obj.getEmailPassword(),
-                        obj.getSmtp(), obj.getTls()};
+                                obj.getLastName(), obj.getDisplayName(), obj.getEmail(), obj.getEmailPassword(),
+                                obj.getSmtp(), obj.getTls()};
                     }
                 });
     }
@@ -55,12 +55,21 @@ public class TsvEmailConfigurationHelper implements IEmailConfigurationHelper {
     }
 
     /**
-     * Inserts a new <c>SayItEmailConfiguration</c> into the database.
+     * Inserts a new <c>SayItEmailConfiguration</c> into the database. Unlike the same
+     * method in <c>MongoEmailConfigurationHelper</c>, this one needs to check that
+     * all fields are nonnull. This same method in Mongo only gets called when all
+     * fields are nonnull.
      *
      * @param config The email configuration to create.
      */
     @Override
     public void createEmailConfiguration(SayItEmailConfiguration config) {
+        if (config.getAccUsername() == null || config.getFirstName() == null ||
+                config.getLastName() == null || config.getDisplayName() == null ||
+                config.getEmail() == null || config.getEmailPassword() == null ||
+                config.getSmtp() == null || config.getTls() == null) {
+            return;
+        }
         this._writer.addEntry(config);
         this._writer.save();
     }
@@ -83,7 +92,7 @@ public class TsvEmailConfigurationHelper implements IEmailConfigurationHelper {
 
     /**
      * Replaces a <c>SayItEmailConfiguration</c> from the database.
-     * This method is only called after <c>getEmailConfiguration()</c> returns true.
+     * This method is only called after <c>getEmailConfiguration()</c> returns a nonnull value.
      * Calls <c>deleteEmailConfiguration()</c> then <c>createEmailConfiguration()</c>.
      *
      * @param config The email configuration to be inserted into the databse, replacing

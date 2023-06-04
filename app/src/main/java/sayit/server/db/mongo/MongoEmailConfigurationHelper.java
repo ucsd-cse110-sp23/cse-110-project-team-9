@@ -52,6 +52,7 @@ public final class MongoEmailConfigurationHelper implements IEmailConfigurationH
 
     /**
      * Inserts a new <c>SayItEmailConfiguration</c> into the database.
+     * Precondition: config has all nonnull fields.
      *
      * @param config The email configuration to create.
      */
@@ -68,13 +69,13 @@ public final class MongoEmailConfigurationHelper implements IEmailConfigurationH
     @Override
     public boolean deleteEmailConfiguration(String username) {
         return this._sayItEmailConfigurations.deleteOne(
-                        eq(SayItEmailConfiguration.ACC_USERNAME_FIELD, username)
+                eq(SayItEmailConfiguration.ACC_USERNAME_FIELD, username)
         ).getDeletedCount() > 0;
     }
 
     /**
      * Replaces a <c>SayItEmailConfiguration</c> from the database.
-     * Precondition: This method is only called after <c>getEmailConfiguration()</c> returns true.
+     * Precondition: This method is only called after <c>getEmailConfiguration()</c> returns a nonull value.
      * Calls <c>deleteEmailConfiguration()</c> then <c>createEmailConfiguration()</c>.
      *
      * @param config The email configuration to be inserted into the databse, replacing

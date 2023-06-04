@@ -51,8 +51,8 @@ public final class RequestSender {
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
             this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
-            this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "save_email_config");
-            this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "get_email_config");
+            this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_config");
+            this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_config");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -271,7 +271,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(deleteEntryUrl + "?" + 
+        URI uri = new URI(deleteEntryUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
@@ -292,7 +292,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(checkAccountUrl + "?" + 
+        URI uri = new URI(checkAccountUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
@@ -317,7 +317,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(clearHistoryUrl + "?" 
+        URI uri = new URI(clearHistoryUrl + "?"
                 + USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -344,8 +344,8 @@ public final class RequestSender {
      * @throws InterruptedException
      */
     public boolean saveEmailConfiguration(String username, String firstName, String lastName,
-                                            String displayName, String email, String emailPassword,
-                                            String smtp, String tls)
+                                          String displayName, String email, String emailPassword,
+                                          String smtp, String tls)
             throws IOException, URISyntaxException, InterruptedException {
 
         Map<String, Object> parameters = new HashMap<>();

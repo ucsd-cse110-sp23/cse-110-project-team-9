@@ -249,7 +249,7 @@ public class SayItEmailConfiguration {
     public boolean equals(Object obj) {
         if (obj instanceof SayItEmailConfiguration config) {
             return (this.accUsername.equals(config.getAccUsername())
-                    && this.firstName == config.getFirstName()
+                    && this.firstName.equals(config.getFirstName())
                     && this.lastName.equals(config.getLastName())
                     && this.displayName.equals(config.getDisplayName())
                     && this.email.equals(config.getEmail())
