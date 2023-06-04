@@ -36,12 +36,30 @@ public final class FrontEndConstants {
             + "Please try again later.";
     public static final String VERIFICATION_FAILED_PROMPT = "Password Verification Failed";
     public static final String LOGIN_FAILED_PROMPT = "Login credentials invalid";
+    public static final String EMAIL_MISSING_INFO = "Please fill out all fields before continuing.";
+
+    public static final int NUM_EMAIL_FIELDS = 7;
 
     // Constants for requests
     public static final String USERNAME_QUERY_PARAM = "username=";
 
+    // Misc. constants
     public static final String ACC_USERNAME_QUERY_PARAM = "acc_username=";
 
-    // Misc. constants
+    // Button Dimensions
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
+    public static final Dimension SHORT_BUTTON_DIMENSION = new Dimension(150, 40);
+    public static final Dimension TEXT_FIELD_DIMENSION = new Dimension(200, 40);
+
+    // Email constants
+    public static final String EMAIL_HEADER = "Email: ";
+    public static final String FIRST_NAME_HEADER = "First Name: ";
+    public static final String LAST_NAME_HEADER = "LAST Name: ";
+    public static final String DISPLAY_NAME_HEADER = "Display Name: ";
+    public static final String SMTP_HOST_HEADER = "SMTP Host: ";
+    public static final String TLS_PORT_HEADER = "TLS Port: ";
+    public static final String CANCEL_HEADER = "Cancel";
+    public static final String EMPTY_STRING = "";
+    public static final String SAVE_PROMPT = "Save";
+
 }

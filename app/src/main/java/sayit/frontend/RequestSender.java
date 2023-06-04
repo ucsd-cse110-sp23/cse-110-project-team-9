@@ -201,6 +201,12 @@ public final class RequestSender {
                         null,
                         null
                 );
+                case UniversalConstants.SETUP_EMAIL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.SETUP_EMAIL,
+                        null,
+                        null
+                );
                 default -> new InputOutputEntry(
                         Integer.MIN_VALUE,
                         UniversalConstants.ERROR,
