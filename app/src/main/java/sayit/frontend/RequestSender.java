@@ -33,6 +33,7 @@ public final class RequestSender {
     private final URL createAccountUrl;
     private final URL checkAccountUrl;
     private final URL loginUrl;
+    private final URL sendUrl;
 
     private static RequestSender requestSender;
 
@@ -47,6 +48,8 @@ public final class RequestSender {
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
             this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
+            this.sendUrl = new URL("http://" + host + ":" + port + "/sendEmail");
+
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
