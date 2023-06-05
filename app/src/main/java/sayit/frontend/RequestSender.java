@@ -430,8 +430,22 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean sendEmail(String username, String toAddress){
-        return true;
+    public boolean sendEmail(String username, String toAddress, long id)
+        throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI(getEmailConfigurationUrl + "?" +
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return false;
+        }
+
+        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
+        }
+
+        JSONObject json = new JSONObject(response.body());
+        return false;
     }
 
     /**

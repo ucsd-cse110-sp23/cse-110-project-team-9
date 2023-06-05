@@ -27,6 +27,7 @@ public final class FrontEndConstants {
     public static final String SUCCESS_TEXT = "Success";
     public static final String EMAIL_SAVED = "Your email configuration has been saved.";
     public static final String EMAIL_NOT_SAVED = "Your email configuration could not be saved.";
+    public static final String EMAIL_NOT_SENT = "Your email could not be sent";
 
 
     // Constants for events

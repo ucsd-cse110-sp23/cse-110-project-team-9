@@ -209,6 +209,21 @@ public final class MainUiEventHandlers {
 
                             emailSetupUserInterface.open();
                         }
+                        case UniversalConstants.SEND_EMAIL ->{
+
+                            try{
+                                RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                    JOptionPane.showMessageDialog(null,
+                                            EMAIL_NOT_SENT + " " + ex.getMessage(),
+                                            ERROR_TEXT,
+                                            JOptionPane.ERROR_MESSAGE
+                                    );
+                                    return;
+                            }
+
+                        }
                         default -> {
                             // Assume error
                             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT
