@@ -48,7 +48,7 @@ public class Server {
                 Executors.newFixedThreadPool(10);
 
         if (pHelper != null) {
-            this._server.createContext("/input", new InputHandler(pHelper, whisper, chatgpt));
+            this._server.createContext("/input", new InputHandler(pHelper, configHelper, whisper, chatgpt));
             this._server.createContext("/history", new HistoryHandler(pHelper));
             this._server.createContext("/delete-question", new DeleteHandler(pHelper));
             this._server.createContext("/clear-all", new ClearAllHandler(pHelper));
