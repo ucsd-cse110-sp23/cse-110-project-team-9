@@ -183,6 +183,22 @@ public class InputHandler implements HttpHandler {
                     this.pHelper.createPrompt(prompt);
                     this.pHelper.save();
 
+            response = obj.toString();
+        } else if(input.toLowerCase().startsWith("send email")){
+            //parse email address out of response
+            input = input.substring(11);
+            String toAddress = input.toLowerCase();
+            toAddress = toAddress.replace(" dot ", ".");
+            toAddress = toAddress.replace(" at ", "@");
+            toAddress = toAddress.replace(" ", "");
+            toAddress = toAddress.replace("-", "");
+            if (toAddress.endsWith(".")){
+                toAddress = toAddress.substring(0, toAddress.length() -1);
+            }
+            obj.put(SayItPrompt.INPUT_FIELD, input);
+            obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
+            response = obj.toString();
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);

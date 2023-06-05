@@ -33,6 +33,7 @@ public final class RequestSender {
     private final URL createAccountUrl;
     private final URL checkAccountUrl;
     private final URL loginUrl;
+    private final URL sendUrl;
     private final URL saveEmailConfigurationUrl;
     private final URL getEmailConfigurationUrl;
 
@@ -51,6 +52,8 @@ public final class RequestSender {
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
             this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_configuration");
             this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_configuration");
+            this.sendUrl = new URL("http://" + host + ":" + port + "/sendEmail");
+
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -198,6 +201,12 @@ public final class RequestSender {
                         UniversalConstants.CLEAR_ALL,
                         null,
                         null
+                );
+                case UniversalConstants.SEND_EMAIL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.SEND_EMAIL,
+                        new UserInput(json.getString(UniversalConstants.INPUT)),
+                        new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
                 );
                 case UniversalConstants.SETUP_EMAIL -> new InputOutputEntry(
                         Integer.MIN_VALUE,
@@ -406,6 +415,23 @@ public final class RequestSender {
         GET,
         DELETE,
         POST
+    }
+
+    /**
+     * <p>
+     * Sends a request to the server to send an email if one is created.
+     * </p>
+     * <p>
+     * It is assumed that the server is up.
+     * </p>
+     *
+     * @return The number of entries deleted.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    public boolean sendEmail(String username, String toAddress){
+        return true;
     }
 
     /**
