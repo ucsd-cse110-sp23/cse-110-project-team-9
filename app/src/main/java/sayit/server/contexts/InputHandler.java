@@ -5,7 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
+import sayit.server.db.common.IEmailConfigurationHelper;
 import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.doctypes.SayItEmailConfiguration;
 import sayit.server.db.doctypes.SayItPrompt;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
@@ -27,18 +29,20 @@ import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
  */
 public class InputHandler implements HttpHandler {
     private final IPromptHelper pHelper;
+    private final IEmailConfigurationHelper eHelper;
     private final IWhisper whisper;
     private final IChatGpt chatGpt;
 
     /**
-     * Creates a new instance of the <c>AskQuestionHandler</c> class.
+     * Creates a new instance of the <c>InputHandler</c> class.
      *
-     * @param pHelper The helper to use.
+     * @param pHelper The prompt helper to use.
      * @param whisper The <c>Whisper</c> instance to use.
      * @param chatGpt The <c>ChatGPT</c> instance to use.
      */
-    public InputHandler(IPromptHelper pHelper, IWhisper whisper, IChatGpt chatGpt) {
+    public InputHandler(IPromptHelper pHelper, IEmailConfigurationHelper eHelper, IWhisper whisper, IChatGpt chatGpt) {
         this.pHelper = pHelper;
+        this.eHelper = eHelper;
         this.whisper = whisper;
         this.chatGpt = chatGpt;
     }
@@ -112,7 +116,7 @@ public class InputHandler implements HttpHandler {
 
             input = input.trim();
 
-            //if audio is transcribed, pass to Chat GPT
+            // if audio is transcribed, pass to Chat GPT
             String answer;
 
             try {
@@ -131,7 +135,6 @@ public class InputHandler implements HttpHandler {
             obj.put(SayItPrompt.OUTPUT_FIELD, answer);
             obj.put(UniversalConstants.ID, time);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
-            response = obj.toString();
 
             SayItPrompt prompt = new SayItPrompt(username, time,
                     UniversalConstants.QUESTION, input, answer);
@@ -139,9 +142,47 @@ public class InputHandler implements HttpHandler {
             this.pHelper.save();
         } else if (input.toLowerCase().startsWith("delete prompt")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
-            response = obj.toString();
         } else if (input.toLowerCase().startsWith("clear all")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
+        } else if (input.toLowerCase().startsWith("setup email")
+                || input.toLowerCase().startsWith("set up email")) {
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SETUP_EMAIL);
+        } else if(input.toLowerCase().startsWith("create email")
+                || input.toLowerCase().startsWith("create an email")){
+
+                    input = input.trim();
+        
+                    // if audio is transcribed, pass to Chat GPT
+                    String answer;
+        
+                    try {
+                        answer = this.chatGpt.askQuestion(input);
+                    } catch (Exception e) {
+                        response = "ChatGPT Error: " + e.getMessage();
+                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
+                        httpExchange.getResponseBody().write(response.getBytes());
+                        httpExchange.close();
+                        return;
+                    }
+                    
+                    int lastNL = answer.lastIndexOf('\n');
+                    SayItEmailConfiguration eConfig = eHelper.getEmailConfiguration(username);
+                    String signature = eConfig.getDisplayName();
+                    
+                    answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+
+                    long time = System.currentTimeMillis();
+        
+                    obj.put(SayItPrompt.INPUT_FIELD, input);
+                    obj.put(SayItPrompt.OUTPUT_FIELD, answer);
+                    obj.put(UniversalConstants.ID, time);
+                    obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
+        
+                    SayItPrompt prompt = new SayItPrompt(username, time,
+                            UniversalConstants.QUESTION, input, answer);
+                    this.pHelper.createPrompt(prompt);
+                    this.pHelper.save();
+
             response = obj.toString();
         } else if(input.toLowerCase().startsWith("send email")){
             //parse email address out of response
@@ -162,9 +203,9 @@ public class InputHandler implements HttpHandler {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
-            response = obj.toString();
         }
-
+        
+        response = obj.toString();
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);

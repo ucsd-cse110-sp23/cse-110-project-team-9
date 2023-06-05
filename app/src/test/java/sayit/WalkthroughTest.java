@@ -10,6 +10,7 @@ import sayit.openai.MockWhisper;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
 import sayit.server.db.store.TsvAccountHelper;
+import sayit.server.db.store.TsvEmailConfigurationHelper;
 import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import static sayit.TestConstants.PORT;
 public class WalkthroughTest {
     private static final String TEST_PROMPT_TSV = "test_prompt.tsv";
     private static final String TEST_ACCOUNT_TSV = "test_account.tsv";
+    private static final String TEST_EMAIL_TSV = "test_email.tsv";
 
     @BeforeEach
     public void setUp() {
@@ -31,6 +33,10 @@ public class WalkthroughTest {
             assertTrue(file.delete());
         }
         file = new File(TEST_ACCOUNT_TSV);
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+        file = new File(TEST_EMAIL_TSV);
         if (file.exists()) {
             assertTrue(file.delete());
         }
@@ -185,6 +191,76 @@ public class WalkthroughTest {
         // Billy never touches the app again.
         // Greg has since retired from teaching.
         // The end.
+
+        server.stop();
+    }
+
+    @Test
+    public void testEmailCreationWalkThrough() throws InterruptedException, IOException, URISyntaxException {
+        MockWhisper whisper = new MockWhisper(false, "Question. What is 1 + 1?");
+        MockChatGpt chatGpt = new MockChatGpt(false, "The answer is 2.");
+
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(whisper)
+                .setChatGpt(chatGpt)
+                .setPromptHelper(new TsvPromptHelper(TEST_PROMPT_TSV))
+                .setAccountHelper(new TsvAccountHelper(TEST_ACCOUNT_TSV))
+                .setEmailConfigurationHelper(new TsvEmailConfigurationHelper(TEST_EMAIL_TSV))
+                .build();
+
+        server.start();
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
+        // Wait for server to start
+        Thread.sleep(2000);
+
+        // First, Greg Miranda says "Setup email."
+        whisper.setValues(false, "Setup email.");
+        assertEquals(UniversalConstants.SETUP_EMAIL,
+                requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda").getType());
+
+        // Because Greg never set up an email, nothing should be returned when he asks for his email configuration.
+        assertNull(requestSender.getEmailConfiguration("gmiranda"));
+
+        // Let's pretend that the UI for email setup is working.
+        String firstName = "Greg";
+        String lastName = "Miranda";
+        String email = "gmiranda@yahoo.com";
+        String password = "cse110isgood";
+        String smtpServer = "smtp.mail.yahoo.com";
+        String tlsPort = "587";
+        String displayName = "Greg Miranda";
+
+        // Greg enters his information into the UI.
+        // The UI then sends a request to the server to set up his email.
+        assertTrue(requestSender.saveEmailConfiguration("gmiranda", firstName, lastName, displayName,
+                email, password, smtpServer, tlsPort));
+        // Cool, it's been saved. Now, let's check if the correct values have been saved.
+        var emailConfig = requestSender.getEmailConfiguration("gmiranda");
+        assertNotNull(emailConfig);
+        assertEquals(firstName, emailConfig.get(UniversalConstants.FIRST_NAME));
+        assertEquals(lastName, emailConfig.get(UniversalConstants.LAST_NAME));
+        assertEquals(email, emailConfig.get(UniversalConstants.EMAIL));
+        assertEquals(password, emailConfig.get(UniversalConstants.EMAIL_PASSWORD));
+        assertEquals(smtpServer, emailConfig.get(UniversalConstants.SMTP));
+        assertEquals(tlsPort, emailConfig.get(UniversalConstants.TLS));
+
+        // Greg now wants to edit his email
+        // He enters his new information into the UI.
+        // The UI then sends a request to the server to edit his email.
+        String newFirstName = "Gregory";
+        assertTrue(requestSender.saveEmailConfiguration("gmiranda", newFirstName, lastName, displayName,
+                email, password, smtpServer, tlsPort));
+        // Cool, it's been saved. Now, let's check if the correct values have been saved.
+        var newEmailConfig = requestSender.getEmailConfiguration("gmiranda");
+        assertNotNull(newEmailConfig);
+        assertEquals(newFirstName, newEmailConfig.get(UniversalConstants.FIRST_NAME));
+        assertEquals(lastName, newEmailConfig.get(UniversalConstants.LAST_NAME));
+        assertEquals(email, newEmailConfig.get(UniversalConstants.EMAIL));
+        assertEquals(password, newEmailConfig.get(UniversalConstants.EMAIL_PASSWORD));
+        assertEquals(smtpServer, newEmailConfig.get(UniversalConstants.SMTP));
+        assertEquals(tlsPort, newEmailConfig.get(UniversalConstants.TLS));
 
         server.stop();
     }
