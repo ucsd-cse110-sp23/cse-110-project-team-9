@@ -31,9 +31,9 @@ public class InputHandler implements HttpHandler {
     private final IChatGpt chatGpt;
 
     /**
-     * Creates a new instance of the <c>AskQuestionHandler</c> class.
+     * Creates a new instance of the <c>InputHandler</c> class.
      *
-     * @param pHelper The helper to use.
+     * @param pHelper The prompt helper to use.
      * @param whisper The <c>Whisper</c> instance to use.
      * @param chatGpt The <c>ChatGPT</c> instance to use.
      */
@@ -112,7 +112,7 @@ public class InputHandler implements HttpHandler {
 
             input = input.trim();
 
-            //if audio is transcribed, pass to Chat GPT
+            // if audio is transcribed, pass to Chat GPT
             String answer;
 
             try {
@@ -131,7 +131,6 @@ public class InputHandler implements HttpHandler {
             obj.put(SayItPrompt.OUTPUT_FIELD, answer);
             obj.put(UniversalConstants.ID, time);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
-            response = obj.toString();
 
             SayItPrompt prompt = new SayItPrompt(username, time,
                     UniversalConstants.QUESTION, input, answer);
@@ -139,17 +138,18 @@ public class InputHandler implements HttpHandler {
             this.pHelper.save();
         } else if (input.toLowerCase().startsWith("delete prompt")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
-            response = obj.toString();
         } else if (input.toLowerCase().startsWith("clear all")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
-            response = obj.toString();
+        } else if (input.toLowerCase().startsWith("setup email")
+                || input.toLowerCase().startsWith("set up email")) {
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SETUP_EMAIL);
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
-            response = obj.toString();
         }
 
+        response = obj.toString();
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);

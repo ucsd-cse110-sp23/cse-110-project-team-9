@@ -33,6 +33,8 @@ public final class RequestSender {
     private final URL createAccountUrl;
     private final URL checkAccountUrl;
     private final URL loginUrl;
+    private final URL saveEmailConfigurationUrl;
+    private final URL getEmailConfigurationUrl;
 
     private static RequestSender requestSender;
 
@@ -47,6 +49,8 @@ public final class RequestSender {
             this.createAccountUrl = new URL("http://" + host + ":" + port + "/create-account");
             this.checkAccountUrl = new URL("http://" + host + ":" + port + "/check-account");
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
+            this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_configuration");
+            this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_configuration");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -195,6 +199,12 @@ public final class RequestSender {
                         null,
                         null
                 );
+                case UniversalConstants.SETUP_EMAIL -> new InputOutputEntry(
+                        Integer.MIN_VALUE,
+                        UniversalConstants.SETUP_EMAIL,
+                        null,
+                        null
+                );
                 default -> new InputOutputEntry(
                         Integer.MIN_VALUE,
                         UniversalConstants.ERROR,
@@ -265,8 +275,8 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(deleteEntryUrl + "?" + 
-                USERNAME_QUERY_PARAM + username + "&id=" + id);
+        URI uri = new URI(deleteEntryUrl + "?" +
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&id=" + id);
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -286,7 +296,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(checkAccountUrl + "?" + 
+        URI uri = new URI(checkAccountUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
 
@@ -311,7 +321,7 @@ public final class RequestSender {
      * @throws InterruptedException If an error occurs while sending the request.
      */
     public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(clearHistoryUrl + "?" 
+        URI uri = new URI(clearHistoryUrl + "?"
                 + USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
         HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
@@ -319,6 +329,77 @@ public final class RequestSender {
         }
 
         return Long.parseLong(response.body());
+    }
+
+    /**
+     * Sends a POST request to create an email configuration.
+     *
+     * @param username      The username.
+     * @param firstName     The first name.
+     * @param lastName      The last name.
+     * @param displayName   The display name.
+     * @param email         The email.
+     * @param emailPassword The email password.
+     * @param smtp          The smtp port.
+     * @param tls           The tls port.
+     * @return <c>true</c> if the email configuration was created, <c>false</c> otherwise.
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    public boolean saveEmailConfiguration(String username, String firstName, String lastName,
+                                          String displayName, String email, String emailPassword,
+                                          String smtp, String tls)
+            throws IOException, URISyntaxException, InterruptedException {
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(UniversalConstants.USERNAME, username);
+        parameters.put(UniversalConstants.FIRST_NAME, firstName);
+        parameters.put(UniversalConstants.LAST_NAME, lastName);
+        parameters.put(UniversalConstants.DISPLAY_NAME, displayName);
+        parameters.put(UniversalConstants.EMAIL, email);
+        parameters.put(UniversalConstants.EMAIL_PASSWORD, emailPassword);
+        parameters.put(UniversalConstants.SMTP, smtp);
+        parameters.put(UniversalConstants.TLS, tls);
+
+        HttpResponse<String> response = sendRequest(this.saveEmailConfigurationUrl.toURI(), RequestType.POST, parameters);
+        return response.statusCode() == HttpURLConnection.HTTP_OK;
+    }
+
+    /**
+     * Sends a GET request to get an email configuration with the specified username.
+     *
+     * @param username The username
+     * @return An email configuration with the specified username (if found)
+     * @throws IOException          If an error occurs while sending the request.
+     * @throws URISyntaxException   Should never happen.
+     * @throws InterruptedException If an error occurs while sending the request.
+     */
+    public Map<String, String> getEmailConfiguration(String username)
+            throws IOException, URISyntaxException, InterruptedException {
+        URI uri = new URI(getEmailConfigurationUrl + "?" +
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return null;
+        }
+
+        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
+        }
+
+        JSONObject json = new JSONObject(response.body());
+        Map<String, String> emailInfo = new HashMap<>();
+        emailInfo.put(UniversalConstants.USERNAME, json.getString(UniversalConstants.USERNAME));
+        emailInfo.put(UniversalConstants.FIRST_NAME, json.getString(UniversalConstants.FIRST_NAME));
+        emailInfo.put(UniversalConstants.LAST_NAME, json.getString(UniversalConstants.LAST_NAME));
+        emailInfo.put(UniversalConstants.DISPLAY_NAME, json.getString(UniversalConstants.DISPLAY_NAME));
+        emailInfo.put(UniversalConstants.EMAIL, json.getString(UniversalConstants.EMAIL));
+        emailInfo.put(UniversalConstants.EMAIL_PASSWORD, json.getString(UniversalConstants.EMAIL_PASSWORD));
+        emailInfo.put(UniversalConstants.SMTP, json.getString(UniversalConstants.SMTP));
+        emailInfo.put(UniversalConstants.TLS, json.getString(UniversalConstants.TLS));
+        return emailInfo;
     }
 
     enum RequestType {

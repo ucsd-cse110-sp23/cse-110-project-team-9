@@ -1,19 +1,22 @@
-package sayit.frontend;
+package sayit.frontend.events;
 
 import sayit.common.UniversalConstants;
 import sayit.common.qa.InputOutputEntry;
+import sayit.frontend.*;
+import sayit.frontend.components.QuestionButton;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import static sayit.frontend.FrontEndConstants.*;
 
 /**
- * A class that contains static methods to handle events in the UI.
+ * A class that contains static methods to handle events in the main UI.
  */
-public final class EventHandlers {
+public final class MainUiEventHandlers {
 
     /**
      * Handles the event when the user presses the button from the sidebar (the
@@ -29,101 +32,6 @@ public final class EventHandlers {
             ui.displayEntry(qa);
             // track which button was last selected for deletion
             ui.setSelectedButton(button);
-        };
-    }
-
-    /**
-     * Handles the event when the user presses the create button.
-     *
-     * @param instance The <c>LoginUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onCreateButtonPress(LoginUserInterface instance) {
-        return e -> {
-            // check valid input
-            if (instance.getEmail().length() == 0
-                    || instance.getPassword().length() == 0) {
-                JOptionPane.showMessageDialog(null, INVALID_INPUT_PROMPT);
-                return;
-            }
-
-            String username = instance.getEmail();
-            // Check if the account has been created
-            try {
-                if (RequestSender.getInstance().doesAccountExist(username)) {
-                    JOptionPane.showMessageDialog(null, USERNAME_IN_USE_PROMPT);
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            JPanel myPanel = new JPanel();
-            myPanel.add(new JLabel(PASSWORD_HEADER));
-            JTextField passwordField = new JTextField(10);
-            myPanel.add(passwordField);
-
-            int result = JOptionPane.showConfirmDialog(null, myPanel, VERIFY_PASSWORD_HEADER,
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-            if (result != JOptionPane.OK_OPTION) {
-                return;
-            }
-
-            if (!passwordField.getText().equals(instance.getPassword())) {
-                JOptionPane.showMessageDialog(null, VERIFICATION_FAILED_PROMPT);
-                return;
-            }
-
-            // successful login
-            // Create the account
-            try {
-                boolean created = RequestSender
-                        .getInstance()
-                        .createAccount(username,
-                                instance.getPassword());
-
-                if (!created) {
-                    JOptionPane.showMessageDialog(null, UNKNOWN_ERROR_PROMPT);
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            instance.close(); // close the login UI
-            MainUserInterface.createInstance(username); // start the main UI
-        };
-    }
-
-    /**
-     * Handles the event when the user presses the login button.
-     *
-     * @param instance The <c>LoginUserInterface</c> object.
-     * @return An <c>ActionListener</c> object.
-     */
-    public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
-        return e -> {
-            String username = instance.getEmail();
-            String password = instance.getPassword();
-            try {
-                if (!RequestSender.getInstance().login(username, password)) {
-                    JOptionPane.showMessageDialog(null, LOGIN_FAILED_PROMPT);
-                    instance.clearText();
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,
-                        FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
-                return;
-            }
-
-            instance.close(); // close the login UI
-            MainUserInterface.createInstance(username); // start the main UI
         };
     }
 
@@ -240,6 +148,66 @@ public final class EventHandlers {
                             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
                             ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
                             ui.setSelectedButton(null);
+                        }
+                        case UniversalConstants.SETUP_EMAIL -> {
+                            // See if the user has any email configuration set up
+
+                            Map<String, String> emailConfig;
+                            try {
+                                emailConfig = RequestSender.getInstance().getEmailConfiguration(ui.getUser());
+                            } catch (Exception ex) {
+                                resetStartButton(ui, recordingFile);
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+
+                            String[] emailInfo = null;
+                            if (emailConfig != null) {
+                                String firstName = emailConfig.get(UniversalConstants.FIRST_NAME);
+                                String lastName = emailConfig.get(UniversalConstants.LAST_NAME);
+                                String email = emailConfig.get(UniversalConstants.EMAIL);
+                                String password = emailConfig.get(UniversalConstants.EMAIL_PASSWORD);
+                                String smtp = emailConfig.get(UniversalConstants.SMTP);
+                                String tls = emailConfig.get(UniversalConstants.TLS);
+                                String displayName = emailConfig.get(UniversalConstants.DISPLAY_NAME);
+
+                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp, tls};
+                            }
+
+                            EmailSetupUserInterface emailSetupUserInterface = new EmailSetupUserInterface(data -> {
+                                String firstName = data[0];
+                                String lastName = data[1];
+                                String displayName = data[2];
+                                String email = data[3];
+                                String password = data[4];
+                                String smtp = data[5];
+                                String tls = data[6];
+
+                                boolean result;
+                                try {
+                                    result = RequestSender.getInstance().saveEmailConfiguration(ui.getUser(),
+                                            firstName, lastName, displayName, email, password, smtp, tls);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                    JOptionPane.showMessageDialog(null,
+                                            EMAIL_NOT_SAVED + " " + ex.getMessage(),
+                                            ERROR_TEXT,
+                                            JOptionPane.ERROR_MESSAGE
+                                    );
+                                    return;
+                                }
+
+                                if (result) {
+                                    JOptionPane.showMessageDialog(null, EMAIL_SAVED, SUCCESS_TEXT,
+                                            JOptionPane.INFORMATION_MESSAGE);
+                                } else {
+                                    JOptionPane.showMessageDialog(null, EMAIL_NOT_SAVED, ERROR_TEXT,
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            }, emailInfo);
+
+                            emailSetupUserInterface.open();
                         }
                         default -> {
                             // Assume error
