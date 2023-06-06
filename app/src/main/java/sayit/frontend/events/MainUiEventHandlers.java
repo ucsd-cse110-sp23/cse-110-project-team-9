@@ -100,6 +100,20 @@ public final class MainUiEventHandlers {
                             ui.getScrollBar().repaint();
                             ui.setSelectedButton(button);
                         }
+                        case UniversalConstants.EMAIL_DRAFT -> {
+                            ui.displayEntry(serverResponse);
+
+                            QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
+                                    serverResponse.getID());
+                            button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
+                            button.addActionListener(onQaButtonPress(ui, serverResponse, button));
+                            ui.getScrollBar().add(button);
+
+                            // update scrollBar
+                            ui.getScrollBar().revalidate();
+                            ui.getScrollBar().repaint();
+                            ui.setSelectedButton(button);
+                        }
                         case UniversalConstants.DELETE_PROMPT -> {
                             if (ui.getSelectedButton() == null) {
                                 if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)

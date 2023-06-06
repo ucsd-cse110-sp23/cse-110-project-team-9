@@ -61,7 +61,7 @@ public class HistoryHandler implements HttpHandler {
         for (var item : promptList) {
             JSONObject entry = new JSONObject();
             String type = item.getType();
-            if (!type.equals(UniversalConstants.QUESTION)) {
+            if (!type.equals(UniversalConstants.QUESTION)&& !type.equals(UniversalConstants.EMAIL_DRAFT)) {
                 continue;
             }
 

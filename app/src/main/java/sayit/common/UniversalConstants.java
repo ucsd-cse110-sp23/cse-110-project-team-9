@@ -8,6 +8,7 @@ public final class UniversalConstants {
     public static final String SEND_EMAIL = "SEND_EMAIL";
     public static final String ERROR = "ERROR";
     public static final String SETUP_EMAIL = "SETUP_EMAIL";
+    public static final String EMAIL_DRAFT = "EMAIL_DRAFT";
     public static final String ID = "id";
 
 

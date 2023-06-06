@@ -202,6 +202,12 @@ public final class RequestSender {
                         null,
                         null
                 );
+                case UniversalConstants.EMAIL_DRAFT -> new InputOutputEntry(
+                        json.getLong(UniversalConstants.ID), 
+                        UniversalConstants.EMAIL_DRAFT,
+                        new UserInput(json.getString(UniversalConstants.INPUT)), 
+                        new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
+                );
                 case UniversalConstants.SEND_EMAIL -> new InputOutputEntry(
                         json.getLong(UniversalConstants.ID),
                         UniversalConstants.SEND_EMAIL,
