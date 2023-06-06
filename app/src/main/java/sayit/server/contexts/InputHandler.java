@@ -195,10 +195,18 @@ public class InputHandler implements HttpHandler {
             if (toAddress.endsWith(".")){
                 toAddress = toAddress.substring(0, toAddress.length() -1);
             }
+            long time = System.currentTimeMillis();
+
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
+            obj.put(UniversalConstants.ID, time);
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
             response = obj.toString();
+            SayItPrompt prompt = new SayItPrompt(username, time,
+                    UniversalConstants.QUESTION, input, UniversalConstants.SEND_EMAIL + ": " + toAddress);
+            this.pHelper.createPrompt(prompt);
+            this.pHelper.save();
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);

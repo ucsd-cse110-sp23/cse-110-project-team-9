@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static sayit.frontend.FrontEndConstants.USERNAME_QUERY_PARAM;
+import static sayit.frontend.FrontEndConstants.*;
 
 /**
  * A class that contains static methods to make requests to our HTTP server to
@@ -203,7 +203,7 @@ public final class RequestSender {
                         null
                 );
                 case UniversalConstants.SEND_EMAIL -> new InputOutputEntry(
-                        Integer.MIN_VALUE,
+                        json.getLong(UniversalConstants.ID),
                         UniversalConstants.SEND_EMAIL,
                         new UserInput(json.getString(UniversalConstants.INPUT)),
                         new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
@@ -432,20 +432,23 @@ public final class RequestSender {
      */
     public boolean sendEmail(String username, String toAddress, long id)
         throws IOException, URISyntaxException, InterruptedException {
-        URI uri = new URI(getEmailConfigurationUrl + "?" +
-                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
-        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+        URI uri = new URI(sendUrl + "?" +
+                USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&" +
+                TO_ADDRESS_QUERY_PARAM + URLEncoder.encode(toAddress, StandardCharsets.UTF_8) + "&" +
+                ID_QUERY_PARAM + URLEncoder.encode(Long.toString(id), StandardCharsets.UTF_8)
+                );
+        HttpResponse<String> response = sendRequest(uri, RequestType.POST, null);
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return false;
         }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
-            throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
+            return false;
         }
+        return true;
 
-        JSONObject json = new JSONObject(response.body());
-        return false;
+        
     }
 
     /**

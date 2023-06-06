@@ -23,6 +23,7 @@ dependencies {
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.json:json:20230227")
     implementation("org.mongodb:mongodb-driver-sync:4.9.1")
+    implementation("com.sun.mail:javax.mail:1.6.2")
 }
 
 application {

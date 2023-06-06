@@ -16,6 +16,8 @@ public final class UniversalConstants {
     public static final String INPUT = "input";
     public static final String OUTPUT = "output";
 
+    public static final String TO_ADDRESS = "toAddress";
+
     //Following constants below are for EmailConfiguration stuff
     public static final String FIRST_NAME = "first_name";
     public static final String LAST_NAME = "last_name";

@@ -210,9 +210,22 @@ public final class MainUiEventHandlers {
                             emailSetupUserInterface.open();
                         }
                         case UniversalConstants.SEND_EMAIL ->{
-
+                            boolean result = false;
                             try{
-                                RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                                 result = RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                                ui.displayEntry(serverResponse);
+
+                                // add data to scrollBar
+                                QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
+                                    serverResponse.getID());
+                                button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
+                                button.addActionListener(onQaButtonPress(ui, serverResponse, button));
+                                ui.getScrollBar().add(button);
+
+                                // update scrollBar
+                                ui.getScrollBar().revalidate();
+                                ui.getScrollBar().repaint();
+                                ui.setSelectedButton(button);
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                                     JOptionPane.showMessageDialog(null,
@@ -221,6 +234,13 @@ public final class MainUiEventHandlers {
                                             JOptionPane.ERROR_MESSAGE
                                     );
                                     return;
+                            }
+                            if (result) {
+                                JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SENT, ERROR_TEXT,
+                                        JOptionPane.ERROR_MESSAGE);
                             }
 
                         }

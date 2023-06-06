@@ -57,7 +57,7 @@ public class Server {
         if (configHelper != null) {
             this._server.createContext("/save_email_configuration", new SaveEmailConfigHandler(configHelper));
             this._server.createContext("/get_email_configuration", new GetEmailConfigurationHandler(configHelper));
-            this._server.createContext("/send_email", new SendEmailHandler(configHelper));
+            this._server.createContext("/send_email", new SendEmailHandler(configHelper, pHelper));
         }
 
         if (accountHelper != null) {
