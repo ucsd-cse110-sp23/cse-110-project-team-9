@@ -52,7 +52,7 @@ public final class RequestSender {
             this.loginUrl = new URL("http://" + host + ":" + port + "/login");
             this.saveEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/save_email_configuration");
             this.getEmailConfigurationUrl = new URL("http://" + host + ":" + port + "/get_email_configuration");
-            this.sendUrl = new URL("http://" + host + ":" + port + "/sendEmail");
+            this.sendUrl = new URL("http://" + host + ":" + port + "/send_email");
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
@@ -450,9 +450,10 @@ public final class RequestSender {
         }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+            System.out.println("\tsend email problem");
             return false;
         }
-        System.out.println("email sent");
+        System.out.println("\temail sent");
         return true;
 
         

@@ -1,10 +1,11 @@
-package sayit.server.contexts;
+package sayit.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
+import sayit.server.contexts.ISendHandler;
 import sayit.server.db.common.IEmailConfigurationHelper;
 import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.doctypes.SayItEmailConfiguration;
@@ -22,7 +23,7 @@ import java.util.Properties;
  * Handles a request for sending an email  
  * The endpoint will be <c>/send_email</c>
  */
-public class SendEmailHandler extends ISendHandler {
+public class MockSendHandler extends ISendHandler {
     private final IEmailConfigurationHelper configHelper;
     private final IPromptHelper promptHelper;
 
@@ -31,7 +32,7 @@ public class SendEmailHandler extends ISendHandler {
      *
      * @param configHelper The email configuration helper to use.
      */
-    public SendEmailHandler(IEmailConfigurationHelper configHelper, IPromptHelper promptHelper) {
+    public MockSendHandler(IEmailConfigurationHelper configHelper, IPromptHelper promptHelper) {
         this.configHelper = configHelper;
         this.promptHelper = promptHelper;
     }
@@ -45,6 +46,7 @@ public class SendEmailHandler extends ISendHandler {
      */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+
         // Make sure we have a POST request here
         if (!httpExchange.getRequestMethod().equals("POST")) {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
@@ -73,7 +75,7 @@ public class SendEmailHandler extends ISendHandler {
             return;
         }
 
-        System.out.println(toAddress);
+        
 
         String idsString = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.ID);
@@ -98,6 +100,8 @@ public class SendEmailHandler extends ISendHandler {
             return;
         }
 
+        
+
         String smtpHost = config.getSmtp();
         String tlsPort = config.getTls();
         String fromAddress = config.getEmail();
@@ -106,8 +110,14 @@ public class SendEmailHandler extends ISendHandler {
 
         SayItPrompt sendItPrompt = promptHelper.get(username, id);
 
+        
+
         //check if selected prompt is an email
-        String checkForEmail = sendItPrompt.getInput();
+        //String checkForEmail = sendItPrompt.getInput();
+        String checkForEmail = "create email 1";
+
+        
+
         if (!checkForEmail.toLowerCase().startsWith("create email")
                 && !checkForEmail.toLowerCase().startsWith("create an email")){
             System.out.println("Selected Prompt not an email");
@@ -116,39 +126,9 @@ public class SendEmailHandler extends ISendHandler {
             return;
         }
 
-
-        //send email
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", smtpHost);
-        props.put("mail.smtp.port", tlsPort);
-
-        Session session = Session.getInstance(props,
-            new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(fromAddress, password);
-                }
-        });
         
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(fromAddress, displayName));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
-            message.setSubject("Test Subject");
-            message.setText(sendItPrompt.getOutput());
 
-            Transport.send(message);
-
-            System.out.println("Email sent successfully");
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Error sending email");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
-            httpExchange.close();
-            return;
-        }
+        //Skip Sending Email
 
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
         httpExchange.close();

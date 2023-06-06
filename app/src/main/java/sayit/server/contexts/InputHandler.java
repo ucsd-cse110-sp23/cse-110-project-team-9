@@ -165,9 +165,16 @@ public class InputHandler implements HttpHandler {
                         httpExchange.close();
                         return;
                     }
-                    System.out.println("Create_email after try catch");
                     int lastNL = answer.lastIndexOf('\n');
                     SayItEmailConfiguration eConfig = eHelper.getEmailConfiguration(username);
+                    
+                    if(eConfig == null){
+                        response = "Email not setup";
+                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, response.length());
+                        httpExchange.getResponseBody().write(response.getBytes());
+                        httpExchange.close();
+                        return;
+                    }
                     String signature = eConfig.getDisplayName();
                     
                     answer = answer.substring(0, lastNL).concat("\n").concat(signature);
@@ -198,23 +205,21 @@ public class InputHandler implements HttpHandler {
             long time = System.currentTimeMillis();
 
             obj.put(SayItPrompt.INPUT_FIELD, input);
-            obj.put(SayItPrompt.OUTPUT_FIELD, UniversalConstants.SEND_EMAIL + ": " + toAddress);
+            obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
             obj.put(UniversalConstants.ID, time);
-            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
             response = obj.toString();
             SayItPrompt prompt = new SayItPrompt(username, time,
                     UniversalConstants.QUESTION, input, UniversalConstants.SEND_EMAIL + ": " + toAddress);
             this.pHelper.createPrompt(prompt);
             this.pHelper.save();
-            System.out.println("INputHandlerSend");
+            response = obj.toString();
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
         }
         
-        System.out.println(obj.get(SayItPrompt.TYPE_FIELD));
         response = obj.toString();
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
