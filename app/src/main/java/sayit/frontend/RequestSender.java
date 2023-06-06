@@ -265,7 +265,7 @@ public final class RequestSender {
             long id = entry.getLong(UniversalConstants.ID);
             InputOutputEntry inputOutputEntry = new InputOutputEntry(
                     id,
-                    UniversalConstants.QUESTION,
+                    entry.getString(UniversalConstants.TYPE),
                     new UserInput(entry.getString(UniversalConstants.INPUT)),
                     new ProgramOutput(entry.getString(UniversalConstants.OUTPUT))
             );

@@ -176,8 +176,9 @@ public class InputHandler implements HttpHandler {
                         return;
                     }
                     String signature = eConfig.getDisplayName();
-                    
-                    answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+
+                    // TODO make sure lastNL isn't -1
+                    answer = answer.substring(0, 10).concat("\n").concat(signature);
 
                     long time = System.currentTimeMillis();
                     obj.put(SayItPrompt.INPUT_FIELD, input);

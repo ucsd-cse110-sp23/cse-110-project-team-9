@@ -1,9 +1,7 @@
 package sayit.server;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.NullConversion;
-
-import com.sun.mail.imap.protocol.ID;
 
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
@@ -13,15 +11,25 @@ import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.store.TsvEmailConfigurationHelper;
 import sayit.server.db.store.TsvPromptHelper;
 
+import java.io.File;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sayit.TestConstants.*;
 
 public class SendEmailTest {
     private static final String TEST_EMAIL_TSV = "test_email.tsv";
 
+    @BeforeEach
+    public void setUp() {
+        var file = new File(TEST_EMAIL_TSV);
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+    }
+
     @Test
     public void testCorrectSend() throws Exception{
-        IPromptHelper promptHelper = new TsvPromptHelper("testCreateEmail.tsv");
+        IPromptHelper promptHelper = new TsvPromptHelper(TEST_EMAIL_TSV);
         IEmailConfigurationHelper configHelper = new TsvEmailConfigurationHelper(TEST_EMAIL_TSV);
         MockSendServer server = MockSendServer.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
@@ -41,7 +49,8 @@ public class SendEmailTest {
         requestSender.saveEmailConfiguration("username1", "aa",
                 "bb", "ac", "ad", "ae", "af", "ag");
 
-        var response = requestSender.sendEmail("username1", toAddress, dummyID);
+        var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
+        var response = requestSender.sendEmail("username1", toAddress, recording.getID());
         assertTrue(response);
         server.stop();
     }
