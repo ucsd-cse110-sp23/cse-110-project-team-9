@@ -446,6 +446,7 @@ public final class RequestSender {
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             return false;
         }
+        System.out.println("email sent");
         return true;
 
         

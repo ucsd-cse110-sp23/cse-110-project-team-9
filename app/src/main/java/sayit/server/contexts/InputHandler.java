@@ -198,7 +198,7 @@ public class InputHandler implements HttpHandler {
             long time = System.currentTimeMillis();
 
             obj.put(SayItPrompt.INPUT_FIELD, input);
-            obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
+            obj.put(SayItPrompt.OUTPUT_FIELD, UniversalConstants.SEND_EMAIL + ": " + toAddress);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
             obj.put(UniversalConstants.ID, time);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);

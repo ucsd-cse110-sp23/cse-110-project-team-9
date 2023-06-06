@@ -84,6 +84,7 @@ public final class MainUiEventHandlers {
                         return;
                     }
 
+                    System.out.println(serverResponse.getType());
                     switch (serverResponse.getType()) {
                         case UniversalConstants.QUESTION -> {
                             ui.displayEntry(serverResponse);
@@ -210,9 +211,11 @@ public final class MainUiEventHandlers {
                             emailSetupUserInterface.open();
                         }
                         case UniversalConstants.SEND_EMAIL ->{
+                            System.out.println("do I even get here?");
                             boolean result = false;
                             try{
-                                 result = RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                                result = RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                                
                                 ui.displayEntry(serverResponse);
 
                                 // add data to scrollBar
