@@ -43,6 +43,6 @@ public class SendEmailTest {
 
         var response = requestSender.sendEmail("username1", toAddress, dummyID);
         assertTrue(response);
-
+        server.stop();
     }
 }

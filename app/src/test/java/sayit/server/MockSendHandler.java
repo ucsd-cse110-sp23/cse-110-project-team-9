@@ -12,6 +12,8 @@ import sayit.server.db.doctypes.SayItEmailConfiguration;
 import sayit.server.db.doctypes.SayItPrompt;
 import sayit.server.db.mongo.*;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -110,11 +112,13 @@ public class MockSendHandler extends ISendHandler {
 
         SayItPrompt sendItPrompt = promptHelper.get(username, id);
 
+        assertNotNull(sendItPrompt);
         
 
         //check if selected prompt is an email
         //String checkForEmail = sendItPrompt.getInput();
         String checkForEmail = "create email 1";
+        System.out.println(checkForEmail);
 
         
 
