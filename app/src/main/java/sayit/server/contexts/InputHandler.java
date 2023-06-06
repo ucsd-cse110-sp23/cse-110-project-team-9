@@ -157,6 +157,7 @@ public class InputHandler implements HttpHandler {
         
                     try {
                         answer = this.chatGpt.askQuestion(input);
+                        
                     } catch (Exception e) {
                         response = "ChatGPT Error: " + e.getMessage();
                         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
@@ -164,7 +165,7 @@ public class InputHandler implements HttpHandler {
                         httpExchange.close();
                         return;
                     }
-                    
+                    System.out.println("Create_email after try catch");
                     int lastNL = answer.lastIndexOf('\n');
                     SayItEmailConfiguration eConfig = eHelper.getEmailConfiguration(username);
                     String signature = eConfig.getDisplayName();
@@ -172,7 +173,6 @@ public class InputHandler implements HttpHandler {
                     answer = answer.substring(0, lastNL).concat("\n").concat(signature);
 
                     long time = System.currentTimeMillis();
-        
                     obj.put(SayItPrompt.INPUT_FIELD, input);
                     obj.put(SayItPrompt.OUTPUT_FIELD, answer);
                     obj.put(UniversalConstants.ID, time);
@@ -207,12 +207,14 @@ public class InputHandler implements HttpHandler {
                     UniversalConstants.QUESTION, input, UniversalConstants.SEND_EMAIL + ": " + toAddress);
             this.pHelper.createPrompt(prompt);
             this.pHelper.save();
+            System.out.println("INputHandlerSend");
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
         }
         
+        System.out.println(obj.get(SayItPrompt.TYPE_FIELD));
         response = obj.toString();
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
