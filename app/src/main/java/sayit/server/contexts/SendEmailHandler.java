@@ -103,14 +103,14 @@ public class SendEmailHandler implements HttpHandler {
         SayItPrompt sendItPrompt = promptHelper.get(username, id);
 
         //check if selected prompt is an email
-        String checkForEmail = sendItPrompt.getInput();
-        if (!checkForEmail.toLowerCase().startsWith("create email")
-                && !checkForEmail.toLowerCase().startsWith("create an email")){
-            System.out.println("Selected Prompt not an email");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            httpExchange.close();
-            return;
-        }
+        // String checkForEmail = sendItPrompt.getInput();
+        // if (!checkForEmail.toLowerCase().startsWith("create email")
+        //         && !checkForEmail.toLowerCase().startsWith("create an email")){
+        //     System.out.println("Selected Prompt not an email");
+        //     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+        //     httpExchange.close();
+        //     return;
+        // }
 
 
         //send email
@@ -132,7 +132,7 @@ public class SendEmailHandler implements HttpHandler {
             message.setFrom(new InternetAddress(fromAddress, displayName));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
             message.setSubject("Test Subject");
-            message.setText(sendItPrompt.getOutput());
+            message.setText("Test");
 
             Transport.send(message);
 
