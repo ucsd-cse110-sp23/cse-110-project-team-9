@@ -69,68 +69,25 @@ public class SendEmailHandler extends ISendHandler {
         //extract necessary information from Query
         String username = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.USERNAME);
-        if (username == null) {
-            System.out.println("\tbut is invalid because no username specified.");
-            obj.put(UniversalConstants.SUCCESS, false);
-            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
-            response = obj.toString();
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
-            httpExchange.getResponseBody().write(bytes);
-            httpExchange.close();
-            return;
-        }
+        
         
         String toAddress = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.TO_ADDRESS);
-        if (toAddress == null) {
-            System.out.println("\tbut is invalid because no to address specified.");
-            obj.put(UniversalConstants.SUCCESS, false);
-            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
-            response = obj.toString();
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
-            httpExchange.getResponseBody().write(bytes);
-            httpExchange.close();;
-            return;
-        }
+        
 
         //check ID Query
         String idsString = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.ID);
-        if (idsString == null) {
-            System.out.println("\tbut is invalid because no prompt ID specified.");
-            obj.put(UniversalConstants.SUCCESS, false);
-            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
-            response = obj.toString();
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
-            httpExchange.getResponseBody().write(bytes);
-            httpExchange.close();
-            return;
-        }
+        
 
         String sendID = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
         UniversalConstants.NEW_ID);
-
-        if (sendID == null) {
-            System.out.println("\tbut is invalid because no send ID specified.");
-            obj.put(UniversalConstants.SUCCESS, false);
-            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
-            response = obj.toString();
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
-            httpExchange.getResponseBody().write(bytes);
-            httpExchange.close();
-            return;
-        }
 
         //Id for created email
         long id = Long.parseLong(idsString);
 
         //ID for send email
         long newID = Long.parseLong(sendID);
-
 
         //get prompt information
         SayItPrompt sendItPrompt = promptHelper.get(username, id);
@@ -164,34 +121,11 @@ public class SendEmailHandler extends ISendHandler {
             return;
         }
 
-        if(config == null){
-            System.out.println("\tEmail not configured");
-            obj.put(UniversalConstants.SUCCESS, false);
-            obj.put(UniversalConstants.ERROR, "email not configured");
-            obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
-            response = obj.toString();
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, bytes.length);
-            httpExchange.getResponseBody().write(bytes);
-            httpExchange.close();
-
-            SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL, 
-                "Send email to: " + toAddress + " " + UniversalConstants.ERROR, 
-                obj.getString(UniversalConstants.ERROR)
-            );
-
-            this.promptHelper.createPrompt(prompt);
-            this.promptHelper.save();
-            return;
-        }
-
         String smtpHost = config.getSmtp();
         String tlsPort = config.getTls();
         String fromAddress = config.getEmail();
         String password = config.getEmailPassword();
         String displayName = config.getDisplayName();
-
-
 
         //send email
         Properties props = new Properties();
