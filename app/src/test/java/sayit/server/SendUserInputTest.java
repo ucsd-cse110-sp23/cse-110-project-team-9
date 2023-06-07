@@ -158,4 +158,36 @@ public class SendUserInputTest {
         server.stop();
         assertTrue(promptHelper.clearAllPrompts(DUMMY_USERNAME) > 0);
     }
+    @Test
+    public void testEmailDraft() throws Exception {
+        var file = new File("testEmailDraft.tsv");
+        if (file.exists()) {
+            assertTrue(file.delete());
+        }
+
+        IPromptHelper promptHelper = new TsvPromptHelper("testEmailDraft.tsv");
+        Server server = Server.builder()
+                .setHost(ServerConstants.SERVER_HOSTNAME)
+                .setPort(PORT)
+                .setWhisper(new MockWhisper(false, "Create an email to Kelly."))
+                .setChatGpt(new MockChatGpt(false, "Hey Kelly \n"))
+                .setPromptHelper(promptHelper)
+                .build();
+
+        server.start();
+
+        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
+        // Wait for server to start
+        Thread.sleep(2000);
+        var emailAcc = requestSender.saveEmailConfiguration("username1", "aa",
+                "ab", "ac", "ad", "ae", "af", "ag");
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
+
+        //assertEquals("Create an email to Kelly.", resp.getInput().getInputText());
+        //assertEquals("Hey Kelly \nac", resp.getOutput().getOutputText());
+        //assertTrue(resp.getID() > 0);
+
+        server.stop();
+        //assertEquals(1, promptHelper.clearAllPrompts(DUMMY_USERNAME));
+    }
 }

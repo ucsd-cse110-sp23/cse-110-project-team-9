@@ -150,7 +150,7 @@ public class InputHandler implements HttpHandler {
         } else if(input.toLowerCase().startsWith("create email")
                 || input.toLowerCase().startsWith("create an email")){
 
-                    input = input.trim();
+                    //input = input.trim();
         
                     // if audio is transcribed, pass to Chat GPT
                     String answer;
@@ -169,8 +169,13 @@ public class InputHandler implements HttpHandler {
                     int lastNL = answer.lastIndexOf('\n');
                     SayItEmailConfiguration eConfig = eHelper.getEmailConfiguration(username);
                     String signature = eConfig.getDisplayName();
-                    
-                    answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+                    if(lastNL > 0){
+                        //answer = answer.substring(0, 10).concat("\n").concat(signature);
+                            answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+                        } else{
+                            answer = answer.concat("\n").concat(signature);
+                        }
+                    //answer = answer.substring(0, lastNL).concat("\n").concat(signature);
 
                     long time = System.currentTimeMillis();
                     obj.put(SayItPrompt.INPUT_FIELD, input);
