@@ -18,8 +18,10 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
 import static sayit.server.Helper.saveAudioFile;
+import static sayit.server.ServerConstants.MISSING_ECONFIG;
 import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
-import static sayit.server.ServerConstants.MISSING_ECONFIG;;
+
+;
 
 /**
  * Handles a request for asking a question.
@@ -159,12 +161,17 @@ public class InputHandler implements HttpHandler {
             SayItEmailConfiguration eConfig = this._server.getEmailDb().getEmailConfiguration(username);
 
             if (eConfig == null) {
-                response = "Email not setup";
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
+                obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
+                obj.put(SayItPrompt.INPUT_FIELD, input);
+                obj.put(SayItPrompt.OUTPUT_FIELD, MISSING_ECONFIG);
+                response = obj.toString();
+                byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
+                httpExchange.getResponseBody().write(bytes);
                 httpExchange.close();
                 return;
             }
+
             String signature = eConfig.getDisplayName();
 
             if (lastNL > 0) {
