@@ -181,6 +181,8 @@ public class LoginUserInterface {
                 info.createNewFile();
 
                 FileWriter writer = new FileWriter(LOGIN_INFO_FILENAME);
+
+                //save username
                 writer.write(username);
                 writer.close();
             }
@@ -201,6 +203,7 @@ public class LoginUserInterface {
             File info = new File(LOGIN_INFO_FILENAME);
             Scanner readInfo = new Scanner(info);
             
+            //check for file content and read username
             if(readInfo.hasNextLine()){
                 String username = readInfo.nextLine();
                 MainUserInterface.createInstance(username); // start the main UI
