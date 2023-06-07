@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
-import sayit.server.db.common.IEmailConfigurationHelper;
+import sayit.server.IServer;
 import sayit.server.db.doctypes.SayItEmailConfiguration;
 
 import java.io.IOException;
@@ -16,15 +16,15 @@ import java.net.HttpURLConnection;
  * The endpoint will be <c>/save_email_config</c>
  */
 public class SaveEmailConfigHandler implements HttpHandler {
-    private final IEmailConfigurationHelper configHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>SaveEmailConfigurationHandler</c> class.
      *
-     * @param configHelper The email configuration helper to use.
+     * @param server The server instance
      */
-    public SaveEmailConfigHandler(IEmailConfigurationHelper configHelper) {
-        this.configHelper = configHelper;
+    public SaveEmailConfigHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -66,13 +66,13 @@ public class SaveEmailConfigHandler implements HttpHandler {
 
         SayItEmailConfiguration config = new SayItEmailConfiguration(accUsername, firstName, lastName,
                 displayName, email, emailPassword, smtp, tls);
-        if (configHelper.getEmailConfiguration(accUsername) == null) {
-            configHelper.createEmailConfiguration(config);
+        if (this._server.getEmailDb().getEmailConfiguration(accUsername) == null) {
+            this._server.getEmailDb().createEmailConfiguration(config);
         }
         else {
-            configHelper.replaceEmailConfiguration(config);
+            this._server.getEmailDb().replaceEmailConfiguration(config);
         }
-        configHelper.save();
+        this._server.getEmailDb().save();
 
         System.out.println("\tand created email configuration");
         System.out.println("\t\twith username: " + accUsername);

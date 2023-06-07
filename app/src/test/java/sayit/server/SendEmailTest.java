@@ -33,13 +33,14 @@ public class SendEmailTest {
     public void testCorrectSend() throws Exception{
         IPromptHelper promptHelper = new TsvPromptHelper(TEST_EMAIL_TSV);
         IEmailConfigurationHelper configHelper = new TsvEmailConfigurationHelper(TEST_EMAIL_TSV);
-        MockSendServer server = MockSendServer.builder()
+        Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
                 .setWhisper(new MockWhisper(false, "create email to Dave asking about the weather"))
                 .setChatGpt(new MockChatGpt(false, "Hey Dave how is the weather?"))
                 .setPromptHelper(promptHelper)
                 .setEmailConfigurationHelper(configHelper)
+                .setEmailSender(x -> true)
                 .build();
 
         server.start();
@@ -62,13 +63,14 @@ public class SendEmailTest {
     public void testWrongPromptType() throws Exception{
         IPromptHelper promptHelper = new TsvPromptHelper(TEST_EMAIL_TSV);
         IEmailConfigurationHelper configHelper = new TsvEmailConfigurationHelper(TEST_EMAIL_TSV);
-        MockSendServer server = MockSendServer.builder()
+        Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
                 .setWhisper(new MockWhisper(false, "question to Dave asking about the weather"))
                 .setChatGpt(new MockChatGpt(false, "Hey Dave how is the weather?"))
                 .setPromptHelper(promptHelper)
                 .setEmailConfigurationHelper(configHelper)
+                .setEmailSender(x -> true)
                 .build();
 
         server.start();

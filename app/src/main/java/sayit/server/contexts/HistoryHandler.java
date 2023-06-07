@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.db.common.IPromptHelper;
+import sayit.server.IServer;
 import sayit.server.db.doctypes.SayItPrompt;
 
 import java.io.IOException;
@@ -19,15 +19,15 @@ import java.util.List;
  * The endpoint will be <c>/history</c>.
  */
 public class HistoryHandler implements HttpHandler {
-    private final IPromptHelper pHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>HistoryHandler</c> class.
      *
-     * @param helper The Prompt Helper to use.
+     * @param server the server instance
      */
-    public HistoryHandler(IPromptHelper helper) {
-        this.pHelper = helper;
+    public HistoryHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -56,7 +56,7 @@ public class HistoryHandler implements HttpHandler {
             return;
         }
 
-        List<SayItPrompt> promptList = pHelper.getAllPromptsBy(username);
+        List<SayItPrompt> promptList = this._server.getPromptDb().getAllPromptsBy(username);
         JSONArray history = new JSONArray();
         for (var item : promptList) {
             JSONObject entry = new JSONObject();
