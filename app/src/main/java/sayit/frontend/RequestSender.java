@@ -14,6 +14,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +96,7 @@ public final class RequestSender {
      */
     public boolean isAlive() {
         try {
-            HttpResponse<String> response = sendRequest(pingUrl.toURI(), RequestType.GET, null);
+            HttpResponse<String> response = sendRequest(pingUrl.toURI(), RequestType.GET, null, Duration.ofSeconds(2));
             return response.statusCode() == HttpURLConnection.HTTP_OK;
         } catch (Exception ex) {
             return false;
@@ -116,7 +117,7 @@ public final class RequestSender {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(UniversalConstants.USERNAME, username);
         parameters.put(UniversalConstants.PASSWORD, password);
-        HttpResponse<String> response = sendRequest(this.createAccountUrl.toURI(), RequestType.POST, parameters);
+        HttpResponse<String> response = sendRequest(this.createAccountUrl.toURI(), RequestType.POST, parameters, null);
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
 
@@ -135,7 +136,7 @@ public final class RequestSender {
         parameters.put(UniversalConstants.USERNAME, username);
         parameters.put(UniversalConstants.PASSWORD, password);
 
-        HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters);
+        HttpResponse<String> response = sendRequest(this.loginUrl.toURI(), RequestType.POST, parameters, null);
 
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
@@ -251,6 +252,7 @@ public final class RequestSender {
                 new URI(historyUrl + "?" +
                         USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8)),
                 RequestType.GET,
+                null,
                 null
         );
 
@@ -292,7 +294,7 @@ public final class RequestSender {
     public boolean delete(long id, String username) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(deleteEntryUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&id=" + id);
-        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
+        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
@@ -313,7 +315,7 @@ public final class RequestSender {
     public boolean doesAccountExist(String username) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(checkAccountUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
-        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null, null);
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
@@ -338,7 +340,7 @@ public final class RequestSender {
     public long clearHistory(String username) throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(clearHistoryUrl + "?"
                 + USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
-        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null);
+        HttpResponse<String> response = sendRequest(uri, RequestType.DELETE, null, null);
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Response Code: " + response.statusCode() + ", Response: " + response.body());
         }
@@ -377,7 +379,7 @@ public final class RequestSender {
         parameters.put(UniversalConstants.SMTP, smtp);
         parameters.put(UniversalConstants.TLS, tls);
 
-        HttpResponse<String> response = sendRequest(this.saveEmailConfigurationUrl.toURI(), RequestType.POST, parameters);
+        HttpResponse<String> response = sendRequest(this.saveEmailConfigurationUrl.toURI(), RequestType.POST, parameters, null);
         return response.statusCode() == HttpURLConnection.HTTP_OK;
     }
 
@@ -394,7 +396,7 @@ public final class RequestSender {
             throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(getEmailConfigurationUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8));
-        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null);
+        HttpResponse<String> response = sendRequest(uri, RequestType.GET, null, null);
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return null;
@@ -443,7 +445,7 @@ public final class RequestSender {
                 ID_QUERY_PARAM + URLEncoder.encode(Long.toString(createID), StandardCharsets.UTF_8) + "&" +
                 NEW_ID_QUERY_PARAM + URLEncoder.encode(Long.toString(sendID), StandardCharsets.UTF_8)
         );
-        HttpResponse<String> response = sendRequest(uri, RequestType.POST, null);
+        HttpResponse<String> response = sendRequest(uri, RequestType.POST, null, null);
         String body = response.body();
         JSONObject object = new JSONObject(body);
 
@@ -467,9 +469,10 @@ public final class RequestSender {
     /**
      * Sends a request to the server.
      *
-     * @param uri  The URI to send the request to.
-     * @param type The type of request to send.
-     * @param body The body of the request. This is only used if the request type is POST.
+     * @param uri     The URI to send the request to.
+     * @param type    The type of request to send.
+     * @param body    The body of the request. This is only used if the request type is POST.
+     * @param timeout The timeout for the request.
      * @return The response from the server.
      * @throws IOException          If an error occurs while sending the request.
      * @throws InterruptedException If an error occurs while sending the request.
@@ -477,12 +480,14 @@ public final class RequestSender {
     private static HttpResponse<String> sendRequest(
             URI uri,
             RequestType type,
-            Map<String, Object> body
+            Map<String, Object> body,
+            Duration timeout
     ) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         var request = HttpRequest
                 .newBuilder()
                 .uri(uri)
+                .timeout(timeout)
                 .header("Content-Type", "application/json");
 
         switch (type) {
