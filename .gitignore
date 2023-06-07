@@ -12,6 +12,7 @@ bin/
 # Configuration files
 token.txt
 mongo.txt
+LoginInfo.txt
 
 # Misc. files
 *.tsv
