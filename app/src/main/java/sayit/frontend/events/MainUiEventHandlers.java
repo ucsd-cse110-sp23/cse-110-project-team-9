@@ -224,23 +224,25 @@ public final class MainUiEventHandlers {
                             emailSetupUserInterface.open();
                         }
                         case UniversalConstants.SEND_EMAIL ->{
-                            boolean result = false;
+                            boolean success = false;
+                            InputOutputEntry result;
                             try{
-                                result = RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId());
+                                result = RequestSender.getInstance().sendEmail(ui.getUser(), serverResponse.getOutput().getOutputText(), ui.getSelectedButton().getId(), serverResponse.getID());
                                 
-                                ui.displayEntry(serverResponse);
+                                ui.displayEntry(result);
 
                                 // add data to scrollBar
-                                QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
-                                    serverResponse.getID());
+                                QuestionButton button = new QuestionButton(result.getInput().getInputText(),
+                                    result.getID());
                                 button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
-                                button.addActionListener(onQaButtonPress(ui, serverResponse, button));
+                                button.addActionListener(onQaButtonPress(ui, result, button));
                                 ui.getScrollBar().add(button);
 
                                 // update scrollBar
                                 ui.getScrollBar().revalidate();
                                 ui.getScrollBar().repaint();
                                 ui.setSelectedButton(button);
+                                success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                                     JOptionPane.showMessageDialog(null,
@@ -250,7 +252,7 @@ public final class MainUiEventHandlers {
                                     );
                                     return;
                             }
-                            if (result) {
+                            if (success) {
                                 JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
                                         JOptionPane.INFORMATION_MESSAGE);
                             } else {

@@ -61,9 +61,6 @@ public class HistoryHandler implements HttpHandler {
         for (var item : promptList) {
             JSONObject entry = new JSONObject();
             String type = item.getType();
-            if (!type.equals(UniversalConstants.QUESTION) && !type.equals(UniversalConstants.EMAIL_DRAFT)) {
-                continue;
-            }
 
             entry.put(SayItPrompt.INPUT_FIELD, item.getInput());
             entry.put(SayItPrompt.OUTPUT_FIELD, item.getOutput());

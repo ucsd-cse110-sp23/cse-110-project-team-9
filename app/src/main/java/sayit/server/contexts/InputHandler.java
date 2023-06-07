@@ -214,11 +214,7 @@ public class InputHandler implements HttpHandler {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
             obj.put(UniversalConstants.ID, time);
             response = obj.toString();
-            SayItPrompt prompt = new SayItPrompt(username, time,
-                    UniversalConstants.QUESTION, input, UniversalConstants.SEND_EMAIL + ": " + toAddress);
-            this.pHelper.createPrompt(prompt);
-            this.pHelper.save();
-            response = obj.toString();
+            
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);

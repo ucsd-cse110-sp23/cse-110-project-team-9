@@ -1,5 +1,6 @@
 package sayit.server.contexts;
 
+import com.sun.mail.imap.protocol.ID;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import sayit.server.db.mongo.*;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 
 import javax.mail.*;
 import javax.mail.internet.*;
@@ -45,9 +47,19 @@ public class SendEmailHandler extends ISendHandler {
      */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+
+        //prepare response
+        String response;
+        JSONObject obj = new JSONObject();
+        
         // Make sure we have a POST request here
         if (!httpExchange.getRequestMethod().equals("POST")) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
             httpExchange.close();
             return;
         }
@@ -59,7 +71,12 @@ public class SendEmailHandler extends ISendHandler {
                 UniversalConstants.USERNAME);
         if (username == null) {
             System.out.println("\tbut is invalid because no username specified.");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
             httpExchange.close();
             return;
         }
@@ -68,33 +85,103 @@ public class SendEmailHandler extends ISendHandler {
                 UniversalConstants.TO_ADDRESS);
         if (toAddress == null) {
             System.out.println("\tbut is invalid because no to address specified.");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            httpExchange.close();
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
+            httpExchange.close();;
             return;
         }
 
-        System.out.println(toAddress);
-
+        //check ID Query
         String idsString = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.ID);
         if (idsString == null) {
             System.out.println("\tbut is invalid because no prompt ID specified.");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
             httpExchange.close();
             return;
         }
 
+        String sendID = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
+        UniversalConstants.NEW_ID);
+
+        if (sendID == null) {
+            System.out.println("\tbut is invalid because no send ID specified.");
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
+            httpExchange.close();
+            return;
+        }
+
+        //Id for created email
         long id = Long.parseLong(idsString);
 
-        
+        //ID for send email
+        long newID = Long.parseLong(sendID);
+
+
+        //get prompt information
+        SayItPrompt sendItPrompt = promptHelper.get(username, id);
 
         //get email information
         SayItEmailConfiguration config = configHelper.getEmailConfiguration(username);
 
+        //check if selected prompt is an email
+        String checkForEmail = sendItPrompt.getInput();
+        if (!checkForEmail.toLowerCase().startsWith("create email")
+                && !checkForEmail.toLowerCase().startsWith("create an email")){
+            System.out.println("Selected Prompt not an email");
+
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+            obj.put(UniversalConstants.ERROR, "Selected prompt not an email");
+            response = obj.toString();
+
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
+            httpExchange.close();
+
+            SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL, 
+                "Send email to: " + toAddress + " " + UniversalConstants.ERROR, 
+                obj.getString(UniversalConstants.ERROR)
+            );
+
+            this.promptHelper.createPrompt(prompt);
+            this.promptHelper.save();
+            return;
+        }
+
         if(config == null){
             System.out.println("\tEmail not configured");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.ERROR, "email not configured");
+            obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+            response = obj.toString();
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
             httpExchange.close();
+
+            SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL, 
+                "Send email to: " + toAddress + " " + UniversalConstants.ERROR, 
+                obj.getString(UniversalConstants.ERROR)
+            );
+
+            this.promptHelper.createPrompt(prompt);
+            this.promptHelper.save();
             return;
         }
 
@@ -104,17 +191,6 @@ public class SendEmailHandler extends ISendHandler {
         String password = config.getEmailPassword();
         String displayName = config.getDisplayName();
 
-        SayItPrompt sendItPrompt = promptHelper.get(username, id);
-
-        //check if selected prompt is an email
-        String checkForEmail = sendItPrompt.getInput();
-        if (!checkForEmail.toLowerCase().startsWith("create email")
-                && !checkForEmail.toLowerCase().startsWith("create an email")){
-            System.out.println("Selected Prompt not an email");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            httpExchange.close();
-            return;
-        }
 
 
         //send email
@@ -130,27 +206,78 @@ public class SendEmailHandler extends ISendHandler {
                     return new PasswordAuthentication(fromAddress, password);
                 }
         });
+
+        //get subject and body from GPT response
+        String emailInputText = sendItPrompt.getOutput();
+        String[] lines = emailInputText.split("\n"); // split by newline
+
+        String subjectLine = null;
+        StringBuilder bodyBuilder = new StringBuilder();
+
+        for (String line : lines) {
+            if (subjectLine == null && line.toLowerCase().startsWith("subject:")) {
+                subjectLine = line.substring("subject:".length()).trim();
+            } else {
+            bodyBuilder.append(line).append("\n");
+            }
+        }
+
+        String bodyText = bodyBuilder.toString().trim();
         
+        //try to put email together and send
         try {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(fromAddress, displayName));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
-            message.setSubject("Test Subject");
-            message.setText(sendItPrompt.getOutput());
+            message.setSubject(subjectLine);
+            message.setText(bodyText);
 
             Transport.send(message);
 
-            System.out.println("Email sent successfully");
+            System.out.println("\tEmail sent successfully");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println("Error sending email");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
+            System.out.println("\tError sending email");
+
+            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+            obj.put(UniversalConstants.ERROR, "Error Sending Email");
+            response = obj.toString();
+
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, bytes.length);
+            httpExchange.getResponseBody().write(bytes);
             httpExchange.close();
+
+            SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL, 
+                "Send email to: " + toAddress + " " + UniversalConstants.ERROR, 
+                obj.getString(UniversalConstants.ERROR)
+            );
+
+            this.promptHelper.createPrompt(prompt);
+            this.promptHelper.save();
             return;
         }
 
-        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+        //handle response for updating history
+        
+
+        obj.put(UniversalConstants.SUCCESS, true);
+        obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+        response = obj.toString();
+
+        SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL, 
+            "Send email to: " + toAddress + " " + UniversalConstants.SUCCESS, 
+            sendItPrompt.getOutput()
+            );
+
+        this.promptHelper.createPrompt(prompt);
+        this.promptHelper.save();
+
+        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
+        httpExchange.getResponseBody().write(bytes);
         httpExchange.close();
     }
     

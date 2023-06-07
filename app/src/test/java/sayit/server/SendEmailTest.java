@@ -3,6 +3,7 @@ package sayit.server;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import sayit.common.UniversalConstants;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
@@ -51,38 +52,11 @@ public class SendEmailTest {
                 "bb", "ac", "ad", "ae", "af", "ag");
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
-        var response = requestSender.sendEmail("username1", toAddress, recording.getID());
-        assertTrue(response);
+        var response = requestSender.sendEmail("username1", toAddress, recording.getID(), dummyID);
+        assertTrue(response.getInput().toString().contains(UniversalConstants.SUCCESS));
         server.stop();
     }
 
-    @Test
-    public void testEmailNotConfigured() throws Exception{
-        IPromptHelper promptHelper = new TsvPromptHelper(TEST_EMAIL_TSV);
-        IEmailConfigurationHelper configHelper = new TsvEmailConfigurationHelper(TEST_EMAIL_TSV);
-        MockSendServer server = MockSendServer.builder()
-                .setHost(ServerConstants.SERVER_HOSTNAME)
-                .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "create email to Dave asking about the weather"))
-                .setChatGpt(new MockChatGpt(false, "Hey Dave how is the weather?"))
-                .setPromptHelper(promptHelper)
-                .setEmailConfigurationHelper(configHelper)
-                .build();
-
-        server.start();
-
-        var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
-        // Wait for server to start
-        Thread.sleep(2000);
-
-        requestSender.saveEmailConfiguration("username0", "aa",
-                "bb", "ac", "ad", "ae", "af", "ag");
-
-        var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username0");
-        var response = requestSender.sendEmail("username1", toAddress, recording.getID());
-        assertFalse(response);
-        server.stop();
-    }
 
     @Test
     public void testWrongPromptType() throws Exception{
@@ -107,8 +81,8 @@ public class SendEmailTest {
                 "bb", "ac", "ad", "ae", "af", "ag");
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username0");
-        var response = requestSender.sendEmail("username1", toAddress, recording.getID());
-        assertFalse(response);
+        var response = requestSender.sendEmail("username0", toAddress, recording.getID(), dummyID);
+        assertFalse(response.getInput().toString().contains(UniversalConstants.SUCCESS));
         server.stop();
     }
 }

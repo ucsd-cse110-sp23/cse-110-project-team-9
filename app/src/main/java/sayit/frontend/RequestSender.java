@@ -1,5 +1,6 @@
 package sayit.frontend;
 
+import org.bson.json.JsonObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
@@ -436,25 +437,44 @@ public final class RequestSender {
      * @throws URISyntaxException   Should never happen.
      * @throws InterruptedException If an error occurs while sending the request.
      */
-    public boolean sendEmail(String username, String toAddress, long id)
+    public InputOutputEntry sendEmail(String username, String toAddress, long createID, long sendID)
         throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(sendUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&" +
                 TO_ADDRESS_QUERY_PARAM + URLEncoder.encode(toAddress, StandardCharsets.UTF_8) + "&" +
-                ID_QUERY_PARAM + URLEncoder.encode(Long.toString(id), StandardCharsets.UTF_8)
+                ID_QUERY_PARAM + URLEncoder.encode(Long.toString(createID), StandardCharsets.UTF_8) + "&" +
+                NEW_ID_QUERY_PARAM + URLEncoder.encode(Long.toString(sendID), StandardCharsets.UTF_8)
                 );
         HttpResponse<String> response = sendRequest(uri, RequestType.POST, null);
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            return false;
+            System.out.println("\tunable to connect to email service");
         }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             System.out.println("\tsend email problem");
-            return false;
         }
-        System.out.println("\temail sent");
-        return true;
+
+        String body = response.body();
+        JSONObject object = new JSONObject(body);
+
+        String successString;
+        boolean success = object.getBoolean(UniversalConstants.SUCCESS);
+        String output;
+        
+        if (success){
+            successString = UniversalConstants.SUCCESS;
+            output = object.getString(UniversalConstants.OUTPUT);
+        } else {
+            successString = UniversalConstants.ERROR;
+            output = object.getString(UniversalConstants.ERROR);
+        }
+
+        InputOutputEntry entry = new InputOutputEntry(sendID, UniversalConstants.SEND_EMAIL, 
+            new UserInput("Send email to: " + toAddress + " " + successString), 
+            new ProgramOutput(output));
+        
+        return entry;
 
         
     }

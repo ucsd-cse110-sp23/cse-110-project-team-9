@@ -49,6 +49,8 @@ public final class FrontEndConstants {
     public static final String USERNAME_QUERY_PARAM = "username=";
     public static final String TO_ADDRESS_QUERY_PARAM = "toAddress=";
     public static final String ID_QUERY_PARAM = "id=";
+    public static final String NEW_ID_QUERY_PARAM = "newID=";
+    
 
     // Button Dimensions
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
