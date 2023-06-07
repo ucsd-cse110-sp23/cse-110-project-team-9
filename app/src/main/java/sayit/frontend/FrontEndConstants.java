@@ -28,7 +28,6 @@ public final class FrontEndConstants {
     public static final String EMAIL_SAVED = "Your email configuration has been saved.";
     public static final String EMAIL_NOT_SAVED = "Your email configuration could not be saved.";
 
-
     // Constants for events
     public static final String PASSWORD_HEADER = "Password: ";
     public static final String VERIFY_PASSWORD_HEADER = "Verify Password";
@@ -50,6 +49,9 @@ public final class FrontEndConstants {
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);
     public static final Dimension SHORT_BUTTON_DIMENSION = new Dimension(150, 40);
     public static final Dimension TEXT_FIELD_DIMENSION = new Dimension(200, 40);
+
+    // Remember login
+    public static final String LOGIN_INFO_FILENAME = "LoginInfo.txt";
 
     // Email constants
     public static final String EMAIL_HEADER = "Email: ";

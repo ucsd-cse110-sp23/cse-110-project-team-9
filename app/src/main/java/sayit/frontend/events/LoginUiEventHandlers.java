@@ -14,7 +14,6 @@ import static sayit.frontend.FrontEndConstants.*;
  * This class contains the event handlers for the login UI.
  */
 public final class LoginUiEventHandlers {
-
     /**
      * Handles the event when the user presses the create button.
      *
@@ -78,6 +77,8 @@ public final class LoginUiEventHandlers {
                 return;
             }
 
+            instance.rememberLogin(username);
+
             instance.close(); // close the login UI
             MainUserInterface.createInstance(username); // start the main UI
         };
@@ -104,6 +105,8 @@ public final class LoginUiEventHandlers {
                         FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
                 return;
             }
+
+            instance.rememberLogin(username);
 
             instance.close(); // close the login UI
             MainUserInterface.createInstance(username); // start the main UI
