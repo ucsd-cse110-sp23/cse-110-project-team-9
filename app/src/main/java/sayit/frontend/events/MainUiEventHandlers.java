@@ -242,6 +242,7 @@ public final class MainUiEventHandlers {
                                 ui.getScrollBar().revalidate();
                                 ui.getScrollBar().repaint();
                                 ui.setSelectedButton(button);
+                                //check for success
                                 success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
                             } catch (Exception ex) {
                                 ex.printStackTrace();
