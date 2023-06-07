@@ -1,5 +1,12 @@
 package sayit.frontend;
 
+// Imports for remembering login
+import java.io.File;
+import java.io.FileWriter;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import sayit.frontend.events.LoginUiEventHandlers;
 
 import javax.swing.*;
@@ -7,6 +14,10 @@ import java.awt.*;
 
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TEXT;
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TITLE;
+import static sayit.frontend.FrontEndConstants.ERROR_TEXT;
+import static sayit.frontend.FrontEndConstants.LOGIN_INFO_FILENAME;
+import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TEXT;
+import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TITLE;
 
 /**
  * The login user interface for the application.
@@ -17,6 +28,7 @@ public class LoginUserInterface {
     private final JFrame frame;
     private JTextField emailField;
     private JTextField passwordField;
+    private File info;
 
     // constants
     private final Dimension BUTTON_DIMENSION = new Dimension(150, 40);
@@ -27,30 +39,39 @@ public class LoginUserInterface {
     private static final String EMAIL_HEADER = "Email: ";
     private static final String PASSWORD_HEADER = "Password: ";
     private static final String EMPTY_TEXT = "";
+    private static final String LOGIN_INFO_FAILED_TEXT = "No saved username found";
 
     private LoginUserInterface() {
         frame = new JFrame(APP_NAME);
-        this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addComponentsToPane(this.frame.getContentPane());
-        this.frame.pack();
-        this.frame.setVisible(true);
 
-        // Add behavior for closing app, update db.
-        // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
-        // https://www.codejava.net/java-se/swing/preventing-jframe-window-from-closing
-        frame.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                int confirmClose = JOptionPane.showConfirmDialog(frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        //automatically login if file storing login information already exists
+        info = new File(LOGIN_INFO_FILENAME);
+        System.out.println(LOGIN_INFO_FILENAME);
+        if(!info.exists() || !getLoginInformation()){
+            //only show login user interface if no automatic login
 
-                // if user confirms closing the window, exit
-                if (confirmClose == JOptionPane.YES_OPTION) {
-                    // terminate Java VM and exit
-                    System.exit(0);
+            this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            addComponentsToPane(this.frame.getContentPane());
+            this.frame.pack();
+            this.frame.setVisible(true);
+
+            // Add behavior for closing app, update db.
+            // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+            // https://www.codejava.net/java-se/swing/preventing-jframe-window-from-closing
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    int confirmClose = JOptionPane.showConfirmDialog(frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+                    // if user confirms closing the window, exit
+                    if (confirmClose == JOptionPane.YES_OPTION) {
+                        // terminate Java VM and exit
+                        System.exit(0);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private static LoginUserInterface userInterface;
@@ -141,5 +162,70 @@ public class LoginUserInterface {
     public void clearText() {
         emailField.setText(EMPTY_TEXT);
         passwordField.setText(EMPTY_TEXT);
+    }
+
+    /**
+     * Helper function for asking and logging whether to remember user login on this device
+     * @param username String containing user's email to automatically login
+     * @return
+     */
+    public void rememberLogin(String username){
+        int confirmRemember = JOptionPane.showConfirmDialog(this.frame, REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_TITLE,
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        // if user confirms, write username to file
+        if (confirmRemember == JOptionPane.YES_OPTION) {
+            // create file and close
+            try{
+                info.createNewFile();
+
+                FileWriter writer = new FileWriter(LOGIN_INFO_FILENAME);
+
+                //save username
+                writer.write(username);
+                writer.close();
+            }
+            catch (IOException exception){
+                System.out.println(ERROR_TEXT);
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Read login information from the file stored on local device
+     * Automatically log in using stored username
+     * @return true if successfully logged in automatically
+     */
+    public boolean getLoginInformation(){
+        try{
+            Scanner readInfo = new Scanner(info);
+            
+            //check for file content and read username
+            if(readInfo.hasNextLine()){
+                String username = readInfo.nextLine();
+                readInfo.close();
+
+                // Check if the account exists
+                try {
+                    if (RequestSender.getInstance().doesAccountExist(username)) {
+                        MainUserInterface.createInstance(username); // start the main UI
+                        return true;
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null,
+                            FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
+                }
+            }
+            else{
+                System.out.println(LOGIN_INFO_FAILED_TEXT);
+            }
+        }
+        catch(FileNotFoundException ex){
+            System.out.println(ERROR_TEXT);
+            ex.printStackTrace();
+        }
+
+        return false;
     }
 }
