@@ -48,6 +48,7 @@ public final class MainUiEventHandlers {
             if (!RequestSender.getInstance().isAlive()) {
                 JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
                         FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                resetStartButton(ui, null);
                 return;
             }
 
