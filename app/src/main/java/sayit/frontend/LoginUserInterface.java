@@ -16,6 +16,8 @@ import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TEXT;
 import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TITLE;
 import static sayit.frontend.FrontEndConstants.ERROR_TEXT;
 import static sayit.frontend.FrontEndConstants.LOGIN_INFO_FILENAME;
+import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TEXT;
+import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TITLE;
 
 /**
  * The login user interface for the application.
@@ -40,7 +42,7 @@ public class LoginUserInterface {
 
     private LoginUserInterface() {
         frame = new JFrame(APP_NAME);
-        
+
         //automatically login if file storing login information already exists
         File info = new File(LOGIN_INFO_FILENAME);
         if(info.exists()){
@@ -168,11 +170,11 @@ public class LoginUserInterface {
      * @return
      */
     public void rememberLogin(String username){
-        int confirmClose = JOptionPane.showConfirmDialog(this.frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+        int confirmRemember = JOptionPane.showConfirmDialog(this.frame, REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_TITLE,
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
         // if user confirms, write username to file
-        if (confirmClose == JOptionPane.YES_OPTION) {
+        if (confirmRemember == JOptionPane.YES_OPTION) {
             // create file and close
             File info = new File(LOGIN_INFO_FILENAME);
             try{

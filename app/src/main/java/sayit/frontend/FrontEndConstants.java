@@ -52,6 +52,8 @@ public final class FrontEndConstants {
 
     // Remember login
     public static final String LOGIN_INFO_FILENAME = "LoginInfo.txt";
+    public static final String REMEMBER_LOGIN_TEXT = "Would you like to remember your login information on this device?";
+    public static final String REMEMBER_LOGIN_TITLE = "Automatically Log In?";
 
     // Email constants
     public static final String EMAIL_HEADER = "Email: ";
