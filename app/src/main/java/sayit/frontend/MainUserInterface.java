@@ -1,7 +1,7 @@
 package sayit.frontend;
 
 import sayit.common.qa.InputOutputEntry;
-import sayit.frontend.components.QuestionButton;
+import sayit.frontend.components.SidebarButton;
 import sayit.frontend.events.MainUiEventHandlers;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class MainUserInterface {
     private JTextArea answerTextArea;
 
     // tracks the last selected button from sidebar (for deletion)
-    private QuestionButton selectedButton;
+    private SidebarButton selectedButton;
 
     private final JFrame frame;
 
@@ -176,7 +176,7 @@ public class MainUserInterface {
 
         for (Map.Entry<Long, InputOutputEntry> entry : inputHistory.entrySet()) {
             String question = entry.getValue().getInput().getInputText();
-            QuestionButton button = new QuestionButton(question, entry.getKey());
+            SidebarButton button = new SidebarButton(question, entry.getKey());
             button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
             button.addActionListener(MainUiEventHandlers.onQaButtonPress(this, entry.getValue(), button));
             scrollBar.add(button);
@@ -224,7 +224,7 @@ public class MainUserInterface {
      * @return The button associated with the question that is currently being
      * displayed.
      */
-    public QuestionButton getSelectedButton() {
+    public SidebarButton getSelectedButton() {
         return selectedButton;
     }
 
@@ -242,7 +242,7 @@ public class MainUserInterface {
      *
      * @param selectedButton The button that was last selected.
      */
-    public void setSelectedButton(QuestionButton selectedButton) {
+    public void setSelectedButton(SidebarButton selectedButton) {
         this.selectedButton = selectedButton;
     }
 

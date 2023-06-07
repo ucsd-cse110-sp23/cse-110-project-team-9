@@ -17,7 +17,7 @@ public final class FrontEndConstants {
     public static final String RECORD_PROCESSING_TEXT = "PROCESSING";
 
     // Constants for success and error messages
-    public static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
+    public static final String DELETION_NONE_SELECTED_TEXT = "No prompt selected. Please select a prompt and try again.";
     public static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
     public static final String SERVER_UNAVAILABLE_TEXT = "The server is currently offline "
             + "and cannot handle any requests. This functionality is currently unavailable.";
@@ -27,6 +27,8 @@ public final class FrontEndConstants {
     public static final String SUCCESS_TEXT = "Success";
     public static final String EMAIL_SAVED = "Your email configuration has been saved.";
     public static final String EMAIL_NOT_SAVED = "Your email configuration could not be saved.";
+    public static final String EMAIL_SENT = "Your email has been sent";
+    public static final String EMAIL_NOT_SENT = "Your email could not be sent";
 
     // Constants for events
     public static final String PASSWORD_HEADER = "Password: ";
@@ -44,6 +46,10 @@ public final class FrontEndConstants {
 
     // Constants for requests
     public static final String USERNAME_QUERY_PARAM = "username=";
+    public static final String TO_ADDRESS_QUERY_PARAM = "toAddress=";
+    public static final String ID_QUERY_PARAM = "id=";
+    public static final String NEW_ID_QUERY_PARAM = "newID=";
+    
 
     // Button Dimensions
     public static final Dimension PROMPT_HISTORY_BTN_DIMENSIONS = new Dimension(180, 100);

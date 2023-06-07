@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.frontend.helpers.Pair;
 import sayit.server.Helper;
-import sayit.server.db.common.IAccountHelper;
+import sayit.server.IServer;
 import sayit.server.db.doctypes.SayItAccount;
 
 import java.io.IOException;
@@ -16,15 +16,15 @@ import java.net.HttpURLConnection;
  * The endpoint will be <c>/create-account</c>.
  */
 public class CreateAccountHandler implements HttpHandler {
-    private final IAccountHelper _accountHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>CreateAccountHandler</c> class.
      *
-     * @param accountHelper The account helper to use.
+     * @param server the server instance
      */
-    public CreateAccountHandler(IAccountHelper accountHelper) {
-        this._accountHelper = accountHelper;
+    public CreateAccountHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -56,7 +56,7 @@ public class CreateAccountHandler implements HttpHandler {
         String username = credentials.getFirst();
         String password = credentials.getSecond();
 
-        if (this._accountHelper.getAccount(username) != null) {
+        if (this._server.getAccountDb().getAccount(username) != null) {
             System.out.println("\tbut account already exists.");
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_CONFLICT, 0);
             exchange.close();
@@ -67,8 +67,8 @@ public class CreateAccountHandler implements HttpHandler {
         System.out.println("\t\twith username: " + username);
         System.out.println("\t\twith password: " + "*".repeat(password.length()));
 
-        this._accountHelper.createAccount(new SayItAccount(username, password));
-        this._accountHelper.save();
+        this._server.getAccountDb().createAccount(new SayItAccount(username, password));
+        this._server.getAccountDb().save();
         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
         exchange.close();
     }

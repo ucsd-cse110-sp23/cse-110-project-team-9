@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.db.common.IEmailConfigurationHelper;
+import sayit.server.IServer;
 import sayit.server.db.doctypes.SayItEmailConfiguration;
 
 import java.io.IOException;
@@ -17,11 +17,16 @@ import java.nio.charset.StandardCharsets;
  * The endpoint will be <c>get_email_config</c>.
  */
 public class GetEmailConfigurationHandler implements HttpHandler {
+    private final IServer _server;
 
-    private final IEmailConfigurationHelper configHelper;
 
-    public GetEmailConfigurationHandler(IEmailConfigurationHelper configHelper) {
-        this.configHelper = configHelper;
+    /**
+     * Creates a new instance of the <c>GetEmailConfigurationHandler</c> class.
+     *
+     * @param server the server instance
+     */
+    public GetEmailConfigurationHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -49,7 +54,7 @@ public class GetEmailConfigurationHandler implements HttpHandler {
             return;
         }
 
-        SayItEmailConfiguration config = configHelper.getEmailConfiguration(username);
+        SayItEmailConfiguration config = this._server.getEmailDb().getEmailConfiguration(username);
         if (config == null) {
             System.out.println("\tbut no email configuration for  " + username + " was found.");
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);

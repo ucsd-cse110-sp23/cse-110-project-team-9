@@ -60,5 +60,5 @@ public final class ServerConstants {
     }
 
     public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized."
-            + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt.\"";
+            + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt\" or \"Create an email.\" or \"Send email to\"";
 }

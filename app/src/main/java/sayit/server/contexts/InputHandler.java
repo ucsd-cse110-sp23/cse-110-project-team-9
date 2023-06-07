@@ -5,10 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.db.common.IPromptHelper;
+import sayit.server.IServer;
+import sayit.server.db.doctypes.SayItEmailConfiguration;
 import sayit.server.db.doctypes.SayItPrompt;
-import sayit.server.openai.IChatGpt;
-import sayit.server.openai.IWhisper;
 import sayit.server.openai.WhisperCheck;
 
 import java.io.ByteArrayOutputStream;
@@ -26,21 +25,15 @@ import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
  * The endpoint will be <c>/ask</c>.
  */
 public class InputHandler implements HttpHandler {
-    private final IPromptHelper pHelper;
-    private final IWhisper whisper;
-    private final IChatGpt chatGpt;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>InputHandler</c> class.
      *
-     * @param pHelper The prompt helper to use.
-     * @param whisper The <c>Whisper</c> instance to use.
-     * @param chatGpt The <c>ChatGPT</c> instance to use.
+     * @param server The server instance
      */
-    public InputHandler(IPromptHelper pHelper, IWhisper whisper, IChatGpt chatGpt) {
-        this.pHelper = pHelper;
-        this.whisper = whisper;
-        this.chatGpt = chatGpt;
+    public InputHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -90,7 +83,7 @@ public class InputHandler implements HttpHandler {
         String soundFilePath = saveAudioFile(audioBytes);
 
         // Access Whisper API
-        WhisperCheck whisperCheck = new WhisperCheck(this.whisper, new File(soundFilePath));
+        WhisperCheck whisperCheck = new WhisperCheck(this._server.getWhisper(), new File(soundFilePath));
 
         String input = whisperCheck.output();
         String response;
@@ -116,7 +109,7 @@ public class InputHandler implements HttpHandler {
             String answer;
 
             try {
-                answer = this.chatGpt.askQuestion(input);
+                answer = this._server.getChatGpt().askQuestion(input);
             } catch (Exception e) {
                 response = "ChatGPT Error: " + e.getMessage();
                 httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
@@ -134,8 +127,8 @@ public class InputHandler implements HttpHandler {
 
             SayItPrompt prompt = new SayItPrompt(username, time,
                     UniversalConstants.QUESTION, input, answer);
-            this.pHelper.createPrompt(prompt);
-            this.pHelper.save();
+            this._server.getPromptDb().createPrompt(prompt);
+            this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("delete prompt")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
         } else if (input.toLowerCase().startsWith("clear all")) {
@@ -143,6 +136,70 @@ public class InputHandler implements HttpHandler {
         } else if (input.toLowerCase().startsWith("setup email")
                 || input.toLowerCase().startsWith("set up email")) {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SETUP_EMAIL);
+        } else if (input.toLowerCase().startsWith("create email")
+                || input.toLowerCase().startsWith("create an email")) {
+
+            input = input.trim();
+
+            // if audio is transcribed, pass to Chat GPT
+            String answer;
+
+            try {
+                answer = this._server.getChatGpt().askQuestion(input);
+
+            } catch (Exception e) {
+                response = "ChatGPT Error: " + e.getMessage();
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
+                httpExchange.getResponseBody().write(response.getBytes());
+                httpExchange.close();
+                return;
+            }
+            int lastNL = answer.lastIndexOf('\n');
+            SayItEmailConfiguration eConfig = this._server.getEmailDb().getEmailConfiguration(username);
+
+            if (eConfig == null) {
+                response = "Email not setup";
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, response.length());
+                httpExchange.getResponseBody().write(response.getBytes());
+                httpExchange.close();
+                return;
+            }
+            String signature = eConfig.getDisplayName();
+
+            if (lastNL > 0) {
+                answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+            } else {
+                answer = answer.concat("\n").concat(signature);
+            }
+
+
+            long time = System.currentTimeMillis();
+            obj.put(SayItPrompt.INPUT_FIELD, input);
+            obj.put(SayItPrompt.OUTPUT_FIELD, answer);
+            obj.put(UniversalConstants.ID, time);
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.EMAIL_DRAFT);
+
+            SayItPrompt prompt = new SayItPrompt(username, time,
+                    UniversalConstants.EMAIL_DRAFT, input, answer);
+            this._server.getPromptDb().createPrompt(prompt);
+            this._server.getPromptDb().save();
+        } else if (input.toLowerCase().startsWith("send email to")) {
+            //parse email address out of response
+            input = input.substring(14);
+            String toAddress = input.toLowerCase();
+            toAddress = toAddress.replace(" dot ", ".");
+            toAddress = toAddress.replace(" at ", "@");
+            toAddress = toAddress.replace(" ", "");
+            toAddress = toAddress.replace("-", "");
+            if (toAddress.endsWith(".")) {
+                toAddress = toAddress.substring(0, toAddress.length() - 1);
+            }
+            long time = System.currentTimeMillis();
+
+            obj.put(SayItPrompt.INPUT_FIELD, input);
+            obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
+            obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
+            obj.put(UniversalConstants.ID, time);
         } else {
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);

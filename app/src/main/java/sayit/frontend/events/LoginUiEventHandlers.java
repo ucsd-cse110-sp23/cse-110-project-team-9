@@ -22,6 +22,12 @@ public final class LoginUiEventHandlers {
      */
     public static ActionListener onCreateButtonPress(LoginUserInterface instance) {
         return e -> {
+            if (!RequestSender.getInstance().isAlive()) {
+                JOptionPane.showMessageDialog(null, FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
+                        ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // check valid input
             if (instance.getEmail().length() == 0
                     || instance.getPassword().length() == 0) {
@@ -92,6 +98,12 @@ public final class LoginUiEventHandlers {
      */
     public static ActionListener onLoginButtonPress(LoginUserInterface instance) {
         return e -> {
+            if (!RequestSender.getInstance().isAlive()) {
+                JOptionPane.showMessageDialog(null, FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
+                        ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             String username = instance.getEmail();
             String password = instance.getPassword();
             try {
