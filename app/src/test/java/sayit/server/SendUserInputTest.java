@@ -5,6 +5,7 @@ import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
 import sayit.server.db.common.IPromptHelper;
+import sayit.server.db.store.TsvEmailConfigurationHelper;
 import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
@@ -164,7 +165,7 @@ public class SendUserInputTest {
         if (file.exists()) {
             assertTrue(file.delete());
         }
-
+        TsvEmailConfigurationHelper emailConfigurationHelper = new TsvEmailConfigurationHelper("testEmailConfig.tsv");
         IPromptHelper promptHelper = new TsvPromptHelper("testEmailDraft.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
@@ -172,6 +173,7 @@ public class SendUserInputTest {
                 .setWhisper(new MockWhisper(false, "Create an email to Kelly."))
                 .setChatGpt(new MockChatGpt(false, "Hey Kelly \n"))
                 .setPromptHelper(promptHelper)
+                .setEmailConfigurationHelper(emailConfigurationHelper)
                 .build();
 
         server.start();

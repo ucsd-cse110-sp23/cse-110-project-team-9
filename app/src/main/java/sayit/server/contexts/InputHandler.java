@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 import static sayit.server.Helper.saveAudioFile;
 import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
+import static sayit.server.ServerConstants.MISSING_ECONFIG;;
 
 /**
  * Handles a request for asking a question.
@@ -150,7 +151,7 @@ public class InputHandler implements HttpHandler {
         } else if(input.toLowerCase().startsWith("create email")
                 || input.toLowerCase().startsWith("create an email")){
 
-                    //input = input.trim();
+                    input = input.trim();
         
                     // if audio is transcribed, pass to Chat GPT
                     String answer;
@@ -168,14 +169,20 @@ public class InputHandler implements HttpHandler {
                     System.out.println("Create_email after try catch");
                     int lastNL = answer.lastIndexOf('\n');
                     SayItEmailConfiguration eConfig = eHelper.getEmailConfiguration(username);
+                    if(eConfig == null){
+                        obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
+                        obj.put(SayItPrompt.INPUT_FIELD, input);
+                        obj.put(SayItPrompt.OUTPUT_FIELD, MISSING_ECONFIG);
+                        response = obj.toString();
+                        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
+                        httpExchange.getResponseBody().write(bytes);
+                        httpExchange.close();
+                    }
+
                     String signature = eConfig.getDisplayName();
-                    if(lastNL > 0){
-                        //answer = answer.substring(0, 10).concat("\n").concat(signature);
-                            answer = answer.substring(0, lastNL).concat("\n").concat(signature);
-                        } else{
-                            answer = answer.concat("\n").concat(signature);
-                        }
-                    //answer = answer.substring(0, lastNL).concat("\n").concat(signature);
+            
+                    answer = answer.substring(0, lastNL).concat("\n").concat(signature);
 
                     long time = System.currentTimeMillis();
                     obj.put(SayItPrompt.INPUT_FIELD, input);
