@@ -142,7 +142,7 @@ public class SendEmailHandler extends ISendHandler {
         String checkForEmail = sendItPrompt.getInput();
         if (!checkForEmail.toLowerCase().startsWith("create email")
                 && !checkForEmail.toLowerCase().startsWith("create an email")){
-            System.out.println("Selected Prompt not an email");
+            System.out.println("\tSelected Prompt not an email");
 
             obj.put(UniversalConstants.SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
