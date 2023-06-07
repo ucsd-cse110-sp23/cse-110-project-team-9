@@ -202,6 +202,7 @@ public final class MainUiEventHandlers {
                                 //check for success
                                 success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
                             } catch (Exception ex) {
+                                resetStartButton(ui, recordingFile);
                                 ex.printStackTrace();
                                 JOptionPane.showMessageDialog(null,
                                         EMAIL_NOT_SENT + " " + ex.getMessage(),
