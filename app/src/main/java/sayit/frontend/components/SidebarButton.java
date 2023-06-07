@@ -7,7 +7,7 @@ import static sayit.frontend.FrontEndConstants.PROMPT_HISTORY_BTN_DIMENSIONS;
 /**
  * Button class for questions on sidebar
  */
-public class QuestionButton extends JButton {
+public class SidebarButton extends JButton {
     private final long id;
 
     /**
@@ -17,7 +17,7 @@ public class QuestionButton extends JButton {
      * @param id          The ID of the corresponding QuestionAnswerEntry in the
      *                    database
      */
-    public QuestionButton(String displayName, long id) {
+    public SidebarButton(String displayName, long id) {
         super(displayName);
         this.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
         this.id = id;

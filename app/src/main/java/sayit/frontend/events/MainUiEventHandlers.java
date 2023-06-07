@@ -3,7 +3,7 @@ package sayit.frontend.events;
 import sayit.common.UniversalConstants;
 import sayit.common.qa.InputOutputEntry;
 import sayit.frontend.*;
-import sayit.frontend.components.QuestionButton;
+import sayit.frontend.components.SidebarButton;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -27,7 +27,7 @@ public final class MainUiEventHandlers {
      * @param button The <c>QuestionButton</c> object.
      * @return An <c>ActionListener</c> object.
      */
-    public static ActionListener onQaButtonPress(MainUserInterface ui, InputOutputEntry qa, QuestionButton button) {
+    public static ActionListener onQaButtonPress(MainUserInterface ui, InputOutputEntry qa, SidebarButton button) {
         return e -> {
             ui.displayEntry(qa);
             // track which button was last selected for deletion
@@ -48,6 +48,7 @@ public final class MainUiEventHandlers {
             if (!RequestSender.getInstance().isAlive()) {
                 JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
                         FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                resetStartButton(ui, null);
                 return;
             }
 
@@ -85,34 +86,11 @@ public final class MainUiEventHandlers {
                     }
 
                     switch (serverResponse.getType()) {
-                        case UniversalConstants.QUESTION -> {
-                            ui.displayEntry(serverResponse);
-
-                            // add data to scrollBar
-                            QuestionButton button = new QuestionButton(serverResponse.getInput().getInputText(),
-                                    serverResponse.getID());
-                            button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
-                            button.addActionListener(onQaButtonPress(ui, serverResponse, button));
-                            ui.getScrollBar().add(button);
-
-                            // update scrollBar
-                            ui.getScrollBar().revalidate();
-                            ui.getScrollBar().repaint();
-                            ui.setSelectedButton(button);
-                        }
+                        case UniversalConstants.QUESTION, UniversalConstants.EMAIL_DRAFT ->
+                                addButtonToSidebar(ui, serverResponse);
                         case UniversalConstants.DELETE_PROMPT -> {
-                            if (ui.getSelectedButton() == null) {
-                                if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)
-                                        && ui.getAnswerTextArea().getText().equals(ANSWER_HEADER_TEXT)) {
-                                    JOptionPane.showMessageDialog(ui.getFrame(), DELETION_NONE_SELECTED_TEXT,
-                                            FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
-                                }
-
-                                ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
-                                ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
-                                resetStartButton(ui, recordingFile);
+                            if (!checkButtonSelected(ui, recordingFile))
                                 return;
-                            }
 
                             try {
                                 RequestSender.getInstance().delete(ui.getSelectedButton().getId(),
@@ -209,6 +187,40 @@ public final class MainUiEventHandlers {
 
                             emailSetupUserInterface.open();
                         }
+                        case UniversalConstants.SEND_EMAIL -> {
+                            if (!checkButtonSelected(ui, recordingFile))
+                                return;
+
+                            boolean success;
+                            InputOutputEntry result;
+                            try {
+                                result = RequestSender.getInstance().sendEmail(ui.getUser(),
+                                        serverResponse.getOutput().getOutputText(),
+                                        ui.getSelectedButton().getId(),
+                                        serverResponse.getID());
+
+                                addButtonToSidebar(ui, result);
+                                //check for success
+                                success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
+                            } catch (Exception ex) {
+                                resetStartButton(ui, recordingFile);
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null,
+                                        EMAIL_NOT_SENT + " " + ex.getMessage(),
+                                        ERROR_TEXT,
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                                return;
+                            }
+                            if (success) {
+                                JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SENT, ERROR_TEXT,
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+
+                        }
                         default -> {
                             // Assume error
                             ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT
@@ -225,6 +237,51 @@ public final class MainUiEventHandlers {
                 t.start();
             }
         };
+    }
+
+    /**
+     * Adds a button to the sidebar, updating the scroll bar.
+     *
+     * @param ui             The main user interface.
+     * @param serverResponse The server response.
+     */
+    private static void addButtonToSidebar(MainUserInterface ui, InputOutputEntry serverResponse) {
+        ui.displayEntry(serverResponse);
+
+        // add data to scrollBar
+        SidebarButton button = new SidebarButton(serverResponse.getInput().getInputText(),
+                serverResponse.getID());
+        button.setPreferredSize(PROMPT_HISTORY_BTN_DIMENSIONS);
+        button.addActionListener(onQaButtonPress(ui, serverResponse, button));
+        ui.getScrollBar().add(button);
+
+        // update scrollBar
+        ui.getScrollBar().revalidate();
+        ui.getScrollBar().repaint();
+        ui.setSelectedButton(button);
+    }
+
+    /**
+     * Checks if a button is selected. If not, it displays an error message and resets the start button.
+     *
+     * @param ui The main user interface.
+     * @return <c>true</c> if a button is selected, <c>false</c> otherwise.
+     */
+    private static boolean checkButtonSelected(MainUserInterface ui, File recordingFile) {
+        if (ui.getSelectedButton() != null) {
+            return true;
+        }
+
+        if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)
+                && ui.getAnswerTextArea().getText().equals(ANSWER_HEADER_TEXT)) {
+            JOptionPane.showMessageDialog(ui.getFrame(), DELETION_NONE_SELECTED_TEXT,
+                    FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+        }
+
+        ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);
+        ui.getAnswerTextArea().setText(ANSWER_HEADER_TEXT);
+        resetStartButton(ui, recordingFile);
+        return false;
     }
 
     /**

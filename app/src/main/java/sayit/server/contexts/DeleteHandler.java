@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.db.common.IPromptHelper;
+import sayit.server.IServer;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,15 +14,15 @@ import java.net.HttpURLConnection;
  * The endpoint will be <c>/delete-question</c>.
  */
 public class DeleteHandler implements HttpHandler {
-    private final IPromptHelper pHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>AskQuestionHandler</c> class.
      *
-     * @param helper The Prompt Helper to use.
+     * @param server The server instance
      */
-    public DeleteHandler(IPromptHelper helper) {
-        this.pHelper = helper;
+    public DeleteHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -70,8 +70,8 @@ public class DeleteHandler implements HttpHandler {
         }
 
         System.out.println("\twith ID: " + id);
-        boolean deleteSuccess = pHelper.deletePrompt(username, id);
-        pHelper.save();
+        boolean deleteSuccess = this._server.getPromptDb().deletePrompt(username, id);
+        this._server.getPromptDb().save();
 
         String result = String.valueOf(deleteSuccess);
         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length());
