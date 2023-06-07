@@ -21,8 +21,6 @@ import static sayit.server.Helper.saveAudioFile;
 import static sayit.server.ServerConstants.MISSING_ECONFIG;
 import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
 
-;
-
 /**
  * Handles a request for asking a question.
  * The endpoint will be <c>/ask</c>.
