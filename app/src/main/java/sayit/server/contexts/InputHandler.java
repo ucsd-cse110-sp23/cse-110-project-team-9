@@ -183,9 +183,9 @@ public class InputHandler implements HttpHandler {
                     UniversalConstants.EMAIL_DRAFT, input, answer);
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
-        } else if (input.toLowerCase().startsWith("send email")) {
+        } else if (input.toLowerCase().startsWith("send email to")) {
             //parse email address out of response
-            input = input.substring(11);
+            input = input.substring(14);
             String toAddress = input.toLowerCase();
             toAddress = toAddress.replace(" dot ", ".");
             toAddress = toAddress.replace(" at ", "@");

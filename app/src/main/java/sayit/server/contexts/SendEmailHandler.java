@@ -68,6 +68,7 @@ public class SendEmailHandler implements HttpHandler {
                 UniversalConstants.USERNAME);
         String toAddress = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.TO_ADDRESS);
+        
         //check ID Query
         String idsString = Helper.getQueryParameter(httpExchange.getRequestURI().getQuery(),
                 UniversalConstants.ID);
