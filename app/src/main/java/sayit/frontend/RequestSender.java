@@ -487,8 +487,10 @@ public final class RequestSender {
         var request = HttpRequest
                 .newBuilder()
                 .uri(uri)
-                .timeout(timeout)
                 .header("Content-Type", "application/json");
+        if (timeout != null) {
+            request.timeout(timeout);
+        }
 
         switch (type) {
             case GET -> request.GET();
