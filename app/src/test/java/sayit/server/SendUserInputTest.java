@@ -185,11 +185,11 @@ public class SendUserInputTest {
                 "ab", "ac", "ad", "ae", "af", "ag");
         var resp = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
 
-        //assertEquals("Create an email to Kelly.", resp.getInput().getInputText());
-        //assertEquals("Hey Kelly \nac", resp.getOutput().getOutputText());
-        //assertTrue(resp.getID() > 0);
+        assertEquals("Create an email to Kelly.", resp.getInput().getInputText());
+        assertEquals("Hey Kelly \nac", resp.getOutput().getOutputText());
+        assertTrue(resp.getID() > 0);
 
         server.stop();
-        //assertEquals(1, promptHelper.clearAllPrompts(DUMMY_USERNAME));
+        assertEquals(1, promptHelper.clearAllPrompts("username1"));
     }
 }
