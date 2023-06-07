@@ -191,6 +191,11 @@ public class LoginUserInterface {
         }
     }
 
+    /**
+     * Read login information from the file stored on local device
+     * Automatically log in using stored username
+     * @return
+     */
     public void getLoginInformation(){
         try{
             File info = new File(LOGIN_INFO_FILENAME);
