@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import sayit.common.UniversalConstants;
 import sayit.server.Helper;
-import sayit.server.db.common.IAccountHelper;
+import sayit.server.IServer;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,15 +14,15 @@ import java.net.HttpURLConnection;
  * The endpoint will be <c>/check-account</c>.
  */
 public class CheckAccountExistHandler  implements HttpHandler {
-    private final IAccountHelper _accountHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>CheckAccountExistHandler</c> class.
      *
-     * @param accountHelper The account helper to use.
+     * @param server the server instance
      */
-    public CheckAccountExistHandler(IAccountHelper accountHelper) {
-        this._accountHelper = accountHelper;
+    public CheckAccountExistHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -51,7 +51,7 @@ public class CheckAccountExistHandler  implements HttpHandler {
         }
 
         System.out.println("\twith username: " + username);
-        String response = String.valueOf(this._accountHelper.getAccount(username) != null);
+        String response = String.valueOf(this._server.getAccountDb().getAccount(username) != null);
         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
         exchange.getResponseBody().write(response.getBytes());
         exchange.close();

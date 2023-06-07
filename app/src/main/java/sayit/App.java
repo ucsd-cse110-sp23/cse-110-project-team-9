@@ -1,6 +1,7 @@
 package sayit;
 
 import sayit.frontend.LoginUserInterface;
+import sayit.server.DefaultEmailSender;
 import sayit.server.Server;
 import sayit.server.ServerConstants;
 import sayit.server.db.mongo.MongoAccountHelper;
@@ -21,6 +22,7 @@ public class App {
                 .setPromptHelper(MongoPromptHelper.getOrCreateInstance(mongo))
                 .setEmailConfigurationHelper(MongoEmailConfigurationHelper.getOrCreateInstance(mongo))
                 .setAccountHelper(MongoAccountHelper.getOrCreateInstance(mongo))
+                .setEmailSender(new DefaultEmailSender())
                 .build();
 
         s.start();

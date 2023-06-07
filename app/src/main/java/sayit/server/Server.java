@@ -1,13 +1,16 @@
 package sayit.server;
 
 import com.sun.net.httpserver.HttpServer;
+import sayit.common.IMapper;
 import sayit.server.contexts.*;
 import sayit.server.db.common.IAccountHelper;
-import sayit.server.db.common.IPromptHelper;
 import sayit.server.db.common.IEmailConfigurationHelper;
+import sayit.server.db.common.IPromptHelper;
 import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -16,24 +19,44 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * The server class that handles all the requests.
  */
-public class Server {
+public class Server implements IServer {
     private final HttpServer _server;
     private final int _port;
-    private Thread _serverThread;
+    private final IEmailConfigurationHelper _emailDb;
+    private final IAccountHelper _accountDb;
+    private final IPromptHelper _promptDb;
+    private final IWhisper _whisper;
+    private final IChatGpt _chatgpt;
+    private final IMapper<Message, MessagingException> _emailSender;
+
 
     /**
      * Creates a new server.
      *
+     * @param configHelper  The email configuration helper to use.
      * @param pHelper       The prompt helper to use.
      * @param accountHelper The account helper to use.
+     * @param emailSender   The email sender to use.
      * @param host          The host to use.
      * @param port          The port to use.
      * @param whisper       The <c>whisper</c> instance to use.
      * @param chatgpt       The <c>ChatGPT</c> instance to use.
      */
-    private Server(IEmailConfigurationHelper configHelper, IPromptHelper pHelper, IAccountHelper accountHelper,
-                   String host, int port, IWhisper whisper, IChatGpt chatgpt) {
+    private Server(IEmailConfigurationHelper configHelper,
+                   IPromptHelper pHelper,
+                   IAccountHelper accountHelper,
+                   IMapper<Message, MessagingException> emailSender,
+                   String host,
+                   int port,
+                   IWhisper whisper,
+                   IChatGpt chatgpt) {
         this._port = port;
+        this._emailDb = configHelper;
+        this._accountDb = accountHelper;
+        this._promptDb = pHelper;
+        this._whisper = whisper;
+        this._chatgpt = chatgpt;
+        this._emailSender = emailSender;
 
         try {
             this._server = HttpServer.create(
@@ -47,24 +70,18 @@ public class Server {
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)
                 Executors.newFixedThreadPool(10);
 
-        if (pHelper != null) {
-            this._server.createContext("/input", new InputHandler(pHelper, configHelper, whisper, chatgpt));
-            this._server.createContext("/history", new HistoryHandler(pHelper));
-            this._server.createContext("/delete-question", new DeleteHandler(pHelper));
-            this._server.createContext("/clear-all", new ClearAllHandler(pHelper));
-        }
+        this._server.createContext("/input", new InputHandler(this));
+        this._server.createContext("/history", new HistoryHandler(this));
+        this._server.createContext("/delete-question", new DeleteHandler(this));
+        this._server.createContext("/clear-all", new ClearAllHandler(this));
 
-        if (configHelper != null) {
-            this._server.createContext("/save_email_configuration", new SaveEmailConfigHandler(configHelper));
-            this._server.createContext("/get_email_configuration", new GetEmailConfigurationHandler(configHelper));
-            this._server.createContext("/send_email", new SendEmailHandler(configHelper, pHelper));
-        }
+        this._server.createContext("/save_email_configuration", new SaveEmailConfigHandler(this));
+        this._server.createContext("/get_email_configuration", new GetEmailConfigurationHandler(this));
+        this._server.createContext("/send_email", new SendEmailHandler(this));
 
-        if (accountHelper != null) {
-            this._server.createContext("/create-account", new CreateAccountHandler(accountHelper));
-            this._server.createContext("/check-account", new CheckAccountExistHandler(accountHelper));
-            this._server.createContext("/login", new LoginHandler(accountHelper));
-        }
+        this._server.createContext("/create-account", new CreateAccountHandler(this));
+        this._server.createContext("/check-account", new CheckAccountExistHandler(this));
+        this._server.createContext("/login", new LoginHandler(this));
 
         this._server.createContext("/ping", new PingHandler());
         this._server.setExecutor(threadPoolExecutor);
@@ -83,8 +100,8 @@ public class Server {
      * Starts the server.
      */
     public void start() {
-        this._serverThread = new Thread(this._server::start);
-        this._serverThread.start();
+        Thread serverThread = new Thread(this._server::start);
+        serverThread.start();
         System.out.println("Server started on port " + this._port);
     }
 
@@ -97,6 +114,67 @@ public class Server {
     }
 
     /**
+     * Gets the email sender.
+     *
+     * @return The email sender.
+     */
+    @Override
+    public IEmailConfigurationHelper getEmailDb() {
+        return this._emailDb;
+    }
+
+    /**
+     * Gets the prompt helper.
+     *
+     * @return The prompt helper.
+     */
+    @Override
+    public IPromptHelper getPromptDb() {
+        return this._promptDb;
+    }
+
+    /**
+     * Gets the account helper.
+     *
+     * @return The account helper.
+     */
+    @Override
+    public IAccountHelper getAccountDb() {
+        return this._accountDb;
+    }
+
+    /**
+     * Gets the email sender.
+     *
+     * @return The email sender.
+     */
+    @Override
+    public IChatGpt getChatGpt() {
+        return this._chatgpt;
+    }
+
+    /**
+     * Gets the email sender.
+     *
+     * @return The email sender.
+     */
+    @Override
+    public IWhisper getWhisper() {
+        return this._whisper;
+    }
+
+    /**
+     * Gets the function that tries to send the specified message, and returns an exception if something bad
+     * happened or null if it was successful.
+     *
+     * @return The function that tries to send the specified message.
+     */
+    @Override
+    public IMapper<Message, MessagingException> getEmailSender() {
+        return this._emailSender;
+    }
+
+    /**
      * A builder for the <c>Server</c> class.
      */
     public static class ServerBuilder {
@@ -104,9 +182,18 @@ public class Server {
         private IPromptHelper _pHelper;
         private IAccountHelper _accountHelper;
         private String _host;
-        private int _port = -1;
+        private int _port;
         private IWhisper _whisper;
         private IChatGpt _chatgpt;
+        private IMapper<Message, MessagingException> _emailSender;
+
+        /**
+         * Creates a new server builder with the default values.
+         */
+        public ServerBuilder() {
+            this._host = ServerConstants.SERVER_HOSTNAME;
+            this._port = ServerConstants.SERVER_PORT;
+        }
 
         /**
          * Sets the email configuration helper to use.
@@ -186,6 +273,17 @@ public class Server {
         }
 
         /**
+         * Sets the email sender to use.
+         *
+         * @param emailSender A function that takes a message and sends it, and returns whether it was successful.
+         * @return The builder.
+         */
+        public ServerBuilder setEmailSender(IMapper<Message, MessagingException> emailSender) {
+            this._emailSender = emailSender;
+            return this;
+        }
+
+        /**
          * Builds the server.
          *
          * @return The server.
@@ -203,6 +301,7 @@ public class Server {
                     this._configHelper,
                     this._pHelper,
                     this._accountHelper,
+                    this._emailSender,
                     this._host,
                     this._port,
                     this._whisper,

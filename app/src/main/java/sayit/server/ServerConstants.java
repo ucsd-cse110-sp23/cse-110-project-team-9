@@ -60,7 +60,7 @@ public final class ServerConstants {
     }
 
     public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized."
-            + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt\" or \"Create an email.\"";
+            + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt\" or \"Create an email.\" or \"Send email to\"";
     
     public static final String MISSING_ECONFIG = "Please set up email configurations first"
             + " with the command \"Set up email\".";

@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import sayit.frontend.helpers.Pair;
 import sayit.server.Helper;
-import sayit.server.db.common.IAccountHelper;
+import sayit.server.IServer;
 import sayit.server.db.doctypes.SayItAccount;
 
 import java.io.IOException;
@@ -16,15 +16,15 @@ import java.net.HttpURLConnection;
  * The endpoint will be <c>/login</c>.
  */
 public class LoginHandler implements HttpHandler {
-    private final IAccountHelper _accountHelper;
+    private final IServer _server;
 
     /**
      * Creates a new instance of the <c>LoginHandler</c> class.
      *
-     * @param accountHelper The account helper to use.
+     * @param server The server instance
      */
-    public LoginHandler(IAccountHelper accountHelper) {
-        this._accountHelper = accountHelper;
+    public LoginHandler(IServer server) {
+        this._server = server;
     }
 
     /**
@@ -55,7 +55,7 @@ public class LoginHandler implements HttpHandler {
         String username = credentials.getFirst();
         String password = credentials.getSecond();
 
-        SayItAccount acc = this._accountHelper.getAccount(username);
+        SayItAccount acc = this._server.getAccountDb().getAccount(username);
         if (acc == null) {
             System.out.println("\taccount does not exists.");
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
