@@ -459,7 +459,7 @@ public final class RequestSender {
         JSONObject object = new JSONObject(body);
 
         String successString;
-        boolean success = object.getBoolean(UniversalConstants.SUCCESS);
+        boolean success = object.getBoolean(UniversalConstants.SEND_SUCCESS);
         String output;
         
         if (success){

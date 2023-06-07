@@ -54,7 +54,7 @@ public class SendEmailHandler extends ISendHandler {
         
         // Make sure we have a POST request here
         if (!httpExchange.getRequestMethod().equals("POST")) {
-            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, UniversalConstants.ERROR);
             response = obj.toString();
             byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
@@ -101,7 +101,7 @@ public class SendEmailHandler extends ISendHandler {
                 && !checkForEmail.toLowerCase().startsWith("create an email")){
             System.out.println("\tSelected Prompt not an email");
 
-            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
             obj.put(UniversalConstants.ERROR, "Selected prompt not an email");
             response = obj.toString();
@@ -174,7 +174,7 @@ public class SendEmailHandler extends ISendHandler {
             System.out.println(e.getMessage());
             System.out.println("\tError sending email");
 
-            obj.put(UniversalConstants.SUCCESS, false);
+            obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
             obj.put(UniversalConstants.ERROR, "Error Sending Email");
             response = obj.toString();
@@ -197,7 +197,7 @@ public class SendEmailHandler extends ISendHandler {
         //handle response for updating history
         
 
-        obj.put(UniversalConstants.SUCCESS, true);
+        obj.put(UniversalConstants.SEND_SUCCESS, true);
         obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
         response = obj.toString();
 
