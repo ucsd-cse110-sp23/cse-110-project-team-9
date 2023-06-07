@@ -17,7 +17,7 @@ public final class FrontEndConstants {
     public static final String RECORD_PROCESSING_TEXT = "PROCESSING";
 
     // Constants for success and error messages
-    public static final String DELETION_NONE_SELECTED_TEXT = "No question selected";
+    public static final String DELETION_NONE_SELECTED_TEXT = "No prompt selected. Please select a prompt and try again.";
     public static final String DELETION_ERROR_TEXT = "Unable to delete recording file.";
     public static final String SERVER_UNAVAILABLE_TEXT = "The server is currently offline "
             + "and cannot handle any requests. This functionality is currently unavailable.";

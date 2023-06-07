@@ -10,6 +10,7 @@ import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -26,7 +27,7 @@ public class Server implements IServer {
     private final IPromptHelper _promptDb;
     private final IWhisper _whisper;
     private final IChatGpt _chatgpt;
-    private final IMapper<Message, Boolean> _emailSender;
+    private final IMapper<Message, MessagingException> _emailSender;
 
 
     /**
@@ -44,7 +45,7 @@ public class Server implements IServer {
     private Server(IEmailConfigurationHelper configHelper,
                    IPromptHelper pHelper,
                    IAccountHelper accountHelper,
-                   IMapper<Message, Boolean> emailSender,
+                   IMapper<Message, MessagingException> emailSender,
                    String host,
                    int port,
                    IWhisper whisper,
@@ -163,12 +164,13 @@ public class Server implements IServer {
     }
 
     /**
-     * Gets the function that tries to send the specified message, and returns whether it was successful.
+     * Gets the function that tries to send the specified message, and returns an exception if something bad
+     * happened or null if it was successful.
      *
-     * @return The function that tries to send the specified message, and returns whether it was successful.
+     * @return The function that tries to send the specified message.
      */
     @Override
-    public IMapper<Message, Boolean> getEmailSender() {
+    public IMapper<Message, MessagingException> getEmailSender() {
         return this._emailSender;
     }
 
@@ -183,7 +185,7 @@ public class Server implements IServer {
         private int _port;
         private IWhisper _whisper;
         private IChatGpt _chatgpt;
-        private IMapper<Message, Boolean> _emailSender;
+        private IMapper<Message, MessagingException> _emailSender;
 
         /**
          * Creates a new server builder with the default values.
@@ -276,7 +278,7 @@ public class Server implements IServer {
          * @param emailSender A function that takes a message and sends it, and returns whether it was successful.
          * @return The builder.
          */
-        public ServerBuilder setEmailSender(IMapper<Message, Boolean> emailSender) {
+        public ServerBuilder setEmailSender(IMapper<Message, MessagingException> emailSender) {
             this._emailSender = emailSender;
             return this;
         }

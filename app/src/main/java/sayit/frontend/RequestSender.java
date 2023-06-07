@@ -1,6 +1,5 @@
 package sayit.frontend;
 
-import org.bson.json.JsonObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sayit.common.UniversalConstants;
@@ -204,9 +203,9 @@ public final class RequestSender {
                         null
                 );
                 case UniversalConstants.EMAIL_DRAFT -> new InputOutputEntry(
-                        json.getLong(UniversalConstants.ID), 
+                        json.getLong(UniversalConstants.ID),
                         UniversalConstants.EMAIL_DRAFT,
-                        new UserInput(json.getString(UniversalConstants.INPUT)), 
+                        new UserInput(json.getString(UniversalConstants.INPUT)),
                         new ProgramOutput(json.getString(UniversalConstants.OUTPUT))
                 );
                 case UniversalConstants.SEND_EMAIL -> new InputOutputEntry(
@@ -425,44 +424,34 @@ public final class RequestSender {
     }
 
     /**
-     * <p>
-     * Sends a request to the server to send an email if one is created.
-     * </p>
-     * <p>
-     * It is assumed that the server is up.
-     * </p>
+     * Attempts to email the user based on the given ID.
      *
-     * @return The number of entries deleted.
+     * @param username  The username of the current user.
+     * @param toAddress The email address to send the email to.
+     * @param createID  The ID of the prompt entry with the email contents.
+     * @param sendID    The ID corresponding to the prompt with the email address.
+     * @return The input output entry of the email.
      * @throws IOException          If an error occurs while sending the request.
      * @throws URISyntaxException   Should never happen.
-     * @throws InterruptedException If an error occurs while sending the request.
+     * @throws InterruptedException If an error occurs while sending the request.`
      */
     public InputOutputEntry sendEmail(String username, String toAddress, long createID, long sendID)
-        throws IOException, URISyntaxException, InterruptedException {
+            throws IOException, URISyntaxException, InterruptedException {
         URI uri = new URI(sendUrl + "?" +
                 USERNAME_QUERY_PARAM + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&" +
                 TO_ADDRESS_QUERY_PARAM + URLEncoder.encode(toAddress, StandardCharsets.UTF_8) + "&" +
                 ID_QUERY_PARAM + URLEncoder.encode(Long.toString(createID), StandardCharsets.UTF_8) + "&" +
                 NEW_ID_QUERY_PARAM + URLEncoder.encode(Long.toString(sendID), StandardCharsets.UTF_8)
-                );
+        );
         HttpResponse<String> response = sendRequest(uri, RequestType.POST, null);
-
-        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            System.out.println("\tunable to connect to email service");
-        }
-
-        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
-            System.out.println("\tsend email problem");
-        }
-
         String body = response.body();
         JSONObject object = new JSONObject(body);
 
         String successString;
         boolean success = object.getBoolean(UniversalConstants.SEND_SUCCESS);
         String output;
-        
-        if (success){
+
+        if (success) {
             successString = UniversalConstants.SUCCESS;
             output = object.getString(UniversalConstants.OUTPUT);
         } else {
@@ -470,13 +459,9 @@ public final class RequestSender {
             output = object.getString(UniversalConstants.ERROR);
         }
 
-        InputOutputEntry entry = new InputOutputEntry(sendID, UniversalConstants.SEND_EMAIL, 
-            new UserInput("Send email to: " + toAddress + " " + successString), 
-            new ProgramOutput(output));
-        
-        return entry;
-
-        
+        return new InputOutputEntry(sendID, UniversalConstants.SEND_EMAIL,
+                new UserInput("Send email to: " + toAddress + " " + successString),
+                new ProgramOutput(output));
     }
 
     /**

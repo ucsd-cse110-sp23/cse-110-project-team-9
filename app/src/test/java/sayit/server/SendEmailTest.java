@@ -40,7 +40,7 @@ public class SendEmailTest {
                 .setChatGpt(new MockChatGpt(false, "Hey Dave how is the weather?"))
                 .setPromptHelper(promptHelper)
                 .setEmailConfigurationHelper(configHelper)
-                .setEmailSender(x -> true)
+                .setEmailSender(x -> null)
                 .build();
 
         server.start();
@@ -53,7 +53,7 @@ public class SendEmailTest {
                 "bb", "ac", "ad", "ae", "af", "ag");
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
-        var response = requestSender.sendEmail("username1", toAddress, recording.getID(), dummyID);
+        var response = requestSender.sendEmail("username1", TO_ADDRESS, recording.getID(), DUMMY_ID);
         assertTrue(response.getInput().toString().contains(UniversalConstants.SUCCESS));
         server.stop();
     }
@@ -70,7 +70,7 @@ public class SendEmailTest {
                 .setChatGpt(new MockChatGpt(false, "Hey Dave how is the weather?"))
                 .setPromptHelper(promptHelper)
                 .setEmailConfigurationHelper(configHelper)
-                .setEmailSender(x -> true)
+                .setEmailSender(x -> null)
                 .build();
 
         server.start();
@@ -83,7 +83,7 @@ public class SendEmailTest {
                 "bb", "ac", "ad", "ae", "af", "ag");
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username0");
-        var response = requestSender.sendEmail("username0", toAddress, recording.getID(), dummyID);
+        var response = requestSender.sendEmail("username0", TO_ADDRESS, recording.getID(), DUMMY_ID);
         assertFalse(response.getInput().toString().contains(UniversalConstants.SUCCESS));
         server.stop();
     }

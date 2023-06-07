@@ -8,6 +8,7 @@ import sayit.server.openai.IChatGpt;
 import sayit.server.openai.IWhisper;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 
 public interface IServer {
     /**
@@ -50,5 +51,5 @@ public interface IServer {
      *
      * @return A function that takes a message and sends it, returning true if successful.
      */
-    IMapper<Message, Boolean> getEmailSender();
+    IMapper<Message, MessagingException> getEmailSender();
 }
