@@ -51,7 +51,7 @@ public final class FrontEndConstants {
     public static final Dimension TEXT_FIELD_DIMENSION = new Dimension(200, 40);
 
     // Remember login
-    public static final String LOGIN_INFO_FILENAME = "LoginInfo.txt";
+    public static final String LOGIN_INFO_FILENAME = System.getProperty("user.home") + "/LoginInfo.txt";
     public static final String REMEMBER_LOGIN_TEXT = "Would you like to remember your login information on this device?";
     public static final String REMEMBER_LOGIN_TITLE = "Automatically Log In?";
 

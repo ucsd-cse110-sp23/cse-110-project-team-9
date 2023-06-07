@@ -28,6 +28,7 @@ public class LoginUserInterface {
     private final JFrame frame;
     private JTextField emailField;
     private JTextField passwordField;
+    private File info;
 
     // constants
     private final Dimension BUTTON_DIMENSION = new Dimension(150, 40);
@@ -44,12 +45,11 @@ public class LoginUserInterface {
         frame = new JFrame(APP_NAME);
 
         //automatically login if file storing login information already exists
-        File info = new File(LOGIN_INFO_FILENAME);
-        if(info.exists()){
-            getLoginInformation();
-        }
-        //only show login user interface if no automatic login
-        else{
+        info = new File(LOGIN_INFO_FILENAME);
+        System.out.println(LOGIN_INFO_FILENAME);
+        if(!info.exists() || !getLoginInformation()){
+            //only show login user interface if no automatic login
+
             this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             addComponentsToPane(this.frame.getContentPane());
             this.frame.pack();
@@ -166,7 +166,7 @@ public class LoginUserInterface {
 
     /**
      * Helper function for asking and logging whether to remember user login on this device
-     * @param username
+     * @param username String containing user's email to automatically login
      * @return
      */
     public void rememberLogin(String username){
@@ -176,7 +176,6 @@ public class LoginUserInterface {
         // if user confirms, write username to file
         if (confirmRemember == JOptionPane.YES_OPTION) {
             // create file and close
-            File info = new File(LOGIN_INFO_FILENAME);
             try{
                 info.createNewFile();
 
@@ -196,27 +195,37 @@ public class LoginUserInterface {
     /**
      * Read login information from the file stored on local device
      * Automatically log in using stored username
-     * @return
+     * @return true if successfully logged in automatically
      */
-    public void getLoginInformation(){
+    public boolean getLoginInformation(){
         try{
-            File info = new File(LOGIN_INFO_FILENAME);
             Scanner readInfo = new Scanner(info);
             
             //check for file content and read username
             if(readInfo.hasNextLine()){
                 String username = readInfo.nextLine();
-                MainUserInterface.createInstance(username); // start the main UI
+                readInfo.close();
+
+                // Check if the account exists
+                try {
+                    if (RequestSender.getInstance().doesAccountExist(username)) {
+                        MainUserInterface.createInstance(username); // start the main UI
+                        return true;
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null,
+                            FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
+                }
             }
             else{
                 System.out.println(LOGIN_INFO_FAILED_TEXT);
             }
-            
-            readInfo.close();
         }
         catch(FileNotFoundException ex){
             System.out.println(ERROR_TEXT);
             ex.printStackTrace();
         }
+
+        return false;
     }
 }
