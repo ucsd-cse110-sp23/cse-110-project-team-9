@@ -97,15 +97,12 @@ public class InputHandler implements HttpHandler {
 
         JSONObject obj = new JSONObject();
         if (input.toLowerCase().startsWith("question")) {
-            String parsedPrompt = Helper.extractPrompt(new String[] {
+            String parsedPrompt = Helper.extractPrompt(new String[]{
                     "question"
             }, input);
 
             if (parsedPrompt == null) {
-                response = NO_PROMPT_AFTER_CMD;
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
-                httpExchange.close();
+                onMissingPrompt(input, httpExchange);
                 return;
             }
 
@@ -190,21 +187,18 @@ public class InputHandler implements HttpHandler {
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("send email to")) {
-            input = Helper.extractPrompt(new String[] {
+            String parsedPrompt = Helper.extractPrompt(new String[]{
                     "send email to",
                     "send email"
             }, input);
 
-            if (input == null) {
-                response = NO_PROMPT_AFTER_CMD;
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
-                httpExchange.close();
+            if (parsedPrompt == null) {
+                onMissingPrompt(input, httpExchange);
                 return;
             }
 
             //parse email address out of response
-            String toAddress = input.toLowerCase();
+            String toAddress = parsedPrompt.toLowerCase();
             toAddress = toAddress.replace(" dot ", ".");
             toAddress = toAddress.replace(" at ", "@");
             toAddress = toAddress.replace(" ", "");
@@ -228,6 +222,24 @@ public class InputHandler implements HttpHandler {
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);
+        httpExchange.close();
+    }
+
+    /**
+     * Called when the user does not provide a prompt after a command
+     *
+     * @param input        the input from the user
+     * @param httpExchange the HTTP exchange
+     * @throws IOException if an error occurs
+     */
+    private void onMissingPrompt(String input, HttpExchange httpExchange) throws IOException {
+        JSONObject obj = new JSONObject();
+        obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
+        obj.put(SayItPrompt.INPUT_FIELD, input);
+        obj.put(SayItPrompt.OUTPUT_FIELD, NO_PROMPT_AFTER_CMD);
+        String response = obj.toString();
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
+        httpExchange.getResponseBody().write(response.getBytes());
         httpExchange.close();
     }
 }
