@@ -76,4 +76,54 @@ public final class Helper {
 
         return new Pair<>(username, password);
     }
+
+    /**
+     * Extracts the prompt from the prompt string.
+     *
+     * @param possStarters The possible starters of the prompt. For example, for
+     *                     asking questions, you might choose "question"; for emailing,
+     *                     you might have "create an email" or "create email".
+     *                     <p>
+     *                     Note that all elements in this array must be lowercase, and
+     *                     longer strings should come before shorter strings, especially
+     *                     if the shorter string is a substring of the longer string.
+     * @param prompt       The prompt string.
+     * @return The extracted prompt, or null if there's no prompt.
+     */
+    public static String extractPrompt(String[] possStarters, String prompt) {
+        prompt = prompt.trim();
+        String lowercasePrompt = prompt.toLowerCase();
+
+        // Look for the first occurrence of a possible starter
+        String starter = null;
+        for (String possStarter : possStarters) {
+            if (lowercasePrompt.startsWith(possStarter)) {
+                starter = possStarter;
+                break;
+            }
+        }
+
+        if (starter == null) {
+            return null;
+        }
+
+        // Remove the starter
+        prompt = prompt.substring(starter.length()).trim();
+        if (prompt.isEmpty()) {
+            return null;
+        }
+
+        // Check if there's a period, exclamation mark, or question mark
+        // at the beginning
+        char firstChar = prompt.charAt(0);
+        if (firstChar == '.' || firstChar == '!' || firstChar == '?') {
+            prompt = prompt.substring(1).trim();
+        }
+
+        if (prompt.isEmpty()) {
+            return null;
+        }
+
+        return prompt;
+    }
 }

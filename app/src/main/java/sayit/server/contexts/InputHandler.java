@@ -18,8 +18,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
 import static sayit.server.Helper.saveAudioFile;
-import static sayit.server.ServerConstants.MISSING_ECONFIG;
-import static sayit.server.ServerConstants.UNKNOWN_PROMPT_OUTPUT;
+import static sayit.server.ServerConstants.*;
 
 /**
  * Handles a request for asking a question.
@@ -98,19 +97,22 @@ public class InputHandler implements HttpHandler {
 
         JSONObject obj = new JSONObject();
         if (input.toLowerCase().startsWith("question")) {
-            if (input.toLowerCase().startsWith("question.")) {
-                input = input.substring(10);
-            } else {
-                input = input.substring(9);
-            }
+            String parsedPrompt = Helper.extractPrompt(new String[] {
+                    "question"
+            }, input);
 
-            input = input.trim();
+            if (parsedPrompt == null) {
+                response = NO_PROMPT_AFTER_CMD;
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
+                httpExchange.getResponseBody().write(response.getBytes());
+                httpExchange.close();
+                return;
+            }
 
             // if audio is transcribed, pass to Chat GPT
             String answer;
-
             try {
-                answer = this._server.getChatGpt().askQuestion(input);
+                answer = this._server.getChatGpt().askQuestion(parsedPrompt);
             } catch (Exception e) {
                 response = "ChatGPT Error: " + e.getMessage();
                 httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
@@ -121,13 +123,13 @@ public class InputHandler implements HttpHandler {
 
             long time = System.currentTimeMillis();
 
-            obj.put(SayItPrompt.INPUT_FIELD, input);
+            obj.put(SayItPrompt.INPUT_FIELD, parsedPrompt);
             obj.put(SayItPrompt.OUTPUT_FIELD, answer);
             obj.put(UniversalConstants.ID, time);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.QUESTION);
 
             SayItPrompt prompt = new SayItPrompt(username, time,
-                    UniversalConstants.QUESTION, input, answer);
+                    UniversalConstants.QUESTION, parsedPrompt, answer);
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("delete prompt")) {
@@ -144,10 +146,8 @@ public class InputHandler implements HttpHandler {
 
             // if audio is transcribed, pass to Chat GPT
             String answer;
-
             try {
                 answer = this._server.getChatGpt().askQuestion(input);
-
             } catch (Exception e) {
                 response = "ChatGPT Error: " + e.getMessage();
                 httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
@@ -155,9 +155,9 @@ public class InputHandler implements HttpHandler {
                 httpExchange.close();
                 return;
             }
+
             int lastNL = answer.lastIndexOf('\n');
             SayItEmailConfiguration eConfig = this._server.getEmailDb().getEmailConfiguration(username);
-
             if (eConfig == null) {
                 obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
                 obj.put(SayItPrompt.INPUT_FIELD, input);
@@ -190,8 +190,20 @@ public class InputHandler implements HttpHandler {
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("send email to")) {
+            input = Helper.extractPrompt(new String[] {
+                    "send email to",
+                    "send email"
+            }, input);
+
+            if (input == null) {
+                response = NO_PROMPT_AFTER_CMD;
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
+                httpExchange.getResponseBody().write(response.getBytes());
+                httpExchange.close();
+                return;
+            }
+
             //parse email address out of response
-            input = input.substring(14);
             String toAddress = input.toLowerCase();
             toAddress = toAddress.replace(" dot ", ".");
             toAddress = toAddress.replace(" at ", "@");
