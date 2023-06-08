@@ -1,6 +1,7 @@
 package sayit.server;
 
 import org.junit.jupiter.api.Test;
+import sayit.common.UniversalConstants;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
@@ -10,7 +11,8 @@ import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sayit.TestConstants.DUMMY_FILE;
 import static sayit.TestConstants.PORT;
 
@@ -40,7 +42,7 @@ public class SendUserInputTest {
         Thread.sleep(2000);
 
         var resp = requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
-      
+        assertEquals(UniversalConstants.QUESTION, resp.getType());
         assertEquals("Hello world.", resp.getInput().getInputText());
         assertEquals("How are you?", resp.getOutput().getOutputText());
         assertTrue(resp.getID() > 0);
@@ -95,24 +97,18 @@ public class SendUserInputTest {
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "Question. ABC"))
+                .setWhisper(new MockWhisper(false, "clear all"))
                 .setChatGpt(new MockChatGpt(false, "DEF"))
                 .setPromptHelper(promptHelper)
                 .build();
         server.start();
 
         var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
+
         // Wait for server to start
         Thread.sleep(2000);
-
-        for (int i = 0; i < 10; i++) {
-            requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
-            Thread.sleep(100);
-        }
-
-        assertEquals(10, requestSender.getHistory(DUMMY_USERNAME).size());
-        assertEquals(10, promptHelper.getAllPromptsBy(DUMMY_USERNAME).size());
-        assertEquals(10, requestSender.clearHistory(DUMMY_USERNAME));
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
+        assertEquals(UniversalConstants.CLEAR_ALL, resp.getType());
         assertTrue(requestSender.getHistory(DUMMY_USERNAME).isEmpty());
         assertTrue(promptHelper.getAllPromptsBy(DUMMY_USERNAME).isEmpty());
 
@@ -121,18 +117,19 @@ public class SendUserInputTest {
     }
 
 
-
     @Test
     public void testDelete() throws Exception {
         if (new File("testDelete.tsv").exists()) {
             assertTrue(new File("testDelete.tsv").delete());
         }
 
+        var whisper = new MockWhisper(false, "Question. CSE 110");
+
         IPromptHelper promptHelper = new TsvPromptHelper("testDelete.tsv");
         Server server = Server.builder()
                 .setHost(ServerConstants.SERVER_HOSTNAME)
                 .setPort(PORT)
-                .setWhisper(new MockWhisper(false, "Question. CSE 110"))
+                .setWhisper(whisper)
                 .setChatGpt(new MockChatGpt(false, "is a class."))
                 .setPromptHelper(promptHelper)
                 .build();
@@ -144,6 +141,10 @@ public class SendUserInputTest {
 
         requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
         requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
+
+        whisper.setValues(false, "Delete prompt");
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE), DUMMY_USERNAME);
+        assertEquals(UniversalConstants.DELETE_PROMPT, resp.getType());
 
         var history = requestSender.getHistory(DUMMY_USERNAME);
         assertEquals(2, history.size());
@@ -159,6 +160,7 @@ public class SendUserInputTest {
         server.stop();
         assertTrue(promptHelper.clearAllPrompts(DUMMY_USERNAME) > 0);
     }
+
     @Test
     public void testEmailDraft() throws Exception {
         var file = new File("testEmailDraft.tsv");
@@ -181,9 +183,10 @@ public class SendUserInputTest {
         var requestSender = RequestSender.getInstance(ServerConstants.SERVER_HOSTNAME, PORT);
         // Wait for server to start
         Thread.sleep(2000);
-        var emailAcc = requestSender.saveEmailConfiguration("username1", "aa",
+        requestSender.saveEmailConfiguration("username1", "aa",
                 "ab", "ac", "ad", "ae", "af", "ag");
         var resp = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
+        assertEquals(UniversalConstants.EMAIL_DRAFT, resp.getType());
 
         assertEquals("Create an email to Kelly.", resp.getInput().getInputText());
         assertEquals("Hey Kelly \nac", resp.getOutput().getOutputText());

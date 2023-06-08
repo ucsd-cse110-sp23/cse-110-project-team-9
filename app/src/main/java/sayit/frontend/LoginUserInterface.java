@@ -1,23 +1,18 @@
 package sayit.frontend;
 
 // Imports for remembering login
-import java.io.File;
-import java.io.FileWriter;
-import java.util.Scanner;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import sayit.frontend.events.LoginUiEventHandlers;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
 
-import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TEXT;
-import static sayit.frontend.FrontEndConstants.CLOSE_WINDOW_TITLE;
-import static sayit.frontend.FrontEndConstants.ERROR_TEXT;
-import static sayit.frontend.FrontEndConstants.LOGIN_INFO_FILENAME;
-import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TEXT;
-import static sayit.frontend.FrontEndConstants.REMEMBER_LOGIN_TITLE;
+import static sayit.frontend.FrontEndConstants.*;
 
 /**
  * The login user interface for the application.
@@ -28,7 +23,7 @@ public class LoginUserInterface {
     private final JFrame frame;
     private JTextField emailField;
     private JTextField passwordField;
-    private File info;
+    private final File info;
 
     // constants
     private final Dimension BUTTON_DIMENSION = new Dimension(150, 40);
@@ -40,38 +35,48 @@ public class LoginUserInterface {
     private static final String PASSWORD_HEADER = "Password: ";
     private static final String EMPTY_TEXT = "";
     private static final String LOGIN_INFO_FAILED_TEXT = "No saved username found";
+    private static final String AUTO_LOGIN_FAILED = "Automatic login failed. The most probable cause is that"
+            + " the server is offline or the automatic login file has been corrupted. Try logging in manually.";
 
     private LoginUserInterface() {
         frame = new JFrame(APP_NAME);
 
         //automatically login if file storing login information already exists
         info = new File(LOGIN_INFO_FILENAME);
-        System.out.println(LOGIN_INFO_FILENAME);
-        if(!info.exists() || !getLoginInformation()){
-            //only show login user interface if no automatic login
 
-            this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            addComponentsToPane(this.frame.getContentPane());
-            this.frame.pack();
-            this.frame.setVisible(true);
+        // If the file exists...
+        if (info.exists()) {
+            // See if we can log in
+            if (getLoginInformation()) {
+                return;
+            }
 
-            // Add behavior for closing app, update db.
-            // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
-            // https://www.codejava.net/java-se/swing/preventing-jframe-window-from-closing
-            frame.addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                    int confirmClose = JOptionPane.showConfirmDialog(frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
-                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-                    // if user confirms closing the window, exit
-                    if (confirmClose == JOptionPane.YES_OPTION) {
-                        // terminate Java VM and exit
-                        System.exit(0);
-                    }
-                }
-            });
+            // If we can't log in, notify the user
+            JOptionPane.showMessageDialog(frame, AUTO_LOGIN_FAILED, ERROR_TEXT,
+                    JOptionPane.ERROR_MESSAGE);
         }
+
+        this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addComponentsToPane(this.frame.getContentPane());
+        this.frame.pack();
+        this.frame.setVisible(true);
+
+        // Add behavior for closing app, update db.
+        // https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        // https://www.codejava.net/java-se/swing/preventing-jframe-window-from-closing
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int confirmClose = JOptionPane.showConfirmDialog(frame, CLOSE_WINDOW_TEXT, CLOSE_WINDOW_TITLE,
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+                // if user confirms closing the window, exit
+                if (confirmClose == JOptionPane.YES_OPTION) {
+                    // terminate Java VM and exit
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     private static LoginUserInterface userInterface;
@@ -166,17 +171,17 @@ public class LoginUserInterface {
 
     /**
      * Helper function for asking and logging whether to remember user login on this device
+     *
      * @param username String containing user's email to automatically login
-     * @return
      */
-    public void rememberLogin(String username){
+    public void rememberLogin(String username) {
         int confirmRemember = JOptionPane.showConfirmDialog(this.frame, REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_TITLE,
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
         // if user confirms, write username to file
         if (confirmRemember == JOptionPane.YES_OPTION) {
             // create file and close
-            try{
+            try {
                 info.createNewFile();
 
                 FileWriter writer = new FileWriter(LOGIN_INFO_FILENAME);
@@ -184,8 +189,7 @@ public class LoginUserInterface {
                 //save username
                 writer.write(username);
                 writer.close();
-            }
-            catch (IOException exception){
+            } catch (IOException exception) {
                 System.out.println(ERROR_TEXT);
                 exception.printStackTrace();
             }
@@ -195,14 +199,19 @@ public class LoginUserInterface {
     /**
      * Read login information from the file stored on local device
      * Automatically log in using stored username
+     *
      * @return true if successfully logged in automatically
      */
-    public boolean getLoginInformation(){
-        try{
+    public boolean getLoginInformation() {
+        try {
             Scanner readInfo = new Scanner(info);
-            
+
             //check for file content and read username
-            if(readInfo.hasNextLine()){
+            if (readInfo.hasNextLine()) {
+                if (!RequestSender.getInstance().isAlive()) {
+                    return false;
+                }
+
                 String username = readInfo.nextLine();
                 readInfo.close();
 
@@ -216,12 +225,10 @@ public class LoginUserInterface {
                     JOptionPane.showMessageDialog(null,
                             FrontEndConstants.SERVER_UNAVAILABLE_TEXT + " " + ex.getMessage());
                 }
-            }
-            else{
+            } else {
                 System.out.println(LOGIN_INFO_FAILED_TEXT);
             }
-        }
-        catch(FileNotFoundException ex){
+        } catch (FileNotFoundException ex) {
             System.out.println(ERROR_TEXT);
             ex.printStackTrace();
         }

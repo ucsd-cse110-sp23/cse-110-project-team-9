@@ -27,8 +27,10 @@ public final class FrontEndConstants {
     public static final String SUCCESS_TEXT = "Success";
     public static final String EMAIL_SAVED = "Your email configuration has been saved.";
     public static final String EMAIL_NOT_SAVED = "Your email configuration could not be saved.";
-    public static final String EMAIL_SENT = "Your email has been sent";
-    public static final String EMAIL_NOT_SENT = "Your email could not be sent";
+    public static final String EMAIL_NOT_SEND_NO_PROMPT = "Your email could not be sent because you didn't select" +
+            " a prompt.";
+    public static final String EMAIL_NOT_SENT = "Your email could not be sent. Make sure your email and password "
+            + "are correct, and further ensure that your email configuration (e.g., SMTP and TLS port) is correct.";
 
     // Constants for events
     public static final String PASSWORD_HEADER = "Password: ";

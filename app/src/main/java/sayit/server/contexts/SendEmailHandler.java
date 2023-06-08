@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+import static sayit.common.UniversalConstants.EMAIL_SENT_SUCCESSFULLY;
+
 /**
  * Handles a request for sending an email
  * The endpoint will be <c>/send_email</c>
@@ -88,14 +90,14 @@ public class SendEmailHandler implements HttpHandler {
         SayItEmailConfiguration config = this._server.getEmailDb().getEmailConfiguration(username);
 
         //check if selected prompt is an email
-        String checkForEmail = sendItPrompt.getInput();
-        if (!checkForEmail.toLowerCase().startsWith("create email")
-                && !checkForEmail.toLowerCase().startsWith("create an email")) {
-            System.out.println("\tSelected Prompt not an email");
+        if (!sendItPrompt.getType().equals(UniversalConstants.EMAIL_DRAFT)) {
+            System.out.println("\tselected Prompt not an email");
             obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
-            obj.put(UniversalConstants.ERROR, "Selected prompt not an email");
+            obj.put(UniversalConstants.ERROR, "The selected prompt is not an email draft. Please select an email "
+                    + "draft, or create a new one using the \"Create email\" command.");
             handleErrorCase(httpExchange, obj, username, toAddress, newID);
+            return;
         }
 
         String smtpHost = config.getSmtp();
@@ -157,19 +159,47 @@ public class SendEmailHandler implements HttpHandler {
             System.out.println("\terror sending email: " + exception.getMessage());
             obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
-            obj.put(UniversalConstants.ERROR, "Error Sending Email: " + exception.getMessage());
+            String errorMsg = exception.getMessage() + "\n\n";
+            // Try to parse the exception to see if we can figure out exactly what
+            // went wrong when trying to send the email.
+            if (exception.getMessage().toLowerCase().contains("host")) {
+                errorMsg += "- Perhaps your SMTP host is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("port")) {
+                errorMsg += "- Perhaps your TLS port is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("username")) {
+                errorMsg += "- Perhaps your username is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("email")) {
+                errorMsg += "- Perhaps your email is invalid?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("password")) {
+                errorMsg += "- Perhaps your password is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("invalid address")) {
+                errorMsg += "- Perhaps the email address you are trying to send to is invalid?\n";
+            }
+
+            obj.put(UniversalConstants.ERROR, "Error Sending Email: " + errorMsg);
             handleErrorCase(httpExchange, obj, username, toAddress, newID);
             return;
         }
 
+        String output = EMAIL_SENT_SUCCESSFULLY + "\n\n" + sendItPrompt.getOutput();
         // Handle response for updating history
         obj.put(UniversalConstants.SEND_SUCCESS, true);
-        obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+        obj.put(UniversalConstants.OUTPUT, output);
         response = obj.toString();
 
         SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL,
-                "Send email to: " + toAddress + " " + UniversalConstants.SUCCESS,
-                sendItPrompt.getOutput()
+                "Send email to: " + toAddress,
+                output
         );
 
         this._server.getPromptDb().createPrompt(prompt);
@@ -202,7 +232,7 @@ public class SendEmailHandler implements HttpHandler {
         httpExchange.close();
 
         SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL,
-                "Send email to: " + toAddress + " " + UniversalConstants.ERROR,
+                "Send email to: " + toAddress,
                 obj.getString(UniversalConstants.ERROR)
         );
 

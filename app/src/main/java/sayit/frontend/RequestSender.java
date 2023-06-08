@@ -449,20 +449,17 @@ public final class RequestSender {
         String body = response.body();
         JSONObject object = new JSONObject(body);
 
-        String successString;
         boolean success = object.getBoolean(UniversalConstants.SEND_SUCCESS);
         String output;
 
         if (success) {
-            successString = UniversalConstants.SUCCESS;
             output = object.getString(UniversalConstants.OUTPUT);
         } else {
-            successString = UniversalConstants.ERROR;
             output = object.getString(UniversalConstants.ERROR);
         }
 
         return new InputOutputEntry(sendID, UniversalConstants.SEND_EMAIL,
-                new UserInput("Send email to: " + toAddress + " " + successString),
+                new UserInput("Send email to: " + toAddress),
                 new ProgramOutput(output));
     }
 
