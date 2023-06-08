@@ -157,7 +157,30 @@ public class SendEmailHandler implements HttpHandler {
             System.out.println("\terror sending email: " + exception.getMessage());
             obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
-            obj.put(UniversalConstants.ERROR, "Error Sending Email: " + exception.getMessage());
+            String errorMsg = exception.getMessage() + "\n\n";
+            // Try to parse the exception to see if we can figure out exactly what
+            // went wrong when trying to send the email.
+            if (exception.getMessage().toLowerCase().contains("host")) {
+                errorMsg += "- Perhaps your SMTP host is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("port")) {
+                errorMsg += "- Perhaps your TLS port is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("username")) {
+                errorMsg += "- Perhaps your username is incorrect?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("email")) {
+                errorMsg += "- Perhaps your email is invalid?\n";
+            }
+
+            if (exception.getMessage().toLowerCase().contains("password")) {
+                errorMsg += "- Perhaps your password is incorrect?\n";
+            }
+
+            obj.put(UniversalConstants.ERROR, "Error Sending Email: " + errorMsg);
             handleErrorCase(httpExchange, obj, username, toAddress, newID);
             return;
         }
