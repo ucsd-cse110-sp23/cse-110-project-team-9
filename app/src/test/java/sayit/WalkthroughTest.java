@@ -208,6 +208,7 @@ public class WalkthroughTest {
                 .setPromptHelper(new TsvPromptHelper(TEST_PROMPT_TSV))
                 .setAccountHelper(new TsvAccountHelper(TEST_ACCOUNT_TSV))
                 .setEmailConfigurationHelper(new TsvEmailConfigurationHelper(TEST_EMAIL_TSV))
+                .setEmailSender(x -> null)
                 .build();
 
         server.start();
@@ -261,6 +262,39 @@ public class WalkthroughTest {
         assertEquals(password, newEmailConfig.get(UniversalConstants.EMAIL_PASSWORD));
         assertEquals(smtpServer, newEmailConfig.get(UniversalConstants.SMTP));
         assertEquals(tlsPort, newEmailConfig.get(UniversalConstants.TLS));
+
+        // Greg now wants to create a new email
+        whisper.setValues(false, "Create an email about why Greg is a good professor.");
+        chatGpt.setValues(false, "Dear Greg, you're a good professor. Sincerely,");
+        var resp = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.EMAIL_DRAFT, resp.getType());
+        assertEquals("Create an email about why Greg is a good professor.", resp.getInput().getInputText());
+        assertEquals("Dear Greg, you're a good professor. Sincerely,\nGreg Miranda", resp.getOutput().getOutputText());
+
+        // Greg now wants to send the email
+        whisper.setValues(false, "Send email to a b c at y a h o o dot com.");
+        var resp2 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+        assertEquals(UniversalConstants.SEND_EMAIL, resp2.getType());
+        assertEquals("Send email to a b c at y a h o o dot com.", resp2.getInput().getInputText());
+        assertEquals("abc@yahoo.com", resp2.getOutput().getOutputText());
+
+        // Greg now wants to send the email
+        var resp3 = RequestSender.getInstance().sendEmail("gmiranda", resp2.getOutput().getOutputText(),
+                resp.getID(), resp2.getID());
+        assertEquals(UniversalConstants.SEND_EMAIL, resp3.getType());
+        assertTrue(resp3.getInput().getInputText().endsWith(UniversalConstants.SUCCESS));
+
+        // Greg now asks a question.
+        whisper.setValues(false, "Question. What is 1 + 1?");
+        chatGpt.setValues(false, "The answer is 2.");
+        var resp5 = requestSender.sendRecording(new File(DUMMY_FILE), "gmiranda");
+
+        // and then tries to send this question as an email.
+        var resp4 = RequestSender.getInstance().sendEmail("gmiranda", resp3.getOutput().getOutputText(),
+                resp5.getID(), resp3.getID());
+        assertEquals(UniversalConstants.SEND_EMAIL, resp4.getType());
+        assertTrue(resp4.getInput().getInputText().endsWith(UniversalConstants.ERROR));
+        assertTrue(resp4.getOutput().getOutputText().contains("The selected prompt is not an email draft"));
 
         server.stop();
     }

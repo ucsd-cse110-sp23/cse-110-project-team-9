@@ -89,7 +89,7 @@ public class SendEmailHandler implements HttpHandler {
 
         //check if selected prompt is an email
         if (!sendItPrompt.getType().equals(UniversalConstants.EMAIL_DRAFT)) {
-            System.out.println("\tSelected Prompt not an email");
+            System.out.println("\tselected Prompt not an email");
             obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
             obj.put(UniversalConstants.ERROR, "The selected prompt is not an email draft. Please select an email "
