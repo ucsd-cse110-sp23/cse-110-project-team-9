@@ -88,14 +88,14 @@ public class SendEmailHandler implements HttpHandler {
         SayItEmailConfiguration config = this._server.getEmailDb().getEmailConfiguration(username);
 
         //check if selected prompt is an email
-        String checkForEmail = sendItPrompt.getInput();
-        if (!checkForEmail.toLowerCase().startsWith("create email")
-                && !checkForEmail.toLowerCase().startsWith("create an email")) {
+        if (!sendItPrompt.getType().equals(UniversalConstants.EMAIL_DRAFT)) {
             System.out.println("\tSelected Prompt not an email");
             obj.put(UniversalConstants.SEND_SUCCESS, false);
             obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
-            obj.put(UniversalConstants.ERROR, "Selected prompt not an email");
+            obj.put(UniversalConstants.ERROR, "The selected prompt is not an email draft. Please select an email "
+                    + "draft, or create a new one using the \"Create email\" command.");
             handleErrorCase(httpExchange, obj, username, toAddress, newID);
+            return;
         }
 
         String smtpHost = config.getSmtp();

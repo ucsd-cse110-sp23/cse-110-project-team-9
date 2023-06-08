@@ -17,8 +17,6 @@ import static sayit.frontend.FrontEndConstants.*;
  * A class that contains static methods to handle events in the main UI.
  */
 public final class MainUiEventHandlers {
-    private static String smtp_host;
-
     /**
      * Handles the event when the user presses the button from the sidebar (the
      * question/answer history button).
@@ -147,11 +145,11 @@ public final class MainUiEventHandlers {
                                 String lastName = emailConfig.get(UniversalConstants.LAST_NAME);
                                 String email = emailConfig.get(UniversalConstants.EMAIL);
                                 String password = emailConfig.get(UniversalConstants.EMAIL_PASSWORD);
-                                smtp_host = emailConfig.get(UniversalConstants.SMTP);
+                                String smtp = emailConfig.get(UniversalConstants.SMTP);
                                 String tls = emailConfig.get(UniversalConstants.TLS);
                                 String displayName = emailConfig.get(UniversalConstants.DISPLAY_NAME);
 
-                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp_host, tls};
+                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp, tls};
                             }
 
                             EmailSetupUserInterface emailSetupUserInterface = new EmailSetupUserInterface(data -> {
@@ -197,7 +195,6 @@ public final class MainUiEventHandlers {
                         case UniversalConstants.SEND_EMAIL -> {
                             if (!checkButtonSelected(ui, recordingFile))
                                 return;
-
                             boolean success;
                             InputOutputEntry result;
                             try {
@@ -207,26 +204,25 @@ public final class MainUiEventHandlers {
                                         serverResponse.getID());
 
                                 addButtonToSidebar(ui, result);
-                                //check for success
                                 success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
                             } catch (Exception ex) {
                                 resetStartButton(ui, recordingFile);
                                 ex.printStackTrace();
                                 JOptionPane.showMessageDialog(null,
-                                        EMAIL_NOT_SENT + " " + ex.getMessage() + "\n SMTP Host: " + smtp_host,
+                                        EMAIL_NOT_SENT + " " + ex.getMessage(),
                                         ERROR_TEXT,
                                         JOptionPane.ERROR_MESSAGE
                                 );
                                 return;
                             }
+
                             if (success) {
                                 JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
                                         JOptionPane.INFORMATION_MESSAGE);
                             } else {
-                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SENT + "\n SMTP Host: " + smtp_host, ERROR_TEXT,
+                                JOptionPane.showMessageDialog(null, result.getOutput(), ERROR_TEXT,
                                         JOptionPane.ERROR_MESSAGE);
                             }
-
                         }
                         default -> {
                             // Assume error
