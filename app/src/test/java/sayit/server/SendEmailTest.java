@@ -3,7 +3,6 @@ package sayit.server;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import sayit.common.UniversalConstants;
 import sayit.frontend.RequestSender;
 import sayit.openai.MockChatGpt;
 import sayit.openai.MockWhisper;
@@ -14,7 +13,6 @@ import sayit.server.db.store.TsvPromptHelper;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sayit.TestConstants.*;
 
@@ -54,7 +52,7 @@ public class SendEmailTest {
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username1");
         var response = requestSender.sendEmail("username1", TO_ADDRESS, recording.getID(), DUMMY_ID);
-        assertTrue(response.getInput().toString().contains(UniversalConstants.SUCCESS));
+        assertTrue(response.getOutput().getOutputText().contains("success"));
         server.stop();
     }
 
@@ -84,7 +82,7 @@ public class SendEmailTest {
 
         var recording = requestSender.sendRecording(new File(DUMMY_FILE), "username0");
         var response = requestSender.sendEmail("username0", TO_ADDRESS, recording.getID(), DUMMY_ID);
-        assertFalse(response.getInput().toString().contains(UniversalConstants.SUCCESS));
+        assertTrue(response.getOutput().getOutputText().contains("not an email draft"));
         server.stop();
     }
 }

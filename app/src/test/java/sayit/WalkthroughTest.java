@@ -282,7 +282,7 @@ public class WalkthroughTest {
         var resp3 = RequestSender.getInstance().sendEmail("gmiranda", resp2.getOutput().getOutputText(),
                 resp.getID(), resp2.getID());
         assertEquals(UniversalConstants.SEND_EMAIL, resp3.getType());
-        assertTrue(resp3.getInput().getInputText().endsWith(UniversalConstants.SUCCESS));
+        assertTrue(resp3.getOutput().getOutputText().contains("successfully"));
 
         // Greg now asks a question.
         whisper.setValues(false, "Question. What is 1 + 1?");
@@ -293,7 +293,6 @@ public class WalkthroughTest {
         var resp4 = RequestSender.getInstance().sendEmail("gmiranda", resp3.getOutput().getOutputText(),
                 resp5.getID(), resp3.getID());
         assertEquals(UniversalConstants.SEND_EMAIL, resp4.getType());
-        assertTrue(resp4.getInput().getInputText().endsWith(UniversalConstants.ERROR));
         assertTrue(resp4.getOutput().getOutputText().contains("The selected prompt is not an email draft"));
 
         server.stop();

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import static sayit.common.UniversalConstants.EMAIL_SENT_SUCCESSFULLY;
 import static sayit.frontend.FrontEndConstants.*;
 
 /**
@@ -88,8 +89,11 @@ public final class MainUiEventHandlers {
                         case UniversalConstants.QUESTION, UniversalConstants.EMAIL_DRAFT ->
                                 addButtonToSidebar(ui, serverResponse);
                         case UniversalConstants.DELETE_PROMPT -> {
-                            if (!checkButtonSelected(ui, recordingFile))
+                            if (!checkButtonSelected(ui, recordingFile)) {
+                                JOptionPane.showMessageDialog(ui.getFrame(), DELETION_NONE_SELECTED_TEXT,
+                                        FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
                                 return;
+                            }
 
                             try {
                                 RequestSender.getInstance().delete(ui.getSelectedButton().getId(),
@@ -193,8 +197,12 @@ public final class MainUiEventHandlers {
                             emailSetupUserInterface.open();
                         }
                         case UniversalConstants.SEND_EMAIL -> {
-                            if (!checkButtonSelected(ui, recordingFile))
+                            if (!checkButtonSelected(ui, recordingFile)) {
+                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SEND_NO_PROMPT, ERROR_TEXT,
+                                        JOptionPane.ERROR_MESSAGE);
                                 return;
+                            }
+
                             boolean success;
                             InputOutputEntry result;
                             try {
@@ -204,7 +212,7 @@ public final class MainUiEventHandlers {
                                         serverResponse.getID());
 
                                 addButtonToSidebar(ui, result);
-                                success = result.getInput().toString().contains(UniversalConstants.SUCCESS);
+                                success = result.getOutput().getOutputText().trim().startsWith(EMAIL_SENT_SUCCESSFULLY);
                             } catch (Exception ex) {
                                 resetStartButton(ui, recordingFile);
                                 ex.printStackTrace();
@@ -217,7 +225,7 @@ public final class MainUiEventHandlers {
                             }
 
                             if (success) {
-                                JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
+                                JOptionPane.showMessageDialog(null, EMAIL_SENT_SUCCESSFULLY, SUCCESS_TEXT,
                                         JOptionPane.INFORMATION_MESSAGE);
                             } else {
                                 JOptionPane.showMessageDialog(null, result.getOutput(), ERROR_TEXT,
@@ -273,12 +281,6 @@ public final class MainUiEventHandlers {
     private static boolean checkButtonSelected(MainUserInterface ui, File recordingFile) {
         if (ui.getSelectedButton() != null) {
             return true;
-        }
-
-        if (ui.getQuestionTextArea().getText().equals(QUESTION_HEADER_TEXT)
-                && ui.getAnswerTextArea().getText().equals(ANSWER_HEADER_TEXT)) {
-            JOptionPane.showMessageDialog(ui.getFrame(), DELETION_NONE_SELECTED_TEXT,
-                    FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
         }
 
         ui.getQuestionTextArea().setText(QUESTION_HEADER_TEXT);

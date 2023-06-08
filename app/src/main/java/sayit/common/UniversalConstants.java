@@ -19,8 +19,8 @@ public final class UniversalConstants {
     public static final String OUTPUT = "output";
 
     public static final String TO_ADDRESS = "toAddress";
-    public static final String SUCCESS = "SUCCESSFUL";
     public static final String SEND_SUCCESS = "Sent";
+    public static final String EMAIL_SENT_SUCCESSFULLY = "Email sent successfully.";
 
     //Following constants below are for EmailConfiguration stuff
     public static final String FIRST_NAME = "first_name";

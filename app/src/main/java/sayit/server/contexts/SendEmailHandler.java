@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+import static sayit.common.UniversalConstants.EMAIL_SENT_SUCCESSFULLY;
+
 /**
  * Handles a request for sending an email
  * The endpoint will be <c>/send_email</c>
@@ -180,19 +182,24 @@ public class SendEmailHandler implements HttpHandler {
                 errorMsg += "- Perhaps your password is incorrect?\n";
             }
 
+            if (exception.getMessage().toLowerCase().contains("invalid address")) {
+                errorMsg += "- Perhaps the email address you are trying to send to is invalid?\n";
+            }
+
             obj.put(UniversalConstants.ERROR, "Error Sending Email: " + errorMsg);
             handleErrorCase(httpExchange, obj, username, toAddress, newID);
             return;
         }
 
+        String output = EMAIL_SENT_SUCCESSFULLY + "\n\n" + sendItPrompt.getOutput();
         // Handle response for updating history
         obj.put(UniversalConstants.SEND_SUCCESS, true);
-        obj.put(UniversalConstants.OUTPUT, sendItPrompt.getOutput());
+        obj.put(UniversalConstants.OUTPUT, output);
         response = obj.toString();
 
         SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL,
-                "Send email to: " + toAddress + " " + UniversalConstants.SUCCESS,
-                sendItPrompt.getOutput()
+                "Send email to: " + toAddress,
+                output
         );
 
         this._server.getPromptDb().createPrompt(prompt);
@@ -225,7 +232,7 @@ public class SendEmailHandler implements HttpHandler {
         httpExchange.close();
 
         SayItPrompt prompt = new SayItPrompt(username, newID, UniversalConstants.SEND_EMAIL,
-                "Send email to: " + toAddress + " " + UniversalConstants.ERROR,
+                "Send email to: " + toAddress,
                 obj.getString(UniversalConstants.ERROR)
         );
 
