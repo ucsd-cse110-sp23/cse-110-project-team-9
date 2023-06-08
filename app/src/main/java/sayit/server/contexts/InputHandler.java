@@ -97,15 +97,14 @@ public class InputHandler implements HttpHandler {
 
         JSONObject obj = new JSONObject();
         if (input.toLowerCase().startsWith("question")) {
-            String parsedPrompt = Helper.extractPrompt(new String[] {
+            System.out.println("\tdetected 'question' input: " + input);
+            String parsedPrompt = Helper.extractPrompt(new String[]{
                     "question"
             }, input);
 
+            System.out.println("\t\tparsed prompt: " + parsedPrompt);
             if (parsedPrompt == null) {
-                response = NO_PROMPT_AFTER_CMD;
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
-                httpExchange.close();
+                onMissingPrompt(input, httpExchange);
                 return;
             }
 
@@ -121,6 +120,7 @@ public class InputHandler implements HttpHandler {
                 return;
             }
 
+            System.out.println("\twith answer: " + answer);
             long time = System.currentTimeMillis();
 
             obj.put(SayItPrompt.INPUT_FIELD, parsedPrompt);
@@ -133,15 +133,18 @@ public class InputHandler implements HttpHandler {
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("delete prompt")) {
+            System.out.println("\tdetected 'delete prompt' input: " + input);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.DELETE_PROMPT);
         } else if (input.toLowerCase().startsWith("clear all")) {
+            System.out.println("\tdetected 'clear all' input: " + input);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.CLEAR_ALL);
         } else if (input.toLowerCase().startsWith("setup email")
                 || input.toLowerCase().startsWith("set up email")) {
+            System.out.println("\tdetected 'setup email' input: " + input);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SETUP_EMAIL);
         } else if (input.toLowerCase().startsWith("create email")
                 || input.toLowerCase().startsWith("create an email")) {
-
+            System.out.println("\tdetected 'create email' input: " + input);
             input = input.trim();
 
             // if audio is transcribed, pass to Chat GPT
@@ -159,6 +162,7 @@ public class InputHandler implements HttpHandler {
             int lastNL = answer.lastIndexOf('\n');
             SayItEmailConfiguration eConfig = this._server.getEmailDb().getEmailConfiguration(username);
             if (eConfig == null) {
+                System.out.println("\tbut no email configuration found for user: " + username);
                 obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
                 obj.put(SayItPrompt.INPUT_FIELD, input);
                 obj.put(SayItPrompt.OUTPUT_FIELD, MISSING_ECONFIG);
@@ -171,14 +175,13 @@ public class InputHandler implements HttpHandler {
             }
 
             String signature = eConfig.getDisplayName();
-
             if (lastNL > 0) {
                 answer = answer.substring(0, lastNL).concat("\n").concat(signature);
             } else {
                 answer = answer.concat("\n").concat(signature);
             }
 
-
+            System.out.println("\twith email content: " + answer.replaceAll("\n", "<br>"));
             long time = System.currentTimeMillis();
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, answer);
@@ -190,21 +193,20 @@ public class InputHandler implements HttpHandler {
             this._server.getPromptDb().createPrompt(prompt);
             this._server.getPromptDb().save();
         } else if (input.toLowerCase().startsWith("send email to")) {
-            input = Helper.extractPrompt(new String[] {
+            System.out.println("\tdetected 'send email to' input: " + input);
+            String parsedPrompt = Helper.extractPrompt(new String[]{
                     "send email to",
                     "send email"
             }, input);
 
-            if (input == null) {
-                response = NO_PROMPT_AFTER_CMD;
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
-                httpExchange.close();
+            System.out.println("\t\tparsed prompt: " + parsedPrompt);
+            if (parsedPrompt == null) {
+                onMissingPrompt(input, httpExchange);
                 return;
             }
 
             //parse email address out of response
-            String toAddress = input.toLowerCase();
+            String toAddress = parsedPrompt.toLowerCase();
             toAddress = toAddress.replace(" dot ", ".");
             toAddress = toAddress.replace(" at ", "@");
             toAddress = toAddress.replace(" ", "");
@@ -214,11 +216,13 @@ public class InputHandler implements HttpHandler {
             }
             long time = System.currentTimeMillis();
 
+            System.out.println("\tparsed email address: " + toAddress);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, toAddress);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.SEND_EMAIL);
             obj.put(UniversalConstants.ID, time);
         } else {
+            System.out.println("\tunknown input: " + input);
             obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
             obj.put(SayItPrompt.INPUT_FIELD, input);
             obj.put(SayItPrompt.OUTPUT_FIELD, UNKNOWN_PROMPT_OUTPUT);
@@ -228,6 +232,24 @@ public class InputHandler implements HttpHandler {
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
         httpExchange.getResponseBody().write(bytes);
+        httpExchange.close();
+    }
+
+    /**
+     * Called when the user does not provide a prompt after a command
+     *
+     * @param input        the input from the user
+     * @param httpExchange the HTTP exchange
+     * @throws IOException if an error occurs
+     */
+    private void onMissingPrompt(String input, HttpExchange httpExchange) throws IOException {
+        JSONObject obj = new JSONObject();
+        obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
+        obj.put(SayItPrompt.INPUT_FIELD, input);
+        obj.put(SayItPrompt.OUTPUT_FIELD, NO_PROMPT_AFTER_CMD);
+        String response = obj.toString();
+        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
+        httpExchange.getResponseBody().write(response.getBytes());
         httpExchange.close();
     }
 }

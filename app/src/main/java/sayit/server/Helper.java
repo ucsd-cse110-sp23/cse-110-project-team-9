@@ -116,7 +116,10 @@ public final class Helper {
         // Check if there's a period, exclamation mark, or question mark
         // at the beginning
         char firstChar = prompt.charAt(0);
-        if (firstChar == '.' || firstChar == '!' || firstChar == '?') {
+        if (firstChar == '.'
+                || firstChar == '!'
+                || firstChar == '?'
+                || firstChar == ',') {
             prompt = prompt.substring(1).trim();
         }
 

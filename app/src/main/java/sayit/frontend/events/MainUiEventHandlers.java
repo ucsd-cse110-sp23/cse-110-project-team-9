@@ -155,6 +155,12 @@ public final class MainUiEventHandlers {
                             }
 
                             EmailSetupUserInterface emailSetupUserInterface = new EmailSetupUserInterface(data -> {
+                                if (!RequestSender.getInstance().isAlive()) {
+                                    JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
+                                            FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+
                                 String firstName = data[0];
                                 String lastName = data[1];
                                 String displayName = data[2];
