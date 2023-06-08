@@ -246,7 +246,7 @@ public class InputHandler implements HttpHandler {
         JSONObject obj = new JSONObject();
         obj.put(SayItPrompt.TYPE_FIELD, UniversalConstants.ERROR);
         obj.put(SayItPrompt.INPUT_FIELD, input);
-        obj.put(SayItPrompt.OUTPUT_FIELD, NO_PROMPT_AFTER_CMD);
+        obj.put(SayItPrompt.OUTPUT_FIELD, NO_PROMPT_AFTER_COMMAND);
         String response = obj.toString();
         httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
         httpExchange.getResponseBody().write(response.getBytes());

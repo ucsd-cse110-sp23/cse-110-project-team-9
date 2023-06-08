@@ -64,4 +64,6 @@ public final class ServerConstants {
     
     public static final String MISSING_ECONFIG = "Please set up email configurations first"
             + " with the command \"Set up email\".";
+    public static final String NO_PROMPT_AFTER_COMMAND = "Please follow your command with a prompt. Try saying:\n" 
+            + "\"Question, how big is the earth?\" or \n \"Create an email to Kyle wishing him happy birthday\"";
 }
