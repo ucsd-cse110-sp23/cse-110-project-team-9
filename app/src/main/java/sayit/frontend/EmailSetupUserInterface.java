@@ -120,7 +120,7 @@ public class EmailSetupUserInterface {
     }
 
     /**
-     * Opens the LoginUserInterface
+     * Opens the EmailSetupUserInterface
      */
     public void open() {
         loadTextFields();
@@ -141,7 +141,7 @@ public class EmailSetupUserInterface {
     }
 
     /**
-     * Closes the LoginUserInterface
+     * Closes the EmailSetupUserInterface
      */
     public void close() {
         clearTextFields();
@@ -185,6 +185,9 @@ public class EmailSetupUserInterface {
         storedInformation[5] = smtpHostField.getText();
         storedInformation[6] = tlsPortField.getText();
         this.saveAction.execute(storedInformation);
+
+        // automatically close after saving
+        frame.setVisible(false);
     }
 
     /**

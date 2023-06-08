@@ -59,6 +59,11 @@ public final class ServerConstants {
         MONGO_URI = mongoUri;
     }
 
-    public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized."
-            + "Try a command like \"Question.\" or \"Clear All.\" or \"Delete Prompt\" or \"Create an email.\" or \"Send email to\"";
+    public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized. Try a command like:\n"
+            + "\"Question <ask a question>\" or \"Clear All.\" or \"Delete Prompt.\" or \"Create an email to <recipient> about <subject>\" or \"Send email to <recipient email address>\"";
+    
+    public static final String MISSING_ECONFIG = "Please set up email configurations first"
+            + " with the command \"Set up email\".";
+    public static final String NO_PROMPT_AFTER_COMMAND = "Please follow your command with a prompt. Try saying:\n" 
+            + "\"Question, how big is the earth?\" or \n \"Create an email to Kyle wishing him happy birthday\"";
 }

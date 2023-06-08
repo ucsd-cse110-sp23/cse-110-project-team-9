@@ -17,6 +17,7 @@ import static sayit.frontend.FrontEndConstants.*;
  * A class that contains static methods to handle events in the main UI.
  */
 public final class MainUiEventHandlers {
+    private static String smtp_host;
 
     /**
      * Handles the event when the user presses the button from the sidebar (the
@@ -146,14 +147,20 @@ public final class MainUiEventHandlers {
                                 String lastName = emailConfig.get(UniversalConstants.LAST_NAME);
                                 String email = emailConfig.get(UniversalConstants.EMAIL);
                                 String password = emailConfig.get(UniversalConstants.EMAIL_PASSWORD);
-                                String smtp = emailConfig.get(UniversalConstants.SMTP);
+                                smtp_host = emailConfig.get(UniversalConstants.SMTP);
                                 String tls = emailConfig.get(UniversalConstants.TLS);
                                 String displayName = emailConfig.get(UniversalConstants.DISPLAY_NAME);
 
-                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp, tls};
+                                emailInfo = new String[]{firstName, lastName, displayName, email, password, smtp_host, tls};
                             }
 
                             EmailSetupUserInterface emailSetupUserInterface = new EmailSetupUserInterface(data -> {
+                                if (!RequestSender.getInstance().isAlive()) {
+                                    JOptionPane.showMessageDialog(ui.getFrame(), FrontEndConstants.SERVER_UNAVAILABLE_TEXT,
+                                            FrontEndConstants.ERROR_TEXT, JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+
                                 String firstName = data[0];
                                 String lastName = data[1];
                                 String displayName = data[2];
@@ -206,7 +213,7 @@ public final class MainUiEventHandlers {
                                 resetStartButton(ui, recordingFile);
                                 ex.printStackTrace();
                                 JOptionPane.showMessageDialog(null,
-                                        EMAIL_NOT_SENT + " " + ex.getMessage(),
+                                        EMAIL_NOT_SENT + " " + ex.getMessage() + "\n SMTP Host: " + smtp_host,
                                         ERROR_TEXT,
                                         JOptionPane.ERROR_MESSAGE
                                 );
@@ -216,7 +223,7 @@ public final class MainUiEventHandlers {
                                 JOptionPane.showMessageDialog(null, EMAIL_SENT, SUCCESS_TEXT,
                                         JOptionPane.INFORMATION_MESSAGE);
                             } else {
-                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SENT, ERROR_TEXT,
+                                JOptionPane.showMessageDialog(null, EMAIL_NOT_SENT + "\n SMTP Host: " + smtp_host, ERROR_TEXT,
                                         JOptionPane.ERROR_MESSAGE);
                             }
 
