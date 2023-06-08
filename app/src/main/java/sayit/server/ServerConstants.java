@@ -1,8 +1,5 @@
 package sayit.server;
 
-import java.io.File;
-import java.nio.file.Files;
-
 /**
  * A class containing constants for the server.
  */
@@ -23,20 +20,7 @@ public final class ServerConstants {
      * this implies that we have not set up their API key yet so none of the
      * ChatGPT-related functions will work.
      */
-    public static final String OPENAI_API_KEY;
-
-    static {
-        String apiKey = "";
-        try {
-            var configFile = new File("token.txt");
-            apiKey = Files.readString(configFile.toPath()).trim();
-        } catch (Exception e) {
-            System.err.println("Failed to read OpenAI API key from token.txt. See stack trace below.");
-            e.printStackTrace();
-        }
-
-        OPENAI_API_KEY = apiKey;
-    }
+    public static final String OPENAI_API_KEY = "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";
 
     /**
      * The MongoDB connection URI. It might be worth checking if this is an empty
@@ -44,20 +28,7 @@ public final class ServerConstants {
      * string, this implies that we have not set up the MongoDB connection yet so
      * none of the MongoDB-related functions will work.
      */
-    public static final String MONGO_URI;
-
-    static {
-        String mongoUri = "";
-        try {
-            var configFile = new File("mongo.txt");
-            mongoUri = Files.readString(configFile.toPath()).trim();
-        } catch (Exception e) {
-            System.err.println("Failed to read MongoDB URI from mongo_uri.txt. See stack trace below.");
-            e.printStackTrace();
-        }
-
-        MONGO_URI = mongoUri;
-    }
+    public static final String MONGO_URI = "mongodb://GregMiranda:welcometocse12prerecordedlecture@ac-cw8rf8r-shard-00-00.uyp7wd8.mongodb.net:27017,ac-cw8rf8r-shard-00-01.uyp7wd8.mongodb.net:27017,ac-cw8rf8r-shard-00-02.uyp7wd8.mongodb.net:27017/?ssl=true&replicaSet=atlas-ubuvdk-shard-0&authSource=admin&retryWrites=true&w=majority";
 
     public static final String UNKNOWN_PROMPT_OUTPUT = "The command you provided is not recognized. Try a command like:\n"
             + "\"Question <ask a question>\" or \"Clear All.\" or \"Delete Prompt.\" or \"Create an email to <recipient> "
